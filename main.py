@@ -8,7 +8,7 @@ from threading import Thread
 
 from PySide2.QtCore import QObject, Signal, Slot
 
-
+m_app = None
 m_win = None
 
 
@@ -43,5 +43,4 @@ if __name__ == "__main__":
 
     webserver.shutdown()
     thread.join()
-    print("joined")
     sys.exit(ret)
