@@ -65,9 +65,11 @@ class DataBaseManager:
 
         try:
             cursor = self.cnxn.cursor()
-            cursor.execute( "SELECT  DISTINCT  dbo.tBild.kBild, dbo.tArtikel.kArtikel   FROM dbo.tBild, dbo.tArtikel, dbo.tArtikelbildPlattform "
-                           "WHERE dbo.tArtikel.kArtikel = ( SELECT dbo.tArtikelbildPlattform.kArtikel FROM dbo.tArtikelbildPlattform "
-                                "WHERE dbo.tArtikelbildPlattform.kBild = dbo.tBild.kBild AND  dbo.tArtikelbildPlattform.kPlattform = 1 )" )
+            cursor.execute(
+                " SELECT  dbo.tBild.kBild , dbo.tArtikel.kArtikel, dbo.tBild.bBild   FROM dbo.tBild, dbo.tArtikel, dbo.tArtikelbildPlattform"
+                " WHERE dbo.tArtikel.kArtikel =  dbo.tArtikelbildPlattform.kArtikel "
+                " AND  dbo.tArtikelbildPlattform.kPlattform = 1"
+                " AND dbo.tArtikelbildPlattform.kBild = dbo.tBild.kBild" )
             return cursor.fetchall()
 
         except Exception as exc:
