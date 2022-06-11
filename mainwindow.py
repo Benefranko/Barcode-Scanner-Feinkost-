@@ -15,12 +15,14 @@ from databasemanager import DataBaseManager
 class MainWindow(QMainWindow):
     window = None
     SHOW_TIME = 10
-    CHANGE_ADVERTISE_TIME = 5
+    CHANGE_ADVERTISE_TIME = 2
 
     showTimeTimer = SHOW_TIME
     changeAdvertiseTimer = CHANGE_ADVERTISE_TIME
     timerID = -1
     databasemanager = None
+
+    testCounter = 1
 
     class STATES(Enum):
         UNKNOWN = 0
@@ -39,6 +41,8 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("My App")
         self.window.b1.setStyleSheet("background-image: url(\"C:/Users/Markus/Desktop/Schulzeug/Q11/Englisch Converstation/whiskyy-klein_42261_480x576.jpg\"); color: blue;")
         self.window.b1.setFixedSize(QImage("C:/Users/Markus/Desktop/Schulzeug/Q11/Englisch Converstation/whiskyy-klein_42261_480x576.jpg").size())
+        self.window.frame.setStyleSheet("background-image: url(\"C:/Users/Markus/Downloads/47271122-es-tut-uns-leid-symbol-internet-taste-auf-weißem-hintergrund-.jpg\"); color: blue;")
+        self.window.frame.setFixedSize(QImage("C:/Users/Markus/Downloads/47271122-es-tut-uns-leid-symbol-internet-taste-auf-weißem-hintergrund-.jpg").size())
 
         # connect
         self.window.pushButton.clicked.connect(self.button1clicked)
@@ -63,28 +67,55 @@ class MainWindow(QMainWindow):
         ui_file.close()
 
     def timerEvent(self, event: QTimerEvent) -> None:
-        self.switch_state("TIMER")
+        self.event_handler("TIMER")
 
     def new_advertise(self):
-        self.switch_state("NEW_LABEL", "AR")
+        self.event_handler("NEW_LABEL", "C:/Users/Markus/Desktop/Schulzeug/Q11/Englisch Converstation/img_5807-1_40950_362x480.jpg")
         return
 
     def newScanHandling(self, value):
         self.showTimeTimer = self.SHOW_TIME
-        self.window.p_name.setText(value)
-        self.window.i1.setText(value)
-        self.window.w1.setText("value")
-        self.window.stackedWidget.setCurrentIndex(1)
         self.state = self.STATES.SHOW_PRODUCT_DESCRIPTION
+        # self.databasemanager.p_all()
+
+        data = self.databasemanager.get_data_by_ean(int(value))
+        if data is None:
+            # switch page to Nothing found
+            self.window.stackedWidget.setCurrentIndex(2)
+        else:
+            self.window.p_name.setText(value)
+            self.window.i1.setText(value)
+            self.window.w1.setText("value")
+            self.window.i2.setText(data.cursor_description[0][0])
+            self.window.w2.setText(str(data[0]))
+            self.window.i2.setText(data.cursor_description[77][0])
+            self.window.w2.setText(data[77])
+            self.window.i3.setText(data.cursor_description[79][0])
+            self.window.w3.setPlainText(data[79])
+
+            # switch page
+            self.window.stackedWidget.setCurrentIndex(1)
         return
 
-    def switch_state(self, action, value = None):
+    def event_handler(self, action, value = None):
         handled: bool = False;
 
         # GLOBAL ACTION HANDLING
         if action == "NEW_LABEL":
             layout = self.window.groupBox.layout()
-            layout.addWidget(QLabel(value))
+            label = None
+
+            if value.startswith("C:/"):
+                label = QPushButton(self)
+                label.setStyleSheet("background-image: url(\"" + value + "\")")
+                label.setFixedSize(QImage(value).size())
+
+            else:
+                label = QLabel(self)
+                label.setText(value)
+
+            layout.addWidget(label, self.testCounter / 20, self.testCounter % 20 )
+            self.testCounter = self.testCounter + 1
             return
 
         # STATE specific ACTION HANDLING
@@ -97,11 +128,11 @@ class MainWindow(QMainWindow):
 
                 if action == "TIMER":
                     handled = True
-                    if self.showTimeTimer > 0:
+                    if self.showTimeTimer > 1:
                         self.showTimeTimer = self.showTimeTimer - 1
                     else:
                         self.showTimeTimer = self.SHOW_TIME
-                        self.switch_state("EXIT_SHOW_DESCRIPTION")
+                        self.event_handler("EXIT_SHOW_DESCRIPTION")
 
                 if action == "NEW_SCAN":
                     self.newScanHandling(value)
@@ -118,11 +149,11 @@ class MainWindow(QMainWindow):
 
                 if action == "TIMER":
                     handled = True
-                    if self.changeAdvertiseTimer > 0:
+                    if self.changeAdvertiseTimer > 1:
                         self.changeAdvertiseTimer = self.changeAdvertiseTimer - 1
                     else:
                         self.changeAdvertiseTimer = self.CHANGE_ADVERTISE_TIME
-                        self.switch_state("CHANGE_ADVERTISE")
+                        self.event_handler("CHANGE_ADVERTISE")
 
             case _:
                 print("ERROR...")
@@ -131,15 +162,16 @@ class MainWindow(QMainWindow):
             print("ERROR: UNHANDLED ACTION:" + action)
 
     def button1clicked(self):
-        self.switch_state("NEW_LABEL", "value")
+        cols = self.databasemanager.get_header_list()
+        for i in cols:
+            self.event_handler("NEW_LABEL", i)
 
     def button2clicked(self):
-        print("clicked -> 2")
-        self.databasemanager.get_ka()
         layout = self.window.groupBox.layout
         for i in reversed(range(layout().count())):
             self.window.groupBox.layout().itemAt(i).widget().deleteLater()
 
+
     @Slot(str)
     def new_scan(self, value):
-        self.switch_state("NEW_SCAN", value)
+        self.event_handler("NEW_SCAN", value)

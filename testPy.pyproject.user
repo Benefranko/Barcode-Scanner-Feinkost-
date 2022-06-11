@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 7.0.1, 2022-06-10T21:41:37. -->
+<!-- Written by QtCreator 7.0.1, 2022-06-11T01:09:24. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -139,6 +139,7 @@
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">E:/Schulzeug/P-Seminar/git/Barcode-Scanner-Feinkost-/mainwindow.py</value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">PythonEditor.RunConfiguration.E:/Schulzeug/P-Seminar/git/Barcode-Scanner-Feinkost-/mainwindow.py</value>
     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">E:/Schulzeug/P-Seminar/git/Barcode-Scanner-Feinkost-/mainwindow.py</value>
+    <value type="QString" key="PythonEditor.RunConfiguation.Interpreter">{9b5161a6-ba72-473a-99e1-5df6d157835c}</value>
     <value type="QString" key="PythonEditor.RunConfiguation.Script">E:\Schulzeug\P-Seminar\git\Barcode-Scanner-Feinkost-\mainwindow.py</value>
     <value type="bool" key="RunConfiguration.UseCppDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
@@ -156,6 +157,7 @@
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">E:/Schulzeug/P-Seminar/git/Barcode-Scanner-Feinkost-/mapplication.py</value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">PythonEditor.RunConfiguration.E:/Schulzeug/P-Seminar/git/Barcode-Scanner-Feinkost-/mapplication.py</value>
     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">E:/Schulzeug/P-Seminar/git/Barcode-Scanner-Feinkost-/mapplication.py</value>
+    <value type="QString" key="PythonEditor.RunConfiguation.Interpreter">{9b5161a6-ba72-473a-99e1-5df6d157835c}</value>
     <value type="QString" key="PythonEditor.RunConfiguation.Script">E:\Schulzeug\P-Seminar\git\Barcode-Scanner-Feinkost-\mapplication.py</value>
     <value type="bool" key="RunConfiguration.UseCppDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>

@@ -15,7 +15,6 @@ class MApplication(QApplication):
     def notify(self, receiver, event: QEvent):
         try:
             if event.type() == QEvent.KeyPress:
-                print(event.text())
 
                 if event.text() == "\r":
                     self.newScan.emit(self.inputBuffer)

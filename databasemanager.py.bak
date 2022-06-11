@@ -57,22 +57,6 @@ class DataBaseManager:
             print(column)
         for row in cursor:
             print('row = %r' % (row,))
-    
-    def get_image_list(self):
-        if self.cnxn is None:
-            print("ERROR: Not Connected!")
-            return None
-
-        try:
-            cursor = self.cnxn.cursor()
-            cursor.execute( "SELECT  DISTINCT  dbo.tBild.kBild, dbo.tArtikel.kArtikel   FROM dbo.tBild, dbo.tArtikel, dbo.tArtikelbildPlattform "
-                           "WHERE dbo.tArtikel.kArtikel = ( SELECT dbo.tArtikelbildPlattform.kArtikel FROM dbo.tArtikelbildPlattform "
-                                "WHERE dbo.tArtikelbildPlattform.kBild = dbo.tBild.kBild AND  dbo.tArtikelbildPlattform.kPlattform = 1 )" )
-            return cursor.fetchall()
-
-        except Exception as exc:
-            print('critical error occurred: {0}. Please save your data and restart application'.format(exc))
-            return None
 
 
 # kArtikel kStueckliste kVaterArtikel kArtikelForKategorieArtikel Artikelnummer Sortiernummer Artikelname Einheit EAN
