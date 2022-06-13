@@ -1,11 +1,11 @@
 import os
 from pathlib import Path
-from PySide2.QtCore import QFile, QTimerEvent
+from PySide2.QtCore import QFile, QTimerEvent, Qt
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QMainWindow
-from PySide2.QtWidgets import QPushButton, QLayout, QLabel, QLayoutItem
+from PySide2.QtWidgets import QPushButton, QLayout, QLabel, QLayoutItem, QFrame
 from PySide2.QtCore import QObject, Signal, Slot
-from PySide2.QtGui import QImage
+from PySide2.QtGui import QImage, QPixmap, QFontMetrics, QResizeEvent, QFont
 
 from enum import Enum
 
@@ -13,16 +13,27 @@ from databasemanager import DataBaseManager
 
 
 class MainWindow(QMainWindow):
-    window = None
+    # Constants
     SHOW_TIME = 10
-    CHANGE_ADVERTISE_TIME = 2
+    CHANGE_ADVERTISE_TIME = 5
+    SPECIAL_PRICE_RED_LINE_HEIGHT = 5
+    SPACE_BETWEEN_PRICE_AND_SPECIAL_PRICE = 10
+    SPECIAL_PRICE_FONT_SIZE = 18
 
+    # Attributes
     showTimeTimer = SHOW_TIME
     changeAdvertiseTimer = CHANGE_ADVERTISE_TIME
     timerID = -1
-    databasemanager = None
 
+    # Objects
+    databasemanager = None
+    window = None
+    special_price_red_line = None
+    special_price_label = None
+
+    # Tests
     testCounter = 1
+    t2 = 0
 
     class STATES(Enum):
         UNKNOWN = 0
@@ -35,18 +46,40 @@ class MainWindow(QMainWindow):
         self.load_ui()
         self.state = self.STATES.WAIT_FOR_SCAN
         self.window.stackedWidget.setCurrentIndex(0)
-        self.showFullScreen()
+
+        # fullscreen
+        # self.showFullScreen()
+        self.setFixedSize(800, 400)
+        self.setWindowFlags(Qt.CustomizeWindowHint | Qt.FramelessWindowHint)
+
+        # init line...
+        self.special_price_red_line = QFrame(self.window.groupBox_infos)
+        self.special_price_red_line.setFrameShape(QFrame.HLine)
+        # self.special_price_red_line.setFixedHeight(20)
+        self.special_price_red_line.setLineWidth(6)
+        self.special_price_red_line.setStyleSheet("color: rgba(255, 0, 0, 150)")
+        self.special_price_red_line.hide()
+
+        # special price label
+        self.special_price_label = QLabel(self.window.groupBox_infos)
+        self.special_price_label.setStyleSheet("color: rgba(255, 0, 0, 255)")
+        self.special_price_label.setFont(QFont("Segoe UI", self.SPECIAL_PRICE_FONT_SIZE, QFont.Bold))
+        self.special_price_label.hide()
 
         # own changes
-        self.setWindowTitle("My App")
-        self.window.b1.setStyleSheet("background-image: url(\"C:/Users/Markus/Desktop/Schulzeug/Q11/Englisch Converstation/whiskyy-klein_42261_480x576.jpg\"); color: blue;")
-        self.window.b1.setFixedSize(QImage("C:/Users/Markus/Desktop/Schulzeug/Q11/Englisch Converstation/whiskyy-klein_42261_480x576.jpg").size())
+        self.setWindowTitle("Feinkostscanner")
         self.window.frame.setStyleSheet("background-image: url(\"C:/Users/Markus/Downloads/47271122-es-tut-uns-leid-symbol-internet-taste-auf-weißem-hintergrund-.jpg\"); color: blue;")
         self.window.frame.setFixedSize(QImage("C:/Users/Markus/Downloads/47271122-es-tut-uns-leid-symbol-internet-taste-auf-weißem-hintergrund-.jpg").size())
 
-        # connect
-        self.window.pushButton.clicked.connect(self.button1clicked)
-        self.window.pushButton_2.clicked.connect(self.button2clicked)
+        pix = QPixmap("E:\Schulzeug\P-Seminar\git\Barcode-Scanner-Feinkost-/sunmi_scan.png")
+        self.window.img1.setPixmap( pix.scaled( QImage("E:\Schulzeug\P-Seminar\git\Barcode-Scanner-Feinkost-/sunmi_scan.png").size() / 8) )
+
+        pix = QPixmap("E:\Schulzeug\P-Seminar\git\Barcode-Scanner-Feinkost-/logo.jpg")
+        self.window.logo.setPixmap( pix.scaled(QImage("E:\Schulzeug\P-Seminar\git\Barcode-Scanner-Feinkost-/logo.jpg").size() / 4 ))
+
+        # ...
+        #self.window.img.setMinimumWidth(600)
+        #self.window.img.setMinimumHeight(800)
 
         # connect to database
         self.databasemanager = DataBaseManager()
@@ -71,6 +104,10 @@ class MainWindow(QMainWindow):
 
     def new_advertise(self):
         self.event_handler("NEW_LABEL", "C:/Users/Markus/Desktop/Schulzeug/Q11/Englisch Converstation/img_5807-1_40950_362x480.jpg")
+        self.t2 = self.t2 + 1
+        if self.t2 % 3 == 0:
+            self.button2clicked()
+            self.t2 = 0
         return
 
     def newScanHandling(self, value):
@@ -79,22 +116,74 @@ class MainWindow(QMainWindow):
         # self.databasemanager.p_all()
 
         data = self.databasemanager.get_data_by_ean(int(value))
+
         if data is None:
             # switch page to Nothing found
             self.window.stackedWidget.setCurrentIndex(2)
         else:
-            self.window.p_name.setText(value)
-            self.window.i1.setText(value)
-            self.window.w1.setText("value")
-            self.window.i2.setText(data.cursor_description[0][0])
-            self.window.w2.setText(str(data[0]))
-            self.window.i2.setText(data.cursor_description[77][0])
-            self.window.w2.setText(data[77])
-            self.window.i3.setText(data.cursor_description[79][0])
-            self.window.w3.setPlainText(data[79])
+            # switch site for layout update & update of geometries of labels
+            self.window.stackedWidget.setCurrentIndex(0)
+
+            img = QImage()
+            content = self.databasemanager.get_first_image(data.kArtikel)
+            if content is not None:
+                assert img.loadFromData(content)
+                self.window.img.setPixmap(QPixmap.fromImage(img).scaled(200,200 , Qt.KeepAspectRatio))
+            else:
+                self.window.img.setPixmap(QPixmap("E:\Schulzeug\P-Seminar\git\Barcode-Scanner-Feinkost-/kein-bild-vorhanden.webp").scaled(200, 200, Qt.KeepAspectRatio))
+
+
+            self.window.p_name.setText(data.Artikelname)
+            self.window.preis.setText(str(float(int(data[28] * 100)) / 100) + " €")
+
+            self.window.inhalt.setText("value")
+            self.window.p_num.setText(str(data.Artikelnummer))
+            self.window.ean.setText(str(data.EAN))
+
+            descript = self.databasemanager.get_artcle_description(data.kArtikel)
+            if descript is not None:
+                self.window.description.setHtml(descript.cBeschreibung)
+                print(descript.cBeschreibung)
+            self.window.hersteller.setText(data.Hersteller)
+
+            # switch site for layout update & update of geometries of labels
+            self.window.stackedWidget.setCurrentIndex(1)
+            special_price = self.databasemanager.get_special_price(data.kArtikel)
+
+            if special_price is not None:
+                # show them for update of positions
+                self.special_price_label.show()
+                self.special_price_red_line.show()
+                # self.window.price_w.show()
+
+                # self.special_price_label.setStyleSheet("background-color: rgba(0,100,0,100)")
+                self.special_price_label.setStyleSheet("color: rgba(255,0,0,255)")
+                self.special_price_label.setText(str(float(int(special_price.fNettoPreis*100)/100)) + " €")
+
+                br_price = QFontMetrics(self.window.preis.font()).boundingRect(self.window.preis.text())
+                br_special_price = QFontMetrics(self.special_price_label.font()).boundingRect(self.special_price_label.text())
+
+                self.special_price_red_line.setGeometry(self.window.preis.x(),
+                                                        self.window.preis.y() + self.window.preis.height() / 2,
+                                                        br_price.width(),
+                                                        self.SPECIAL_PRICE_RED_LINE_HEIGHT)
+
+                print(br_special_price.height())
+                print(br_price.height())
+                print(((   br_price.height() - br_special_price.height() ) / 2)- br_price.height() / 2)
+
+                self.special_price_label.setGeometry(self.window.preis.x() + br_price.width()
+                                                     + self.SPACE_BETWEEN_PRICE_AND_SPECIAL_PRICE,
+                                                     self.window.preis.y() - (  (  br_special_price.height() - br_price.height() ) / 2) ,
+                                                     br_special_price.width() + 2,
+                                                     br_special_price.height())
+
+            else:
+                self.special_price_label.hide()
+                self.special_price_red_line.hide()
 
             # switch page
-            self.window.stackedWidget.setCurrentIndex(1)
+            # self.window.stackedWidget.setCurrentIndex(1)
         return
 
     def event_handler(self, action, value = None):
@@ -108,7 +197,7 @@ class MainWindow(QMainWindow):
             if value.startswith("C:/"):
                 label = QPushButton(self)
                 label.setStyleSheet("background-image: url(\"" + value + "\")")
-                label.setFixedSize(QImage(value).size())
+                label.setFixedSize(QImage(value).size() * 2)
 
             else:
                 label = QLabel(self)

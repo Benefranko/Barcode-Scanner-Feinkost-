@@ -19,7 +19,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
         if m_win is not None:
             self.wfile.write(
-                ("COUNT OF ELEMENTS: " + str(m_win.window.groupBox.layout().count()) + "\r\n   URL:/").encode())
+                ("COUNT OF ELEMENTS: " + str("m_win.window.groupBox.layout().count()") + "\r\n   URL:/").encode())
         self.wfile.write(self.path[1:].encode())
 
 

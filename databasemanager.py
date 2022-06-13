@@ -1,6 +1,5 @@
 import pyodbc
 
-
 class DataBaseManager:
     cnxn = None
 
@@ -41,8 +40,9 @@ class DataBaseManager:
             cursor = self.cnxn.cursor()
             cursor.execute("SELECT * FROM ArtikelVerwaltung.vArtikelliste WHERE vArtikelliste.EAN = ?", ean)
             row = cursor.fetchone()
-            if row is None or len(cursor.fetchall()) != 0:
-                print("Error: Keinen oder mehrere Einträge gefunden!")
+            count = len(cursor.fetchall())
+            if row is None or count != 0:
+                print("WARNUNG: Keinen oder mehrere Einträge gefunden:", count + 1)
             return row
 
         except Exception as exc:
@@ -62,7 +62,6 @@ class DataBaseManager:
         if self.cnxn is None:
             print("ERROR: Not Connected!")
             return None
-
         try:
             cursor = self.cnxn.cursor()
             cursor.execute(
@@ -76,6 +75,45 @@ class DataBaseManager:
             print('critical error occurred: {0}. Please save your data and restart application'.format(exc))
             return None
 
+    def get_first_image(self, k_article):
+        img_list = self.get_image_list()
+        for img in img_list:
+            if img.kArtikel == k_article:
+                return img.bBild
+        return None
+
+    def get_special_price(self, k_article):
+        if self.cnxn is None:
+            print("ERROR: Not Connected!")
+            return None
+        try:
+            cursor = self.cnxn.cursor()
+            cursor.execute("SELECT fNettoPreis, dEnde FROM [DbeS].[vArtikelSonderpreis] as sp WHERE sp.kArtikel = ?"
+                            " AND sp.cAktiv = 'Y'"
+                            " AND sp.dStart < GETDATE()"
+                            " AND sp.kKundenGruppe = 1", k_article)
+            # check if there are more than one special price?!
+            # if cursor.fetchall() is not None...
+            return cursor.fetchone()
+
+        except Exception as exc:
+            print('critical error occurred: {0}. Please save your data and restart application'.format(exc))
+            return None
+
+    def get_artcle_description(self, k_article):
+        if self.cnxn is None:
+            print("ERROR: Not Connected!")
+            return None
+        try:
+            cursor = self.cnxn.cursor()
+            cursor.execute("SELECT cBeschreibung ,cKurzBeschreibung ,cUrlPfad FROM [dbo].[tArtikelBeschreibung] WHERE dbo.tArtikelBeschreibung.kArtikel = ?", k_article)
+            # check if there are more than one special price?!
+            # if cursor.fetchall() is not None...
+            return cursor.fetchone()
+
+        except Exception as exc:
+            print('critical error occurred: {0}. Please save your data and restart application'.format(exc))
+            return None
 
 # kArtikel kStueckliste kVaterArtikel kArtikelForKategorieArtikel Artikelnummer Sortiernummer Artikelname Einheit EAN
 # Herkunftsland UNNUmmer cHAN Gefahrennummer ISBN ASIN TaricCode UPC Hersteller Lieferstatus Breite Hoehe Laenge
