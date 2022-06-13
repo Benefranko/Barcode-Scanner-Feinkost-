@@ -24,7 +24,8 @@ class MApplication(QApplication):
                 # QApplication.notify(self, receiver, QKeyEvent(QEvent.KeyPress,  42, Qt.NoModifier, 0, 0, 0, 'AHA',
                 # False,  1 ) )
                 return True
-            return QApplication.notify(self, receiver, event)
+            else:
+                return QApplication.notify(self, receiver, event)
         except Exception as exc:
             print('critical error occurred: {0}. Please save your data and restart application'.format(exc))
             return False

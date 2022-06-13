@@ -14,7 +14,7 @@ from databasemanager import DataBaseManager
 
 class MainWindow(QMainWindow):
     # Constants
-    SHOW_TIME = 10
+    SHOW_TIME = 15
     CHANGE_ADVERTISE_TIME = 5
     SPECIAL_PRICE_RED_LINE_HEIGHT = 5
     SPACE_BETWEEN_PRICE_AND_SPECIAL_PRICE = 10
@@ -68,14 +68,17 @@ class MainWindow(QMainWindow):
 
         # own changes
         self.setWindowTitle("Feinkostscanner")
-        self.window.frame.setStyleSheet("background-image: url(\"C:/Users/Markus/Downloads/47271122-es-tut-uns-leid-symbol-internet-taste-auf-weißem-hintergrund-.jpg\"); color: blue;")
-        self.window.frame.setFixedSize(QImage("C:/Users/Markus/Downloads/47271122-es-tut-uns-leid-symbol-internet-taste-auf-weißem-hintergrund-.jpg").size())
+
+        pix = QPixmap("C:/Users/Markus/Downloads/47271122-es-tut-uns-leid-symbol-internet-taste-auf-weißem-hintergrund-.jpg")
+        self.window.frame.setPixmap(pix.scaled(pix.toImage().size() / 2))
 
         pix = QPixmap("E:\Schulzeug\P-Seminar\git\Barcode-Scanner-Feinkost-/sunmi_scan.png")
-        self.window.img1.setPixmap( pix.scaled( QImage("E:\Schulzeug\P-Seminar\git\Barcode-Scanner-Feinkost-/sunmi_scan.png").size() / 8) )
+        self.window.img1.setPixmap(pix.scaled( pix.toImage().size() / 5))
 
         pix = QPixmap("E:\Schulzeug\P-Seminar\git\Barcode-Scanner-Feinkost-/logo.jpg")
-        self.window.logo.setPixmap( pix.scaled(QImage("E:\Schulzeug\P-Seminar\git\Barcode-Scanner-Feinkost-/logo.jpg").size() / 4 ))
+        self.window.logo.setPixmap(pix.scaled(pix.toImage().size() / 4))
+
+        self.event_handler("NEW_LABEL", "C:/Users/Markus/Desktop/Schulzeug/Q11/Englisch Converstation/img_5807-1_40950_362x480.jpg")
 
         # ...
         #self.window.img.setMinimumWidth(600)
@@ -103,11 +106,11 @@ class MainWindow(QMainWindow):
         self.event_handler("TIMER")
 
     def new_advertise(self):
-        self.event_handler("NEW_LABEL", "C:/Users/Markus/Desktop/Schulzeug/Q11/Englisch Converstation/img_5807-1_40950_362x480.jpg")
-        self.t2 = self.t2 + 1
-        if self.t2 % 3 == 0:
-            self.button2clicked()
+        self.window.stackedWidget_2.setCurrentIndex(self.t2)
+        if self.t2 >= 1:
             self.t2 = 0
+        else:
+            self.t2 = self.t2 + 1
         return
 
     def newScanHandling(self, value):

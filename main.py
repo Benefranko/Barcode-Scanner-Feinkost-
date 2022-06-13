@@ -14,13 +14,53 @@ m_win = None
 
 class RequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
-        self.send_response(200)
-        self.send_header('content-type', 'text/html')
-        self.end_headers()
-        if m_win is not None:
-            self.wfile.write(
-                ("COUNT OF ELEMENTS: " + str("m_win.window.groupBox.layout().count()") + "\r\n   URL:/").encode())
-        self.wfile.write(self.path[1:].encode())
+        print(self.path)
+        match self.path:
+            case "/monatsst.html":
+                try:
+                    html = open("./html/monatsst.html", "r")
+                except Exception as exc:
+                    print('critical error occurred: {0}. Please save your data and restart application'.format(exc))
+                    return
+
+                self.send_response(200)
+                self.send_header('content-type', 'text/html')
+                self.end_headers()
+                self.wfile.write(html.read().encode("utf-8"))
+            case "/wochenst.html":
+                try:
+                    html = open("./html/test.html", "r")
+                except Exception as exc:
+                    print('critical error occurred: {0}. Please save your data and restart application'.format(exc))
+                    return
+
+                self.send_response(200)
+                self.send_header('content-type', 'text/html')
+                self.end_headers()
+                self.wfile.write(html.read().encode("utf-8"))
+            case "/":
+                try:
+                    html = open("./html/main.html", "r")
+                except Exception as exc:
+                    print('critical error occurred: {0}. Please save your data and restart application'.format(exc))
+                    return
+
+                self.send_response(200)
+                self.send_header('content-type', 'text/html')
+                self.end_headers()
+                self.wfile.write(html.read().encode("utf-8"))
+            case _:
+                try:
+                    html = open("./html/404.html", "r")
+                except Exception as exc:
+                    print('critical error occurred: {0}. Please save your data and restart application'.format(exc))
+                    return
+
+                self.send_response(404)
+                self.send_header('content-type', 'text/html')
+                self.end_headers()
+                self.wfile.write(html.read().encode("utf-8"))
+
 
 
 def start_web_server(server, arg2):
