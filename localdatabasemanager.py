@@ -6,7 +6,7 @@ import contextlib
 class LocalDataBaseManager:
     connection = None
     sql_create_table = """CREATE TABLE IF NOT EXISTS scans (
-                                    id integer PRIMARY KEY ,
+                                    id INTEGER PRIMARY KEY AUTOINCREMENT,
                                     date date NOT NULL,
                                     time time NOT NULL,
                                     kArticle integer NOT NULL,

@@ -46,11 +46,36 @@ class RequestHandler(BaseHTTPRequestHandler):
                     weekday = datetime.today().weekday()
                     for day in range(0, weekday + 1):
                         current_day = datetime.today().date() - timedelta(days=day)
-                        scan_list[weekday - day] = loc_db_mngr.count_scans_at_date(current_day)[0][0]
+                        buf = loc_db_mngr.count_scans_at_date(current_day)
+                        if buf is not None:
+                            scan_list[weekday - day] = buf[0][0]
                     html = html.replace("%DATA_DATASET_1%", str(scan_list))
 
                 case "/jahresst.html":
                     html = open("./html/jahresst.html", "r").read()
+                    scan_list = [0] * 12
+                    s_list = loc_db_mngr.get_all_scans()
+                    current_year = datetime.now().year
+
+                    for m in range(0, 12):
+                        for scan in s_list:
+                            scan_d = datetime.fromisoformat(scan[1])
+                            if scan_d.year == current_year and scan_d.month == m:
+                                scan_list[m] += 1
+                    html = html.replace("%DATA_DATASET_1%", str(scan_list))
+                case "/tabelle.html":
+                    html = open("./html/tabelle.html", "r").read()
+                    s_list = loc_db_mngr.get_all_scans()
+                    sendData = ""
+                    for scan in s_list:
+                        sendData += """<tr>\n
+                                            <td>{0}</td>\n
+                                            <td>{1}</td>\n
+                                            <td>{2}</td>\n
+                                            <td>{3}</td>\n
+                                            <td>{4}</td>\n
+                                    </tr>\n""".format(scan[0], scan[1], scan[2], scan[3], scan[4])
+                    html = html.replace("%LINES%", sendData)
                 case "/":
                     html = open("./html/main.html", "r").read()
                 case _:

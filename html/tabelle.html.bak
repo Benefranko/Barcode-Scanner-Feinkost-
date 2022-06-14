@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Alle Scanns</title>
+		
+		<style>
+			table, th, td {
+				border: 1px solid;
+			}
+			th {
+				height: 50px;
+				width: 150px;
+			}
+			body {
+				width: 80%;
+				margin-left: auto;
+				margin-right: auto;
+			}
+		</style>
+	</head>
+	<body>
+		<h1 style="margin-left: auto; margin-right: auto;">Tabelle mit allen Scan-Eintraegen:</h1>
+		<table style="border-collapse: collapse; border-spacing: 20px; text-align: center; margin-left: auto;  margin-right: auto ">
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th>Datum</th>
+					<th>Zeit</th>
+					<th>kArtikel</th>
+					<th>EAN</th>
+				</tr>
+			</thead>
+			%LINES%
+		</table>
+		
+		<div style="margin-top: 100px; " >
+			<a style="color: blue; text-decoration: none; font-size: 25px" href="/">Zur Startseite</a>
+		</div>
+	</body>
+</html>

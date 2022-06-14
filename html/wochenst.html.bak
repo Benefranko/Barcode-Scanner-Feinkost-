@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Canvas Diagramm</title>
+		<style>
+			canvas {
+				margin-left: 50 % - canvas.width
+			}
+		
+			body {
+				width: 80%;
+				margin-left: auto;
+				margin-right: auto;
+			}
+		</style>
+	</head>
+<body>
+
+
+	<h1>Wochenstatistik:<h1>
+	<p></p>
+
+	<div style=" margin-left: auto; margin-right: auto;">
+		<canvas id="myChart" width="400" height="200"></canvas>
+	</div>
+	
+	<p>Moin Meister</p>
+	<p></p>
+
+	<a style="color: blue; text-decoration: none;" href="/">Zur Startseite</a>
+	
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<script >
+		const ctx = document.getElementById('myChart').getContext('2d');
+		const myChart = new Chart(ctx, {
+			type: 'bar',
+			data: {
+				labels: ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'],
+				datasets: [{
+					label: ' Verwendungen',
+					data: %DATA_DATASET_1%,
+					backgroundColor: [
+						'rgba(255, 99, 132, 0.2)',
+						'rgba(54, 162, 235, 0.2)',
+						'rgba(255, 206, 86, 0.2)',
+						'rgba(75, 192, 192, 0.2)',
+						'rgba(153, 102, 255, 0.2)',
+						'rgba(255, 159, 64, 0.2)'
+					],
+					borderColor: [
+						'rgba(255, 99, 132, 1)',
+						'rgba(54, 162, 235, 1)',
+						'rgba(255, 206, 86, 1)',
+						'rgba(75, 192, 192, 1)',
+						'rgba(153, 102, 255, 1)',
+						'rgba(255, 159, 64, 1)'
+					],
+					borderWidth: 2
+				}]
+			},
+			options: {
+				scales: {
+					y: {
+						beginAtZero: true
+					}
+				}
+			}
+			
+		});
+	</script>
+	
+	</body>
+</html>

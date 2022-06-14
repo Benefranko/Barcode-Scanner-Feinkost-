@@ -13,10 +13,14 @@
 			<a style="color: blue; text-decoration: none;" href="/wochenst.html">Wochenstatistik</a>
 		</li>
 		<li>
-			<a href="/monatsst.html">Monatsstatistik</a>
+			<a style="color: blue; text-decoration: none;" href="/monatsst.html">Monatsstatistik</a>
 		</li>
 		<li>
-			<a href="/jahresst.html">Jahresstatistik</a>
+			<a style="color: blue; text-decoration: none;" href="/jahresst.html">Jahresstatistik</a>
+		</li>
+		
+		<li style="margin-top: 20px;">
+			<a style="color: blue; text-decoration: none;" href="/tabelle.html">Tabelle mit allen Eintraegen</a>
 		</li>
 	</ul></div>
 
