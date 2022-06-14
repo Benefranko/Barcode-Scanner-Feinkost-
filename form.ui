@@ -324,7 +324,7 @@
          <widget class="QWidget" name="page_5">
           <layout class="QGridLayout" name="gridLayout_8">
            <item row="0" column="0">
-            <widget class="QGroupBox" name="groupBox">
+            <widget class="QGroupBox" name="groupBoxAdvertise">
              <property name="font">
               <font>
                <family>Segoe UI</family>

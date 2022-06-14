@@ -10,9 +10,11 @@ from PySide2.QtGui import QImage, QPixmap, QFontMetrics, QResizeEvent, QFont
 from enum import Enum
 
 from databasemanager import DataBaseManager
+from localdatabasemanager import LocalDataBaseManager
 
 
 class MainWindow(QMainWindow):
+
     # Constants
     SHOW_TIME = 15
     CHANGE_ADVERTISE_TIME = 5
@@ -30,9 +32,10 @@ class MainWindow(QMainWindow):
     window = None
     special_price_red_line = None
     special_price_label = None
+    loc_db_mngr: LocalDataBaseManager = None
+
 
     # Tests
-    testCounter = 1
     t2 = 0
 
     class STATES(Enum):
@@ -41,13 +44,13 @@ class MainWindow(QMainWindow):
         WAIT_FOR_SCAN = 2
     state = STATES.SHOW_PRODUCT_DESCRIPTION
 
-    def __init__(self, parent=None):
+    def __init__(self, sql_lite_path, parent=None):
         super(MainWindow, self).__init__(parent)
         self.load_ui()
         self.state = self.STATES.WAIT_FOR_SCAN
         self.window.stackedWidget.setCurrentIndex(0)
 
-        # fullscreen
+        # full screen
         # self.showFullScreen()
         self.setFixedSize(800, 400)
         self.setWindowFlags(Qt.CustomizeWindowHint | Qt.FramelessWindowHint)
@@ -69,24 +72,35 @@ class MainWindow(QMainWindow):
         # own changes
         self.setWindowTitle("Feinkostscanner")
 
-        pix = QPixmap("C:/Users/Markus/Downloads/47271122-es-tut-uns-leid-symbol-internet-taste-auf-weißem-hintergrund-.jpg")
+        pix = QPixmap("./images/no_picture_found.jpg")
         self.window.frame.setPixmap(pix.scaled(pix.toImage().size() / 2))
 
-        pix = QPixmap("E:\Schulzeug\P-Seminar\git\Barcode-Scanner-Feinkost-/sunmi_scan.png")
-        self.window.img1.setPixmap(pix.scaled( pix.toImage().size() / 5))
+        pix = QPixmap("./images/sunmi_scan.png")
+        self.window.img1.setPixmap(pix.scaled(pix.toImage().size() / 5))
 
-        pix = QPixmap("E:\Schulzeug\P-Seminar\git\Barcode-Scanner-Feinkost-/logo.jpg")
+        pix = QPixmap("./images/logo.jpg")
         self.window.logo.setPixmap(pix.scaled(pix.toImage().size() / 4))
 
-        self.event_handler("NEW_LABEL", "C:/Users/Markus/Desktop/Schulzeug/Q11/Englisch Converstation/img_5807-1_40950_362x480.jpg")
-
-        # ...
-        #self.window.img.setMinimumWidth(600)
-        #self.window.img.setMinimumHeight(800)
+        # Example Advertise
+        pix = QPixmap("./images/example.jpg")
+        label = QLabel(self)
+        label.setAlignment(Qt.AlignHCenter)
+        label.setPixmap(pix.scaled(pix.toImage().size() / 3))
+        layout = self.window.groupBoxAdvertise.layout()
+        if layout is not None and label is not None:
+            layout.addWidget(label)
+        print("DEBUG")
 
         # connect to database
         self.databasemanager = DataBaseManager()
         self.databasemanager.connect()
+
+        self.loc_db_mngr = LocalDataBaseManager()
+        self.loc_db_mngr.connect(sql_lite_path)
+        if self.loc_db_mngr.connection is None:
+            print("Failed to open Database!")
+        else:
+            self.loc_db_mngr.create_table()
 
         # start Timer
         self.timerID = self.startTimer(1000)
@@ -133,8 +147,7 @@ class MainWindow(QMainWindow):
                 assert img.loadFromData(content)
                 self.window.img.setPixmap(QPixmap.fromImage(img).scaled(200,200 , Qt.KeepAspectRatio))
             else:
-                self.window.img.setPixmap(QPixmap("E:\Schulzeug\P-Seminar\git\Barcode-Scanner-Feinkost-/kein-bild-vorhanden.webp").scaled(200, 200, Qt.KeepAspectRatio))
-
+                self.window.img.setPixmap(QPixmap("./images/kein-bild-vorhanden.webp").scaled(200, 200, Qt.KeepAspectRatio))
 
             self.window.p_name.setText(data.Artikelname)
             self.window.preis.setText(str(float(int(data[28] * 100)) / 100) + " €")
@@ -146,7 +159,6 @@ class MainWindow(QMainWindow):
             descript = self.databasemanager.get_artcle_description(data.kArtikel)
             if descript is not None:
                 self.window.description.setHtml(descript.cBeschreibung)
-                print(descript.cBeschreibung)
             self.window.hersteller.setText(data.Hersteller)
 
             # switch site for layout update & update of geometries of labels
@@ -171,15 +183,15 @@ class MainWindow(QMainWindow):
                                                         br_price.width(),
                                                         self.SPECIAL_PRICE_RED_LINE_HEIGHT)
 
-                print(br_special_price.height())
-                print(br_price.height())
-                print(((   br_price.height() - br_special_price.height() ) / 2)- br_price.height() / 2)
-
                 self.special_price_label.setGeometry(self.window.preis.x() + br_price.width()
                                                      + self.SPACE_BETWEEN_PRICE_AND_SPECIAL_PRICE,
-                                                     self.window.preis.y() - (  (  br_special_price.height() - br_price.height() ) / 2) ,
+                                                     self.window.preis.y() - ((br_special_price.height()
+                                                                               - br_price.height()) / 2),
                                                      br_special_price.width() + 2,
                                                      br_special_price.height())
+
+                # add to localdb:
+                self.loc_db_mngr.add_new_scan(data.kArtikel, value)
 
             else:
                 self.special_price_label.hide()
@@ -190,25 +202,7 @@ class MainWindow(QMainWindow):
         return
 
     def event_handler(self, action, value = None):
-        handled: bool = False;
-
-        # GLOBAL ACTION HANDLING
-        if action == "NEW_LABEL":
-            layout = self.window.groupBox.layout()
-            label = None
-
-            if value.startswith("C:/"):
-                label = QPushButton(self)
-                label.setStyleSheet("background-image: url(\"" + value + "\")")
-                label.setFixedSize(QImage(value).size() * 2)
-
-            else:
-                label = QLabel(self)
-                label.setText(value)
-
-            layout.addWidget(label, self.testCounter / 20, self.testCounter % 20 )
-            self.testCounter = self.testCounter + 1
-            return
+        handled: bool = False
 
         # STATE specific ACTION HANDLING
         match self.state:
@@ -253,16 +247,10 @@ class MainWindow(QMainWindow):
         if not handled:
             print("ERROR: UNHANDLED ACTION:" + action)
 
-    def button1clicked(self):
-        cols = self.databasemanager.get_header_list()
-        for i in cols:
-            self.event_handler("NEW_LABEL", i)
-
-    def button2clicked(self):
+    def clear_advertise_list(self):
         layout = self.window.groupBox.layout
         for i in reversed(range(layout().count())):
             self.window.groupBox.layout().itemAt(i).widget().deleteLater()
-
 
     @Slot(str)
     def new_scan(self, value):

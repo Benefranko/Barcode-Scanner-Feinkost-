@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 7.0.1, 2022-06-13T21:33:56. -->
+<!-- Written by QtCreator 7.0.1, 2022-06-14T13:01:06. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -122,12 +122,10 @@
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">PythonEditor.RunConfiguration.E:/Schulzeug/P-Seminar/git/Barcode-Scanner-Feinkost-/main.py</value>
     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">E:/Schulzeug/P-Seminar/git/Barcode-Scanner-Feinkost-/main.py</value>
     <value type="QString" key="PythonEditor.RunConfiguation.Interpreter">{9b5161a6-ba72-473a-99e1-5df6d157835c}</value>
-    <value type="QString" key="PythonEditor.RunConfiguation.Script">E:\Schulzeug\P-Seminar\git\Barcode-Scanner-Feinkost-\main.py</value>
     <value type="bool" key="RunConfiguration.UseCppDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
     <value type="bool" key="RunConfiguration.UseQmlDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">E:/Schulzeug/P-Seminar/git/Barcode-Scanner-Feinkost-</value>
    </valuemap>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.RunConfiguration.1">
     <value type="bool" key="Analyzer.Perf.Settings.UseGlobalSettings">true</value>
@@ -140,12 +138,10 @@
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">PythonEditor.RunConfiguration.E:/Schulzeug/P-Seminar/git/Barcode-Scanner-Feinkost-/mainwindow.py</value>
     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">E:/Schulzeug/P-Seminar/git/Barcode-Scanner-Feinkost-/mainwindow.py</value>
     <value type="QString" key="PythonEditor.RunConfiguation.Interpreter">{9b5161a6-ba72-473a-99e1-5df6d157835c}</value>
-    <value type="QString" key="PythonEditor.RunConfiguation.Script">E:\Schulzeug\P-Seminar\git\Barcode-Scanner-Feinkost-\mainwindow.py</value>
     <value type="bool" key="RunConfiguration.UseCppDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
     <value type="bool" key="RunConfiguration.UseQmlDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">E:/Schulzeug/P-Seminar/git/Barcode-Scanner-Feinkost-</value>
    </valuemap>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.RunConfiguration.2">
     <value type="bool" key="Analyzer.Perf.Settings.UseGlobalSettings">true</value>
@@ -158,12 +154,10 @@
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">PythonEditor.RunConfiguration.E:/Schulzeug/P-Seminar/git/Barcode-Scanner-Feinkost-/mapplication.py</value>
     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">E:/Schulzeug/P-Seminar/git/Barcode-Scanner-Feinkost-/mapplication.py</value>
     <value type="QString" key="PythonEditor.RunConfiguation.Interpreter">{9b5161a6-ba72-473a-99e1-5df6d157835c}</value>
-    <value type="QString" key="PythonEditor.RunConfiguation.Script">E:\Schulzeug\P-Seminar\git\Barcode-Scanner-Feinkost-\mapplication.py</value>
     <value type="bool" key="RunConfiguration.UseCppDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
     <value type="bool" key="RunConfiguration.UseQmlDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">E:/Schulzeug/P-Seminar/git/Barcode-Scanner-Feinkost-</value>
    </valuemap>
    <value type="qlonglong" key="ProjectExplorer.Target.RunConfigurationCount">3</value>
   </valuemap>
