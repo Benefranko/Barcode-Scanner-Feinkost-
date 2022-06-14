@@ -72,17 +72,17 @@ class MainWindow(QMainWindow):
         # own changes
         self.setWindowTitle("Feinkostscanner")
 
-        pix = QPixmap("./images/no_picture_found.jpg")
+        pix = QPixmap("../images/no_picture_found.jpg")
         self.window.frame.setPixmap(pix.scaled(pix.toImage().size() / 2))
 
-        pix = QPixmap("./images/sunmi_scan.png")
+        pix = QPixmap("../images/sunmi_scan.png")
         self.window.img1.setPixmap(pix.scaled(pix.toImage().size() / 5))
 
-        pix = QPixmap("./images/logo.jpg")
+        pix = QPixmap("../images/logo.jpg")
         self.window.logo.setPixmap(pix.scaled(pix.toImage().size() / 4))
 
         # Example Advertise
-        pix = QPixmap("./images/example.jpg")
+        pix = QPixmap("../images/example.jpg")
         label = QLabel(self)
         label.setAlignment(Qt.AlignHCenter)
         label.setPixmap(pix.scaled(pix.toImage().size() / 3))
@@ -147,7 +147,7 @@ class MainWindow(QMainWindow):
                 assert img.loadFromData(content)
                 self.window.img.setPixmap(QPixmap.fromImage(img).scaled(200,200 , Qt.KeepAspectRatio))
             else:
-                self.window.img.setPixmap(QPixmap("./images/kein-bild-vorhanden.webp").scaled(200, 200, Qt.KeepAspectRatio))
+                self.window.img.setPixmap(QPixmap("../images/kein-bild-vorhanden.webp").scaled(200, 200, Qt.KeepAspectRatio))
 
             self.window.p_name.setText(data.Artikelname)
             self.window.preis.setText(str(float(int(data[28] * 100)) / 100) + " €")
