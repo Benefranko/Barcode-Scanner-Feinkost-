@@ -1,5 +1,6 @@
 import pyodbc
 
+
 class DataBaseManager:
     cnxn = None
 
@@ -41,8 +42,10 @@ class DataBaseManager:
             cursor.execute("SELECT * FROM ArtikelVerwaltung.vArtikelliste WHERE vArtikelliste.EAN = ?", ean)
             row = cursor.fetchone()
             count = len(cursor.fetchall())
-            if row is None or count != 0:
-                print("WARNUNG: Keinen oder mehrere Einträge gefunden:", count + 1)
+            if row is not None:
+                count += 1
+            if count != 1:
+                print("WARNUNG: Keinen oder mehrere Einträge gefunden:", count)
             return row
 
         except Exception as exc:

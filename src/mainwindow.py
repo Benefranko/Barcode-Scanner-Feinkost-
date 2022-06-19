@@ -127,12 +127,16 @@ class MainWindow(QMainWindow):
             self.t2 = self.t2 + 1
         return
 
-    def newScanHandling(self, value):
+    def newScanHandling(self, value: str):
         self.showTimeTimer = self.SHOW_TIME
         self.state = self.STATES.SHOW_PRODUCT_DESCRIPTION
         # self.databasemanager.p_all()
 
-        data = self.databasemanager.get_data_by_ean(int(value))
+        try:
+            data = self.databasemanager.get_data_by_ean(int(value))
+        except Exception as exc:
+            print("INVALID SCAN: Can't cast to int: '", value, "': ", exc)
+            return
 
         if data is None:
             # switch page to Nothing found
