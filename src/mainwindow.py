@@ -193,13 +193,12 @@ class MainWindow(QMainWindow):
                                                                                - br_price.height()) / 2),
                                                      br_special_price.width() + 2,
                                                      br_special_price.height())
-
-                # add to localdb:
-                self.loc_db_mngr.add_new_scan(data.kArtikel, value)
-
             else:
                 self.special_price_label.hide()
                 self.special_price_red_line.hide()
+
+            # add to localdb:
+            self.loc_db_mngr.add_new_scan(data.kArtikel, value)
 
             # switch page
             # self.window.stackedWidget.setCurrentIndex(1)
