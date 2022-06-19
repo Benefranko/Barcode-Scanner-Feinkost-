@@ -12,10 +12,14 @@ class DataBaseManager:
         #                      "uid=test;pwd=altinsystems;")
         return
 
-    def connect(self, ip="PC-MARKUS", port=None, user="test", pw="altinsystems", db="Mandant_1"):
-        self.cnxn = pyodbc.connect(driver='{ODBC Driver 18 for SQL Server}', host=ip, database=db,
-                                   trusted_connection="yes", user=user, password=pw, encrypt="no")
-        return
+    def connect(self, ip="PC-MARKUS", port=1433, user="test", pw="altinsystems", db="Mandant_1"):
+        try:
+            self.cnxn = pyodbc.connect(driver='{ODBC Driver 18 for SQL Server}', server=ip+","+str(port), database=db,
+                                    trusted_connection="yes", user=user, password=pw, encrypt="no")
+        except Exception as e:
+            print(e)
+            self.cnxn = None
+        return self.cnxn
 
     def get_header_list(self):
         if self.cnxn is None:

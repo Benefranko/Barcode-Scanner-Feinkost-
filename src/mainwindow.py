@@ -1,4 +1,5 @@
 import os
+import sys
 from pathlib import Path
 from PySide2.QtCore import QFile, QTimerEvent, Qt
 from PySide2.QtUiTools import QUiLoader
@@ -93,7 +94,8 @@ class MainWindow(QMainWindow):
 
         # connect to database
         self.databasemanager = DataBaseManager()
-        self.databasemanager.connect()
+        if self.databasemanager.connect(ip="localhost", port=1433) is None:
+            sys.exit(12)
 
         self.loc_db_mngr = LocalDataBaseManager()
         self.loc_db_mngr.connect(sql_lite_path)

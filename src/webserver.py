@@ -46,11 +46,11 @@ class RequestHandler(BaseHTTPRequestHandler):
                     s_list = loc_db_mngr.get_all_scans()
                     current_year = datetime.now().year
 
-                    for m in range(0, 12):
+                    for m in range(1, 13):
                         for scan in s_list:
                             scan_d = datetime.fromisoformat(scan[1])
                             if scan_d.year == current_year and scan_d.month == m:
-                                scan_list[m] += 1
+                                scan_list[m-1] += 1
                     html = html.replace("%DATA_DATASET_1%", str(scan_list))
                 case "/tabelle.html":
                     html = open("../html/tabelle.html", "r").read()
