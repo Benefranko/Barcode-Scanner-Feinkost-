@@ -4,7 +4,7 @@ from pathlib import Path
 from PySide2.QtCore import QFile, QTimerEvent, Qt
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QMainWindow
-from PySide2.QtWidgets import QPushButton, QLayout, QLabel, QLayoutItem, QFrame
+from PySide2.QtWidgets import QPushButton, QLayout, QLabel, QLayoutItem, QFrame, QVBoxLayout, QSpacerItem, QSizePolicy
 from PySide2.QtCore import QObject, Signal, Slot
 from PySide2.QtGui import QImage, QPixmap, QFontMetrics, QResizeEvent, QFont
 
@@ -90,6 +90,13 @@ class MainWindow(QMainWindow):
         layout = self.window.groupBoxAdvertise.layout()
         if layout is not None and label is not None:
             layout.addWidget(label)
+
+            l2 = QVBoxLayout()
+            layout.addLayout(l2, 0, 1)
+            l2.addWidget(QLabel("Sehr gute Quälität"))
+            l2.addWidget(QLabel("Gute Qualität"))
+
+
         print("DEBUG")
 
         # connect to database

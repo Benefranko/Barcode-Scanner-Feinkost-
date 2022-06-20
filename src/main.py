@@ -3,21 +3,11 @@ import mapplication
 import mainwindow
 import webserver
 
-from http.server import HTTPServer
-from threading import Thread
-
-
-def start_web_server(server, arg2):
-    server.serve_forever()
-
-
 if __name__ == "__main__":
+    w_server = webserver.Server()
+    w_server.start_listen()
 
-    webserver = HTTPServer(('127.0.0.1', 8888), webserver.RequestHandler)
-    thread = Thread(target=start_web_server, args=(webserver, 0))
-    thread.start()
-
-    m_app = mapplication.MApplication([])
+    m_app = mapplication.MApplication(sys.argv)
     m_win = mainwindow.MainWindow("./sqlLiteDB.db")
 
     # connect MApplication ( EventFilter ) with MainWindow( handle_EVENT )
@@ -26,6 +16,5 @@ if __name__ == "__main__":
     m_win.show()
     ret = m_app.exec_()
 
-    webserver.shutdown()
-    thread.join()
+    w_server.stop_listen()
     sys.exit(ret)

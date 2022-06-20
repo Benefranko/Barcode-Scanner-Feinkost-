@@ -4,6 +4,29 @@ from datetime import datetime, timedelta
 import calendar
 
 
+from http.server import HTTPServer
+from threading import Thread
+
+
+class Server:
+    webserver = None
+    thread = None
+
+    def __init__(self):
+        self.webserver = HTTPServer(('127.0.0.1', 8888), RequestHandler)
+        self.thread = Thread(target=self.run_web_server, args=())
+
+    def start_listen(self):
+        self.thread.start()
+
+    def stop_listen(self):
+        self.webserver.shutdown()
+        self.thread.join(3)
+
+    def run_web_server(self):
+        self.webserver.serve_forever()
+
+
 class RequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
