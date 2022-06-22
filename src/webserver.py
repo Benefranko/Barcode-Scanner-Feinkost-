@@ -1,20 +1,29 @@
-from http.server import ThreadingHTTPServer, HTTPServer, BaseHTTPRequestHandler, SimpleHTTPRequestHandler
-import localdatabasemanager
-from datetime import datetime, timedelta
+import sys
 import calendar
 
-
-from http.server import HTTPServer
+from http.server import ThreadingHTTPServer, HTTPServer, BaseHTTPRequestHandler
+from datetime import datetime, timedelta
 from threading import Thread
+
+import main
+import localdatabasemanager
 
 
 class Server:
-    webserver = None
-    thread = None
+    webserver: HTTPServer = None
+    thread: Thread = None
+    listenPort: str = ""
+    listenIP: int = -1
 
-    def __init__(self):
-        self.webserver = HTTPServer(('127.0.0.1', 8888), RequestHandler)
-        self.thread = Thread(target=self.run_web_server, args=())
+    def __init__(self, l_ip, l_port):
+        self.listenIP = l_ip
+        self.listenPort = l_port
+        try:
+            self.webserver = ThreadingHTTPServer((l_ip, l_port), RequestHandler)
+            self.thread = Thread(target=self.run_web_server, args=())
+        except Exception as exc:
+            print(exc)
+            sys.exit(12)
 
     def start_listen(self):
         self.thread.start()
@@ -31,7 +40,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         loc_db_mngr = localdatabasemanager.LocalDataBaseManager()
-        loc_db_mngr.connect("./sqlLiteDB.db")
+        loc_db_mngr.connect(main.local_db_path)
         html_status = 200
         try:
             match self.path:

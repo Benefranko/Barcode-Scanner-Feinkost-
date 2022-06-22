@@ -1,12 +1,9 @@
-from PySide2.QtCore import QEvent
+from PySide2.QtCore import QEvent, Signal
 from PySide2.QtWidgets import QApplication
-from PySide2.QtGui import QKeyEvent
-
-from PySide2.QtCore import QObject, Signal, Slot, Qt
 
 
 class MApplication(QApplication):
-    inputBuffer = ""
+    inputBuffer: str = ""
     newScan = Signal(str)
 
     def __init__(self, args):

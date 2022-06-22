@@ -35,7 +35,6 @@ class MainWindow(QMainWindow):
     special_price_label = None
     loc_db_mngr: LocalDataBaseManager = None
 
-
     # Tests
     t2 = 0
 
@@ -45,7 +44,10 @@ class MainWindow(QMainWindow):
         WAIT_FOR_SCAN = 2
     state = STATES.SHOW_PRODUCT_DESCRIPTION
 
-    def __init__(self, sql_lite_path, parent=None):
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.killTimer(self.timerID)
+
+    def __init__(self, sql_lite_path, msql_ip, msql_port, parent=None):
         super(MainWindow, self).__init__(parent)
         self.load_ui()
         self.state = self.STATES.WAIT_FOR_SCAN
@@ -96,12 +98,9 @@ class MainWindow(QMainWindow):
             l2.addWidget(QLabel("Sehr gute Quälität"))
             l2.addWidget(QLabel("Gute Qualität"))
 
-
-        print("DEBUG")
-
         # connect to database
         self.databasemanager = DataBaseManager()
-        if self.databasemanager.connect(ip="localhost", port=1433) is None:
+        if self.databasemanager.connect(ip=msql_ip, port=msql_port) is None:
             sys.exit(12)
 
         self.loc_db_mngr = LocalDataBaseManager()
@@ -113,9 +112,6 @@ class MainWindow(QMainWindow):
 
         # start Timer
         self.timerID = self.startTimer(1000)
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        self.killTimer(self.timerID)
 
     def load_ui(self):
         loader = QUiLoader()
@@ -160,7 +156,8 @@ class MainWindow(QMainWindow):
                 assert img.loadFromData(content)
                 self.window.img.setPixmap(QPixmap.fromImage(img).scaled(200,200 , Qt.KeepAspectRatio))
             else:
-                self.window.img.setPixmap(QPixmap("../images/kein-bild-vorhanden.webp").scaled(200, 200, Qt.KeepAspectRatio))
+                self.window.img.setPixmap(
+                    QPixmap("../images/kein-bild-vorhanden.webp").scaled(200, 200, Qt.KeepAspectRatio))
 
             self.window.p_name.setText(data.Artikelname)
             self.window.preis.setText(str(float(int(data[28] * 100)) / 100) + " €")
@@ -169,7 +166,7 @@ class MainWindow(QMainWindow):
             self.window.p_num.setText(str(data.Artikelnummer))
             self.window.ean.setText(str(data.EAN))
 
-            descript = self.databasemanager.get_artcle_description(data.kArtikel)
+            descript = self.databasemanager.get_article_description(data.kArtikel)
             if descript is not None:
                 self.window.description.setHtml(descript.cBeschreibung)
             self.window.hersteller.setText(data.Hersteller)
