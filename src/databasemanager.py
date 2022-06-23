@@ -1,15 +1,11 @@
+# Open Source Bibliothek für MS SQL
 import pyodbc
 
-
+# Klasse, die sich um den Datenaustausch mit dem MS SQL Server kümmert
 class DataBaseManager:
     conn = None
 
     def __init__(self):
-        # conn = pyodbc.connect("DRIVER={ODBC Driver 18 for SQL Server};"
-        #                      "Server=PC-MARKUS;"
-        #                      "Database=PC-MARKUS;"
-        #                      "Trusted_Connection=yes;"
-        #                      "uid=test;pwd=altinsystems;")
         return
 
     def connect(self, ip="PC-MARKUS", port=1433, user="test", pw="altinsystems", db="Mandant_1"):
@@ -23,10 +19,13 @@ class DataBaseManager:
             # If the value "No" is not specified, the value "Yes" is used.
             # If the value is "No", the UID and PWD keys have to be used to establish a connection with the data source.
             ###
-
+            
+            # Verbinde mit MS SQl server unter verwendung des extern installierten ODBC Driver 18
             self.conn = pyodbc.connect(driver='{ODBC Driver 18 for SQL Server}', server=ip + "," + str(port),
                                        database=db,
-                                       user=user, password=pw, encrypt="no")
+                                       user=user,
+                                       password=pw,
+                                       encrypt="no")
         except Exception as e:
             print(e)
             self.conn = None
