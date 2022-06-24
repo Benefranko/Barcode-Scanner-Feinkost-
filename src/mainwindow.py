@@ -75,7 +75,7 @@ class MainWindow(QMainWindow):
 
         ###
         # Lade Grafik aus Qt-Creator UI Datei
-        if self.load_ui("../src/form.ui") is None:
+        if self.load_ui("../src/form_ALT.ui") is None:
             raise Exception("Konnte UI nicht Laden")
 
         # Lege Startzustand Fest und zeige dementsprechende Seite an
