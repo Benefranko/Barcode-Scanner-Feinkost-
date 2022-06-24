@@ -4,7 +4,7 @@ import mainwindow
 import webserver
 
 # Einstellungen
-# Pfad zu lokaler Datenabnk, die zum Speichern der Statistiken der Nutzung, sowie der Bewertung dient
+# Pfad zu lokaler Datenbank, die zum Speichern der Statistiken der Nutzung, sowie der Bewertung dient
 local_db_path: str = "./sqlLiteDB.db"
 # MS SQL Server mit Daten zu Produkten
 ms_sql_server_ip: str = "home.obermui.de"
@@ -18,22 +18,34 @@ local_http_server_port: int = 8888
 
 
 if __name__ == "__main__":
-    # Starte Lokeln Statistiken Server
-    w_server = webserver.Server(local_http_server_ip, local_http_server_port)
-    w_server.start_listen()
+    # MApplication
+    m_app = None
+    # Lokalen Statistiken Server
+    w_server = None
+    # Rückgabewert QApplication
+    ret = None
 
-    # Erstelle Key Press Event Handler und Ui - Mainwindow
-    m_app = mapplication.MApplication(sys.argv)
-    m_win = mainwindow.MainWindow(local_db_path, ms_sql_server_ip, ms_sql_server_port)
+    try:
+        # Starte Lokalen Statistiken Server
+        w_server = webserver.Server(local_http_server_ip, local_http_server_port)
+        w_server.start_listen()
 
-    # connect MApplication ( EventFilter ) with MainWindow( handle_EVENT )
-    m_app.newScan.connect(m_win.new_scan)
+        # Erstelle Key Press Event Handler und Ui - MainWindow
+        m_app = mapplication.MApplication(sys.argv)
+        m_win = mainwindow.MainWindow(local_db_path, ms_sql_server_ip, ms_sql_server_port)
 
-    # Mache das Fenster sichtbar
-    m_win.show()
-    # Warte auf exit signal
-    ret = m_app.exec_()
-    
+        # connect MApplication ( EventFilter ) with MainWindow( handle_EVENT )
+        m_app.newScan.connect(m_win.new_scan)
+
+        # Mache das Fenster sichtbar
+        m_win.show()
+
+        # Warte auf exit signal
+        ret = m_app.exec_()
+
+    except Exception as exc:
+        print(exc)
+
     # Stoppe lokalen Server und beende das Programm
     w_server.stop_listen()
     sys.exit(ret)

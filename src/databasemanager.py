@@ -1,6 +1,7 @@
 # Open Source Bibliothek für MS SQL
 import pyodbc
 
+
 # Klasse, die sich um den Datenaustausch mit dem MS SQL Server kümmert
 class DataBaseManager:
     conn = None
@@ -19,15 +20,15 @@ class DataBaseManager:
             # If the value "No" is not specified, the value "Yes" is used.
             # If the value is "No", the UID and PWD keys have to be used to establish a connection with the data source.
             ###
-            
+
             # Verbinde mit MS SQl server unter verwendung des extern installierten ODBC Driver 18
             self.conn = pyodbc.connect(driver='{ODBC Driver 18 for SQL Server}', server=ip + "," + str(port),
                                        database=db,
                                        user=user,
                                        password=pw,
                                        encrypt="no")
-        except Exception as e:
-            print(e)
+        except Exception as exc:
+            print('critical error occurred: {0}. Please save your data and restart application'.format(exc))
             self.conn = None
         return self.conn
 

@@ -3,6 +3,7 @@ import sqlite3
 from sqlite3 import Error
 import contextlib
 
+
 class LocalDataBaseManager:
     connection = None
     sql_create_table = """CREATE TABLE IF NOT EXISTS scans (
@@ -38,29 +39,29 @@ class LocalDataBaseManager:
         self.connection = None
 
     def connect(self, file_path):
-        if self.connection is not None:
-            print("Already Connected")
-            return False
         try:
-            self.connection = sqlite3.connect(file_path)
-            return True
-        except Error as e:
-            print(e)
+            if self.connection is not None:
+                print("WARNING: Already Connected")
+            else:
+                self.connection = sqlite3.connect(file_path)
+            return self.connection
+        except Error as exc:
+            print('critical error occurred: {0}. Please save your data and restart application'.format(exc))
             self.connection = None
-            return False
+            return None
 
     def get_all_scans(self):
         if self.connection is None:
-            print("Not Connected")
+            print("ERROR: Nicht mit lokaler Datenbank verbunden!")
             return
         else:
             with contextlib.closing(self.connection.cursor()) as cur:
                 cur.execute("SELECT * FROM scans")
                 return cur.fetchall()
 
-    def count_scans_at_date(self, date:datetime.date):
+    def count_scans_at_date(self, date: datetime.date):
         if self.connection is None:
-            print("Not Connected")
+            print("ERROR: Nicht mit lokaler Datenbank verbunden!")
             return
         else:
             with contextlib.closing(self.connection.cursor()) as cur:
@@ -75,7 +76,7 @@ class LocalDataBaseManager:
            :return: scan id
         """
         if self.connection is None:
-            print("Not Connected")
+            print("ERROR: Nicht mit lokaler Datenbank verbunden!")
             return
 
         if self.connection:
@@ -87,9 +88,9 @@ class LocalDataBaseManager:
                 id_ = cur.lastrowid
             return id_
 
-    def add_rating(self, k_article, ean, rating, msg ):
+    def add_rating(self, k_article, ean, rating, msg):
         if self.connection is None:
-            print("Not Connected")
+            print("ERROR: Nicht mit lokaler Datenbank verbunden!")
             return
 
         if self.connection:
@@ -103,12 +104,9 @@ class LocalDataBaseManager:
 
     def get_rating_by_k_article(self, k_article):
         if self.connection is None:
-            print("Not Connected")
+            print("ERROR: Nicht mit lokaler Datenbank verbunden!")
             return
         else:
             with contextlib.closing(self.connection.cursor()) as cur:
                 cur.execute("SELECT AVG(rating) FROM scans WHERE kArticle = ?", [k_article])
                 return cur.fetchone()
-
-
-
