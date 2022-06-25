@@ -220,8 +220,21 @@ class MainWindow(QMainWindow):
                 QPixmap("../images/kein-bild-vorhanden.webp").scaled(200, 200, Qt.KeepAspectRatio))
 
         # Aktualisiere die Labels im User Interface mit den Werten aus der Datenbank...
+
         # Artikel Namen
-        self.window.p_name.setText(data.Artikelname)
+        if data.Artikelname != "":
+            self.window.p_name.setText(data.Artikelname)
+            # Passe Font Size so an, dass ganzer Name angezeigt wird
+            font: QFont = QFont("Areal")
+            font.setPixelSize(30)
+            font.setBold(True)
+            while QFontMetrics(font).boundingRect(self.window.p_name.text()).width() > 555:
+                font.setPixelSize(font.pixelSize() - 1)
+            self.window.p_name.setFont(font)
+        else:
+            self.event_handler("LOAD_ARTICLE_FAILED", scan_article_ean)
+            return
+
         # Artikel Preis
         self.window.preis.setText(str(float(int(data[28] * 100)) / 100) + " €")
         # Artikel Inhalt
@@ -232,8 +245,11 @@ class MainWindow(QMainWindow):
         self.window.hersteller.setText(data.Hersteller)
         # Artikel Beschreibung - diese muss aus extra Datenbank geladen werden
         descript = self.databasemanager.get_article_description(data.kArtikel)
-        if descript is not None:
+        if descript is None or descript.cBeschreibung == "":
+            self.window.groupBox_beschreibung.hide()
+        else:
             self.window.description.setHtml(descript.cBeschreibung)
+            self.window.groupBox_beschreibung.show()
 
         # Erneuter Seitenwechsel, um Layout-update zu erzwingen
         self.window.stackedWidget.setCurrentIndex(1)

@@ -2,7 +2,8 @@
 import pyodbc
 
 
-# Klasse, die sich um den Datenaustausch mit dem MS SQL Server kümmert
+# Klasse, die sich um den Datenaustausch mit dem MS SQL Server kümmert,
+# um die Informationen zu einem Artikel über die EAN zu bekommen
 class DataBaseManager:
     conn = None
 

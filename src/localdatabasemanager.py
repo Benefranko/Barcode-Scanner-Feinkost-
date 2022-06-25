@@ -4,6 +4,8 @@ from sqlite3 import Error
 import contextlib
 
 
+#
+
 class LocalDataBaseManager:
     connection = None
     sql_create_table = """CREATE TABLE IF NOT EXISTS scans (
