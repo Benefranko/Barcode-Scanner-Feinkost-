@@ -106,6 +106,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                             if scan_d.year == current_year and scan_d.month == m:
                                 scan_list[m-1] += 1
                     html = html.replace("%DATA_DATA_SET_1%", str(scan_list))
+
+                # Erweiterbar mit tabelle/INDEX, mit immer nur 100 Items auf einer seite mit nächster seite und 1 seite
+                # zurück gg. mit POST die anzahl umstellbar machen!
                 case "/tabelle.html":
                     html = open("../html/tabelle.html", "r").read()
                     s_list = self.loc_db_mngr.get_all_scans()

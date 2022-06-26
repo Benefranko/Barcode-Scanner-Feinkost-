@@ -61,6 +61,15 @@ class LocalDataBaseManager:
                 cur.execute("SELECT * FROM scans")
                 return cur.fetchall()
 
+    def getRange(self, begin, count):
+        if self.connection is None:
+            print("ERROR: Nicht mit lokaler Datenbank verbunden!")
+            return
+        else:
+            with contextlib.closing(self.connection.cursor()) as cur:
+                cur.execute("SELECT * FROM scans LIMIT ?, ?;", [begin, count])
+                return cur.fetchall()
+
     def count_scans_at_date(self, date: datetime.date):
         if self.connection is None:
             print("ERROR: Nicht mit lokaler Datenbank verbunden!")
