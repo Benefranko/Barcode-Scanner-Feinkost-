@@ -16,6 +16,9 @@ local_http_server_ip: str = '127.0.0.1'
 # Lokaler HTTP SERVER LISTEN Port
 local_http_server_port: int = 8888
 
+# Pfad zu Qt-Designer Formulardatei: Die Grafik wurde nämlich mithilfe des Qt Creators erstellt.
+ui_file_path: str = "../src/form_ALT.ui"
+
 
 if __name__ == "__main__":
     # MApplication
@@ -32,7 +35,7 @@ if __name__ == "__main__":
 
         # Erstelle Key Press Event Handler und Ui - MainWindow
         m_app = mapplication.MApplication(sys.argv)
-        m_win = mainwindow.MainWindow(local_db_path, ms_sql_server_ip, ms_sql_server_port)
+        m_win = mainwindow.MainWindow(local_db_path, ms_sql_server_ip, ms_sql_server_port, ui_file_path)
 
         # connect MApplication ( EventFilter ) with MainWindow( handle_EVENT )
         m_app.newScan.connect(m_win.new_scan)

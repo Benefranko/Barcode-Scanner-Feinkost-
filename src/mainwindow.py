@@ -65,7 +65,7 @@ class MainWindow(QMainWindow):
     def __exit__(self, exc_type, exc_value, traceback):
         self.killTimer(self.timerID)
 
-    def __init__(self, sql_lite_path, msql_ip, msql_port, parent=None):
+    def __init__(self, sql_lite_path, msql_ip, msql_port, ui_file_path, parent=None):
         # Falls Fenster ein übergeordnetes Objekt erhält, übergib dieses der Basisklasse QMainWindow
         super(MainWindow, self).__init__(parent)
 
@@ -75,7 +75,7 @@ class MainWindow(QMainWindow):
 
         ###
         # Lade Grafik aus Qt-Creator UI Datei
-        if self.load_ui("../src/form_ALT.ui") is None:
+        if self.load_ui(ui_file_path) is None:
             raise Exception("Konnte UI nicht Laden")
 
         # Lege Startzustand Fest und zeige dementsprechende Seite an
