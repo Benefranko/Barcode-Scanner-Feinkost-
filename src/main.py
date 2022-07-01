@@ -12,7 +12,7 @@ ms_sql_server_ip: str = "home.obermui.de"
 ms_sql_server_port: int = 18769
 
 # Lokaler HTTP SERVER LISTEN IP
-local_http_server_ip: str = '127.0.0.1'
+local_http_server_ip: str = "0.0.0.0"
 # Lokaler HTTP SERVER LISTEN Port
 local_http_server_port: int = 8888
 
