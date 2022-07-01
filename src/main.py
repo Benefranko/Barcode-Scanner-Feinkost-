@@ -3,7 +3,19 @@ import mapplication
 import mainwindow
 import webserver
 
+from PySide2 import QtCore
+import pyodbc
+import sqlite3
+
 # Einstellungen
+
+# Programm Version
+PROGRAMM_VERSION: str = "0.9.0"
+
+SQL_DRIVER_USED_VERSION_MS_DRIVER: str = "{ODBC Driver 18 for SQL Server}"
+SQL_DRIVER_USED_VERSION_FreeTDS: str = "{FreeTDS}"
+SQL_DRIVER_USED_VERSION_FreeTDS_VERSION = 7.4
+
 # Pfad zu lokaler Datenbank, die zum Speichern der Statistiken der Nutzung, sowie der Bewertung dient
 local_db_path: str = "./sqlLiteDB.db"
 # MS SQL Server mit Daten zu Produkten
@@ -23,6 +35,15 @@ item_count_on_web_server_list: int = 50
 
 
 if __name__ == "__main__":
+    print("Programm Version: ", PROGRAMM_VERSION)
+    print("Python Version: ", sys.version)
+    print("Qt Version: ", QtCore.qVersion())
+    print("PyODBC Version: ", pyodbc.version)
+    print("SQL Lite3 Version: ", sqlite3.version)
+    print("Verwendete MS ODBC Driver Version: ", SQL_DRIVER_USED_VERSION_MS_DRIVER)
+    print("Verwendete FreeTDS Driver Version: ", SQL_DRIVER_USED_VERSION_FreeTDS, " ",
+          SQL_DRIVER_USED_VERSION_FreeTDS_VERSION)
+
     # MApplication
     m_app = None
     # Lokalen Statistiken Server

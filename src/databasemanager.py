@@ -1,6 +1,6 @@
 # Open Source Bibliothek für MS SQL
 import pyodbc
-
+import main
 
 # Klasse, die sich um den Datenaustausch mit dem MS SQL Server kümmert,
 # um die Informationen zu einem Artikel über die EAN zu bekommen
@@ -26,14 +26,16 @@ class DataBaseManager:
             # Verbinde mit MS SQl server unter verwendung des extern installierten ODBC Driver 18
             driver_names = pyodbc.drivers()
             if "ODBC Driver 18 for SQL Server" in driver_names:
-                self.conn = pyodbc.connect(driver='{ODBC Driver 18 for SQL Server}', server=ip + "," + str(port),
+                self.conn = pyodbc.connect(driver=main.SQL_DRIVER_USED_VERSION_MS_DRIVER, server=ip + "," + str(port),
                                            database=db,
                                            user=usr,
                                            password=pw,
                                            encrypt="no")
             elif "FreeTDS" in driver_names:
                 self.conn = pyodbc.connect('DRIVER="{0}"; SERVER={1}; PORT={2}; DATABASE={3}; UID={4}; PWD={5}; '
-                                           'TDS_Version={6};'.format("{FreeTDS}", ip, port, db, usr, pw, "7.4"))
+                                           'TDS_Version={6};'.format(main.SQL_DRIVER_USED_VERSION_FreeTDS,
+                                                                     ip, port, db,usr, pw,
+                                                                     main.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION))
                 ###
                 # DRIVER = {FreeTDS};
                 #             SERVER = server.com;
@@ -46,7 +48,6 @@ class DataBaseManager:
             else:
                 print('(No suitable driver found. Cannot connect.)')
                 self.conn = None
-
         except Exception as exc:
             print('critical error occurred: {0}. Please save your data and restart application'.format(exc))
             self.conn = None
