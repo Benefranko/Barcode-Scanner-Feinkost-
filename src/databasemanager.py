@@ -10,7 +10,8 @@ class DataBaseManager:
     def __init__(self):
         return
 
-    def connect(self, ip="PC-MARKUS", port=1433, user="test", pw="altinsystems", db="Mandant_1"):
+    def connect(self, ip: str = "PC-MARKUS", port: int = 1433, pw: str = "altinsystems",
+                usr: str = "test", db: str = "Mandant_1"):
         try:
             ###
             # trusted_connection="yes", :
@@ -23,14 +24,34 @@ class DataBaseManager:
             ###
 
             # Verbinde mit MS SQl server unter verwendung des extern installierten ODBC Driver 18
-            self.conn = pyodbc.connect(driver='{ODBC Driver 18 for SQL Server}', server=ip + "," + str(port),
-                                       database=db,
-                                       user=user,
-                                       password=pw,
-                                       encrypt="no")
+            driver_names = pyodbc.drivers()
+            if "ODBC Driver 18 for SQL Server" in driver_names:
+                self.conn = pyodbc.connect(driver='{ODBC Driver 18 for SQL Server}', server=ip + "," + str(port),
+                                           database=db,
+                                           user=usr,
+                                           password=pw,
+                                           encrypt="no")
+            elif "FreeTDS" in driver_names:
+                self.conn = pyodbc.connect('DRIVER="{0}"; SERVER={1}; PORT={2}; DATABASE={3}; UID={4}; PWD={5}; '
+                                           'TDS_Version=7.3;'.format("{FreeTDS}", ip, port, db, usr, pw))
+                # oder testen mit 7.4
+                ###
+                # DRIVER = {FreeTDS};
+                #             SERVER = server.com;
+                #             PORT = 1433;
+                #             DATABASE = dbname;
+                #             UID = dbuser;
+                #             PWD = dbpassword;
+                #             TDS_Version = 7.3;
+                ###
+            else:
+                print('(No suitable driver found. Cannot connect.)')
+                self.conn = None
+
         except Exception as exc:
             print('critical error occurred: {0}. Please save your data and restart application'.format(exc))
             self.conn = None
+
         return self.conn
 
     def get_header_list(self):

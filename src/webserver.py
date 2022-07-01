@@ -62,71 +62,95 @@ class RequestHandler(BaseHTTPRequestHandler):
         html_status = 200
         try:
             # Je nach URL Pfad / je nach aufgerufener Internetseite:
-            match self.path:
-                case "/monatsstatus.html":
-                    # Lade HTML TEMPLATE für Monatsstatus mit Javascript Chart
-                    html = open("../html/monatsstatus.html", "r").read()
-                    now = datetime.now()
-                    days_of_month = calendar.monthrange(now.year, now.month)[1]
-                    day_of_month = int(now.strftime("%d"))
+            sub_paths = self.path.split("/")
+            if sub_paths is not None and len(sub_paths) > 1:
+                match sub_paths[1]:
+                    case "monatsstatus.html":
+                        # Lade HTML TEMPLATE für Monatsstatus mit Javascript Chart
+                        html = open("../html/monatsstatus.html", "r").read()
+                        now = datetime.now()
+                        days_of_month = calendar.monthrange(now.year, now.month)[1]
+                        day_of_month = int(now.strftime("%d"))
 
-                    scan_list = [0] * days_of_month
-                    for day in range(0, day_of_month + 1):
-                        current_day = datetime.today().date() - timedelta(days=day)
-                        scan_list[day_of_month - day] = self.loc_db_mngr.count_scans_at_date(current_day)[0][0]
-                    html = html.replace("%DATA_DATA_SET_1%", str(scan_list))
+                        scan_list = [0] * days_of_month
+                        for day in range(0, day_of_month + 1):
+                            current_day = datetime.today().date() - timedelta(days=day)
+                            scan_list[day_of_month - day] = self.loc_db_mngr.count_scans_at_date(current_day)[0][0]
+                        html = html.replace("%DATA_DATA_SET_1%", str(scan_list))
 
-                    label_list = [""] * days_of_month
-                    for i in range(0, days_of_month):
-                        label_list[i] = str(i + 1) + "."
-                    html = html.replace("%DATA_LABEL_SET_1%", str(label_list))
+                        label_list = [""] * days_of_month
+                        for i in range(0, days_of_month):
+                            label_list[i] = str(i + 1) + "."
+                        html = html.replace("%DATA_LABEL_SET_1%", str(label_list))
 
-                case "/wochenstatus.html":
-                    # Lade HTML TEMPLATE für Wochenstatus mit Javascript Chart
-                    html = open("../html/wochenstatus.html", "r").read()
-                    scan_list = [0] * 7
-                    weekday = datetime.today().weekday()
-                    for day in range(0, weekday + 1):
-                        current_day = datetime.today().date() - timedelta(days=day)
-                        buf = self.loc_db_mngr.count_scans_at_date(current_day)
-                        if buf is not None:
-                            scan_list[weekday - day] = buf[0][0]
-                    html = html.replace("%DATA_DATA_SET_1%", str(scan_list))
+                    case "wochenstatus.html":
+                        # Lade HTML TEMPLATE für Wochenstatus mit Javascript Chart
+                        html = open("../html/wochenstatus.html", "r").read()
+                        scan_list = [0] * 7
+                        weekday = datetime.today().weekday()
+                        for day in range(0, weekday + 1):
+                            current_day = datetime.today().date() - timedelta(days=day)
+                            buf = self.loc_db_mngr.count_scans_at_date(current_day)
+                            if buf is not None:
+                                scan_list[weekday - day] = buf[0][0]
+                        html = html.replace("%DATA_DATA_SET_1%", str(scan_list))
 
-                case "/jahresstatus.html":
-                    # Lade HTML TEMPLATE für Jahresstatus mit Javascript Chart
-                    html = open("../html/jahresstatus.html", "r").read()
-                    scan_list = [0] * 12
-                    s_list = self.loc_db_mngr.get_all_scans()
-                    current_year = datetime.now().year
+                    case "jahresstatus.html":
+                        # Lade HTML TEMPLATE für Jahresstatus mit Javascript Chart
+                        html = open("../html/jahresstatus.html", "r").read()
+                        scan_list = [0] * 12
+                        s_list = self.loc_db_mngr.get_all_scans()
+                        current_year = datetime.now().year
 
-                    for m in range(1, 13):
-                        for scan in s_list:
-                            scan_d = datetime.fromisoformat(scan[1])
-                            if scan_d.year == current_year and scan_d.month == m:
-                                scan_list[m-1] += 1
-                    html = html.replace("%DATA_DATA_SET_1%", str(scan_list))
+                        for m in range(1, 13):
+                            for scan in s_list:
+                                scan_d = datetime.fromisoformat(scan[1])
+                                if scan_d.year == current_year and scan_d.month == m:
+                                    scan_list[m-1] += 1
+                        html = html.replace("%DATA_DATA_SET_1%", str(scan_list))
 
-                # Erweiterbar mit tabelle/INDEX, mit immer nur 100 Items auf einer seite mit nächster seite und 1 seite
-                # zurück gg. mit POST die anzahl umstellbar machen!
-                case "/tabelle.html":
-                    html = open("../html/tabelle.html", "r").read()
-                    s_list = self.loc_db_mngr.get_all_scans()
-                    send_data = ""
-                    for scan in s_list:
-                        send_data += """<tr>\n
-                                            <td>{0}</td>\n
-                                            <td>{1}</td>\n
-                                            <td>{2}</td>\n
-                                            <td>{3}</td>\n
-                                            <td>{4}</td>\n
-                                    </tr>\n""".format(scan[0], scan[1], scan[2], scan[3], scan[4])
-                    html = html.replace("%LINES%", send_data)
-                case "/":
-                    html = open("../html/main.html", "r").read()
-                case _:
-                    html = open("../html/404.html", "r").read()
-                    html_status = 404
+                    # Erweiterbar mit tabelle/INDEX, mit immer nur 100 Items auf einer seite mit nächster
+                    #  seite und 1 seite zurück gg. mit POST die anzahl umstellbar machen!
+                    case "tabelle":
+                        if len(sub_paths) < 3 or not sub_paths[2].isdigit():
+                            html = open("../html/404.html", "r").read()
+                            html_status = 404
+                        else:
+                            html = open("../html/tabelle.html", "r").read()
+                            page: int = int(sub_paths[2])
+                            page_count: int = int(self.loc_db_mngr.getItemCount() /
+                                                  main.item_count_on_web_server_list)
+                            html = html.replace("%LAST%", str(page_count))
+                            html = html.replace("%CURRENT%", str(page))
+
+                            if page == page_count:
+                                html = html.replace("%NEXT%\">></a>", "%NEXT%\"></a>")
+                                html = html.replace("%NEXT%", str(page))
+                            else:
+                                html = html.replace("%NEXT%", str(page + 1))
+                            if page == 0:
+                                html = html.replace("%BACK%\"><</a>", "%BACK%\"></a>")
+                                html = html.replace("%BACK%", str())
+                            else:
+                                html = html.replace("%BACK%", str(page - 1))
+
+                            s_list = self.loc_db_mngr.getRange(main.item_count_on_web_server_list * page,
+                                                               main.item_count_on_web_server_list)
+                            send_data = ""
+                            for scan in s_list:
+                                send_data += """<tr>\n
+                                                    <td>{0}</td>\n
+                                                    <td>{1}</td>\n
+                                                    <td>{2}</td>\n
+                                                    <td>{3}</td>\n
+                                                    <td>{4}</td>\n
+                                            </tr>\n""".format(scan[0], scan[1], scan[2], scan[3], scan[4])
+                            html = html.replace("%LINES%", send_data)
+                    case "":
+                        html = open("../html/main.html", "r").read()
+                    case _:
+                        html = open("../html/404.html", "r").read()
+                        html_status = 404
 
             self.send_response(html_status)
             self.send_header('content-type', 'text/html')

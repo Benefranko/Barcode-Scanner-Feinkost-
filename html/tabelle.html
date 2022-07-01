@@ -17,6 +17,21 @@
 				margin-left: auto;
 				margin-right: auto;
 			}
+
+			.pageSwitchButtonDiv{
+				width: 60px;
+				height: 60px;
+				float: left;
+				background: cyan;
+				text-align: center;
+				line-height: 60px;
+				font-size: 50px;
+			}
+			.switchPageLink{
+				color: white;
+				text-decoration: none;
+			}
+
 		</style>
 	</head>
 	<body>
@@ -33,9 +48,31 @@
 			</thead>
 			%LINES%
 		</table>
-		
-		<div style="margin-top: 100px; " >
-			<a style="color: blue; text-decoration: none; font-size: 35px" href="/">Zur Startseite</a>
+
+		<div style="height: 50px">
+
+		</div>
+
+		<div class="row" style=" margin-left: auto; margin-right: auto;" >
+			<div class="pageSwitchButtonDiv">
+				<a class="switchPageLink" href="/tabelle/0"> 0 </a>
+			</div>
+			<div class="pageSwitchButtonDiv" style="margin-left: 40px">
+				<a class="switchPageLink" href="/tabelle/%BACK%"> < </a>
+			</div>
+			<div class="pageSwitchButtonDiv" style="margin-left: 30px">
+				<a class="switchPageLink" href="/tabelle/%CURRENT%">%CURRENT%</a>
+			</div>
+			<div class="pageSwitchButtonDiv" style="margin-left: 30px">
+				<a class="switchPageLink" href="/tabelle/%NEXT%"> > </a>
+			</div>
+			<div class="pageSwitchButtonDiv" style="margin-left: 40px">
+				<a class="switchPageLink" href="/tabelle/%LAST%">%LAST%</a>
+			</div>
+		</div>
+
+		<div style="margin-top: 150px; font-size: 35px; " >
+			<a style="text-decoration: none; color: blue" href="/">Zur Startseite</a>
 		</div>
 	</body>
 </html>

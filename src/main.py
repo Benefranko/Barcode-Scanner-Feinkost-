@@ -19,6 +19,8 @@ local_http_server_port: int = 8888
 # Pfad zu Qt-Designer Formulardatei: Die Grafik wurde nämlich mithilfe des Qt Creators erstellt.
 ui_file_path: str = "../src/form_ALT.ui"
 
+item_count_on_web_server_list: int = 50
+
 
 if __name__ == "__main__":
     # MApplication

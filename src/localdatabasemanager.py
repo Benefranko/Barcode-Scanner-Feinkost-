@@ -16,22 +16,11 @@ class LocalDataBaseManager:
                                     ean integer NOT NULL
                                     
                                 );"""
-    sql_create_table2 = """CREATE TABLE IF NOT EXISTS ratings (
-                                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                        date date NOT NULL,
-                                        time time NOT NULL,
-                                        kArticle integer NOT NULL,
-                                        ean integer NOT NULL,
-                                        rating float NOT NULL,
-                                        comment string
-                                    );"""
 
     def create_table(self):
         try:
             with contextlib.closing(self.connection.cursor()) as c:
                 c.execute(self.sql_create_table)
-            with contextlib.closing(self.connection.cursor()) as c:
-                c.execute(self.sql_create_table2)
         except Error as e:
             self.connection = None
             print(e)
@@ -70,6 +59,19 @@ class LocalDataBaseManager:
                 cur.execute("SELECT * FROM scans LIMIT ?, ?;", [begin, count])
                 return cur.fetchall()
 
+    def getItemCount(self):
+        if self.connection is None:
+            print("ERROR: Nicht mit lokaler Datenbank verbunden!")
+            return
+        else:
+            with contextlib.closing(self.connection.cursor()) as cur:
+                cur.execute("SELECT COUNT(0) FROM scans")
+                count = cur.fetchone()[0]
+                if count is None:
+                    return 0
+                else:
+                    return int(count)
+
     def count_scans_at_date(self, date: datetime.date):
         if self.connection is None:
             print("ERROR: Nicht mit lokaler Datenbank verbunden!")
@@ -95,20 +97,6 @@ class LocalDataBaseManager:
                           VALUES(date('now','localtime'), time('now','localtime'),?,?) '''
             with contextlib.closing(self.connection.cursor()) as cur:
                 cur.execute(sql, (k_article, ean))
-                self.connection.commit()
-                id_ = cur.lastrowid
-            return id_
-
-    def add_rating(self, k_article, ean, rating, msg):
-        if self.connection is None:
-            print("ERROR: Nicht mit lokaler Datenbank verbunden!")
-            return
-
-        if self.connection:
-            sql = ''' INSERT INTO ratings(date,time,kArticle,ean,rating,comment)
-                          VALUES(date('now','localtime'), time('now','localtime'),?,?,?,?) '''
-            with contextlib.closing(self.connection.cursor()) as cur:
-                cur.execute(sql, (k_article, ean, rating, msg))
                 self.connection.commit()
                 id_ = cur.lastrowid
             return id_
