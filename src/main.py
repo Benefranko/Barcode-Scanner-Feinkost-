@@ -6,7 +6,7 @@ import webserver
 from PySide2 import QtCore
 import pyodbc
 import sqlite3
-
+import datetime
 # Einstellungen
 
 # Programm Version
@@ -35,6 +35,8 @@ item_count_on_web_server_list: int = 50
 
 
 if __name__ == "__main__":
+    print("Programm Start: ", datetime.datetime.now())
+    print("-----------------------")
     print("Programm Version: ", PROGRAMM_VERSION)
     print("Python Version: ", sys.version)
     print("Qt Version: ", QtCore.qVersion())
@@ -43,6 +45,7 @@ if __name__ == "__main__":
     print("Verwendete MS ODBC Driver Version: ", SQL_DRIVER_USED_VERSION_MS_DRIVER)
     print("Verwendete FreeTDS Driver Version: ", SQL_DRIVER_USED_VERSION_FreeTDS, " ",
           SQL_DRIVER_USED_VERSION_FreeTDS_VERSION)
+    print("-----------------------\n\n")
 
     # MApplication
     m_app = None
