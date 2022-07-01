@@ -2,8 +2,34 @@
 
 Mit diesem Programm sollen Kunden durch das Scannen eines Produkt Bar Codes zusätzliche Informationen zu diesem bekommen.
 
+# Installlation kurz:
+````
+sudo wget -qO - https://raw.githubusercontent.com/tvdsluijs/sh-python-installer/main/python.sh | sudo bash -s 3.10.0
+
+sudo apt install tdsodbc freetds-dev freetds-bin unixodbc-dev
+
+sudo echo "[FreeTDS]
+Description=FreeTDS Driver
+Driver=/usr/lib/arm-linux-gnueabihf/odbc/libtdsodbc.so
+Setup=/usr/lib/arm-linux-gnueabihf/odbc/libtdsS.so
+TDS_Version = 7.4" >> /etc/odbcinst.ini
+
+sudo apt install python3-pyodbc
+
+sudo apt install *PySide2.*
+
+sudo apt install python-enum34
+````
+
 
 # Dependencies
+
+## Python 3.10
+für z.B: match!
+### Installation:
+````
+wget -qO - https://raw.githubusercontent.com/tvdsluijs/sh-python-installer/main/python.sh | sudo bash -s 3.10.0
+````
 
 ## MS SQL Open Source Driver:
 
