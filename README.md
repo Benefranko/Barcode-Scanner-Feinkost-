@@ -16,7 +16,7 @@ Erstellen sie die Datei ``/etc/systemd/system/feinkostBarcodeScanner.service``
 mit folgendem Inhalt:
 ````
 [Unit]
-Description=Mit diesem Programm sollen Kunden durch das Scannen eines Produkt Bar Codes zusätzliche Informationen zu diesem bekommen.
+Description=Feinkost Barcode Scanner
 After=network.target
 
 [Service]

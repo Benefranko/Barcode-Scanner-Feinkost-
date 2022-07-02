@@ -40,15 +40,15 @@ item_count_on_web_server_list: int = 50
 
 
 if __name__ == "__main__":
-    logging.basicConfig(filename='~/.feinkostBarcodeScannerLog.log', level=logging.DEBUG)
-    logger = logging.getLogger()
-    sys.stderr.write = logger.error
-    sys.stdout.write = logger.info
-
     # Change Working Directory to the one this file is in
     abspath = os.path.abspath(__file__)
     d_name = os.path.dirname(abspath)
     os.chdir(d_name)
+
+    logging.basicConfig(filename='/.feinkostBarcodeScannerLog.log', level=logging.DEBUG)
+    logger = logging.getLogger()
+    sys.stderr.write = logger.error
+    sys.stdout.write = logger.info
 
     if len(sys.argv) > 1:
         if sys.argv[1] == "--help":
