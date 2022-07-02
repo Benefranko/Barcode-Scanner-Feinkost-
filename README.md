@@ -23,19 +23,15 @@ sudo apt install python-enum34
 
 
 # Dependencies
-unixODBC-bin
-unixODBC-dev
+Da es viele Pakete nur in älteren Version gibt, wird Python 3.7 empfohlen
 
-## Python 3.10
-für z.B: match!
 ### Installation:
 ````
-wget -qO - https://raw.githubusercontent.com/tvdsluijs/sh-python-installer/main/python.sh | sudo bash -s 3.10.0
 ````
 
 ## MS SQL Open Source Driver:
 
-``sudo apt install tdsodbc freetds-dev freetds-bin unixodbc-dev``
+``sudo apt install freetds-dev freetds-bin unixodbc-dev tdsodbc``
 
 Getestet mit: \
 tdsodbc/oldstable,now 1.00.104-1+deb10u1 armhf \
@@ -47,21 +43,14 @@ ODBC driver for connecting to MS SQL and Sybase SQL servers
 
 Mit `` sudo nano /etc/odbcinst.ini`` folgenden Text einfügen:
 
-```
-[FreeTDS]
-Description=FreeTDS Driver
-Driver=/usr/lib/odbc/libtdsodbc.so
-Setup=/usr/lib/odbc/libtdsS.so
-```
-
-einfügen und ggf. Pfade zu folgendem beim RaspberryPi ändern:
+einfügen und ggf. Pfade ändern (manchmal auch unter /usr/lib/odbc/):
 ````
 [FreeTDS]
 Description=FreeTDS Driver
 Driver=/usr/lib/arm-linux-gnueabihf/odbc/libtdsodbc.so
 Setup=/usr/lib/arm-linux-gnueabihf/odbc/libtdsS.so
-TDS_Version = 7.4
 ````
+
 Dadurch kann pyodbc den Driver finden. Weitere Informationen unter \
 [FreeTDS.support.Microsoft](https://www.freetds.org/faq.html#Does.FreeTDS.support.Microsoft.servers) \
 bzw. Informationen zur Protokollversion unter \
@@ -84,7 +73,7 @@ Python3 module for ODBC database access
 
 ## Für die Grafik: PyQt bzw. hier Pyside2 Bibliotheken:
 
-``sudo apt install *PySide2.*``
+``sudo apt install python3-PySide2.*``
 
 ## Weitere Python Module:
 ``sudo apt install python-enum34``

@@ -35,6 +35,15 @@ item_count_on_web_server_list: int = 50
 
 
 if __name__ == "__main__":
+
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "--help":
+            print("Mit diesem Programm sollen Kunden durch das Scannen eines Produkt Bar Codes zusätzliche "
+                  "Informationen zu diesem über die JTL-Wawi MS SQL Datenbank bekommen.")
+            print("Mit '", sys.argv[1], " -platform offscreen' können sie das Programm ohne Fenster starten")
+
+
+
     print("Programm Start: ", datetime.datetime.now())
     print("-----------------------")
     print("Programm Version: ", PROGRAMM_VERSION)
@@ -46,6 +55,7 @@ if __name__ == "__main__":
     print("Verwendete FreeTDS Driver Version: ", SQL_DRIVER_USED_VERSION_FreeTDS, " ",
           SQL_DRIVER_USED_VERSION_FreeTDS_VERSION)
     print("-----------------------\n\n")
+
 
     # MApplication
     m_app = None
