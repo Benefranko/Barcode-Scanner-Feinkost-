@@ -310,56 +310,55 @@ class MainWindow(QMainWindow):
         # Zustands unabhängige Aktionen:
 
         # Zustands spezifische Aktionen:
-        match self.state:
-            # Zustand: Warte für Barcode Scan:
-            case self.STATES.WAIT_FOR_SCAN:
-                # Es wurde ein Barcode gescannt-> Ermittle Informationen und zeige diese an
-                if action == "NEW_SCAN":
-                    self.newScanHandling(value)
-                    return
-                # Timer wurde erreicht-> Wechsle die Warte-Auf-Eingabe Seite, bzw zeige neue Werbung an
-                if action == "CHANGE_ADVERTISE":
-                    self.new_advertise()
-                    return
-                # (jede Sekunde) Sekunden-Timer-Event
-                if action == "TIMER":
-                    # wenn Timer_MAX erreicht wurde, führe Aktion CHANGE_ADVERTISE aus, sonst timer--
-                    if self.changeAdvertiseTimer > 1:
-                        self.changeAdvertiseTimer -= 1
-                    else:
-                        self.changeAdvertiseTimer = self.CHANGE_ADVERTISE_TIME
-                        self.event_handler("CHANGE_ADVERTISE")
-                    return
+        # Zustand: Warte für Barcode Scan:
+        if self.state == self.STATES.WAIT_FOR_SCAN:
+            # Es wurde ein Barcode gescannt-> Ermittle Informationen und zeige diese an
+            if action == "NEW_SCAN":
+                self.newScanHandling(value)
+                return
+            # Timer wurde erreicht-> Wechsle die Warte-Auf-Eingabe Seite, bzw zeige neue Werbung an
+            if action == "CHANGE_ADVERTISE":
+                self.new_advertise()
+                return
+            # (jede Sekunde) Sekunden-Timer-Event
+            if action == "TIMER":
+                # wenn Timer_MAX erreicht wurde, führe Aktion CHANGE_ADVERTISE aus, sonst timer--
+                if self.changeAdvertiseTimer > 1:
+                    self.changeAdvertiseTimer -= 1
+                else:
+                    self.changeAdvertiseTimer = self.CHANGE_ADVERTISE_TIME
+                    self.event_handler("CHANGE_ADVERTISE")
+                return
 
-            # Zustand: Zeige Produktinformationen:
-            case self.STATES.SHOW_PRODUCT_DESCRIPTION:
-                if action == "EXIT_SHOW_DESCRIPTION":
-                    self.window.stackedWidget.setCurrentIndex(0)
-                    self.state = self.STATES.WAIT_FOR_SCAN
-                    return
+        # Zustand: Zeige Produktinformationen:
+        elif self.state == self.STATES.SHOW_PRODUCT_DESCRIPTION:
+            if action == "EXIT_SHOW_DESCRIPTION":
+                self.window.stackedWidget.setCurrentIndex(0)
+                self.state = self.STATES.WAIT_FOR_SCAN
+                return
 
-                if action == "LOAD_ARTICLE_FAILED":
-                    self.window.stackedWidget.setCurrentIndex(2)
-                    self.showTimeTimer = self.SHOW_TIME_NOTHING_FOUND
-                    return
+            if action == "LOAD_ARTICLE_FAILED":
+                self.window.stackedWidget.setCurrentIndex(2)
+                self.showTimeTimer = self.SHOW_TIME_NOTHING_FOUND
+                return
 
-                # (jede Sekunde) Sekunden-Timer-Event
-                if action == "TIMER":
-                    # Wenn Anzeige-Zeit erreicht wurde, wechsle wieder auf Startseite / Objektzustand-"Warte auf Scan"
-                    if self.showTimeTimer > 1:
-                        self.showTimeTimer -= 1
-                    else:
-                        self.showTimeTimer = self.SHOW_TIME
-                        self.event_handler("EXIT_SHOW_DESCRIPTION")
-                    return
-                # Wenn während Informationsanzeige ein neues Produkt gescannt wird,
-                # aktualisiere die Anzeige und resette den Timer
-                if action == "NEW_SCAN":
-                    self.newScanHandling(value)
-                    return
-            # Wenn ein Unbekannter Objektzustand vorliegt, wirf Exception
-            case _:
-                raise Exception("Unbekannter Objektzustand: ")
+            # (jede Sekunde) Sekunden-Timer-Event
+            if action == "TIMER":
+                # Wenn Anzeige-Zeit erreicht wurde, wechsle wieder auf Startseite / Objektzustand-"Warte auf Scan"
+                if self.showTimeTimer > 1:
+                    self.showTimeTimer -= 1
+                else:
+                    self.showTimeTimer = self.SHOW_TIME
+                    self.event_handler("EXIT_SHOW_DESCRIPTION")
+                return
+            # Wenn während Informationsanzeige ein neues Produkt gescannt wird,
+            # aktualisiere die Anzeige und resette den Timer
+            if action == "NEW_SCAN":
+                self.newScanHandling(value)
+                return
+        # Wenn ein Unbekannter Objektzustand vorliegt, wirf Exception
+        else:
+            raise Exception("Unbekannter Objektzustand: ")
 
         if not handled:
             print("WARNUNG: Die Aktion" + action + " wurde nicht bearbeitet!")
