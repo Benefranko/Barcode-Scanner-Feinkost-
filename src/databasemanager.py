@@ -46,7 +46,8 @@ class DataBaseManager:
                 #             TDS_Version = 7.3;
                 ###
             else:
-                print('(No suitable driver found. Cannot connect.)')
+                print('Error: No suitable driver found. Cannot connect.')
+                print("All installed driver: ", pyodbc.drivers())
                 self.conn = None
         except Exception as exc:
             print('critical error occurred: {0}. Please save your data and restart application'.format(exc))
