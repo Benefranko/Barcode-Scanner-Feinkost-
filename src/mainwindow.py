@@ -1,5 +1,4 @@
 from enum import Enum
-import os
 from PySide2.QtCore import QFile, QTimerEvent, Qt
 from PySide2.QtCore import Slot
 from PySide2.QtGui import QImage, QPixmap, QFontMetrics, QFont
@@ -102,8 +101,6 @@ class MainWindow(QMainWindow):
         # MainWindow Nach-Einstellungen
         self.setWindowTitle("Feinkost Barcode Scanner")
 
-        print(os.path.abspath("./"))
-
         # Lade Grafiken
         # "Kein Bild gefunden"-Grafik...
         img_path: str = "../images/no_picture_found.jpg"
@@ -178,8 +175,6 @@ class MainWindow(QMainWindow):
         # Starte Sekunden Event Timer
         self.timerID = self.startTimer(1000)
 
-        self.event_handler("NEW_SCAN", 1)
-
     def load_ui(self, ui_path):
         try:
             # Lade UI aus einer Datei...
@@ -222,8 +217,6 @@ class MainWindow(QMainWindow):
             self.window.stackedWidget.setCurrentIndex(2)
             self.showTimeTimer = self.SHOW_TIME_NOTHING_FOUND
             return
-
-        print(data)
 
         # Wechsle aktuelle Seite zur Startseite, um das Layout zu aktualisieren, damit auch die Positionen der
         # Labels aktualisiert werden, um dann auch die richtige Position des Preis-Labels zu erhalten,

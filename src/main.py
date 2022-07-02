@@ -3,14 +3,17 @@ import mapplication
 import mainwindow
 import webserver
 
+# Für Informationsausgabe
 from PySide2 import QtCore
 import pyodbc
 import sqlite3
 import datetime
+import os
+
 # Einstellungen
 
 # Programm Version
-PROGRAMM_VERSION: str = "0.9.0"
+PROGRAMM_VERSION: str = "0.9.1"
 
 SQL_DRIVER_USED_VERSION_MS_DRIVER: str = "{ODBC Driver 18 for SQL Server}"
 SQL_DRIVER_USED_VERSION_FreeTDS: str = "{FreeTDS}"
@@ -43,8 +46,8 @@ if __name__ == "__main__":
             print("Mit '", sys.argv[0], " -platform offscreen' können sie das Programm ohne Fenster starten")
             exit()
 
-    print("Programm Start: ", datetime.datetime.now())
     print("----------------------------------------------------------------------")
+    print("Programm Start: ", datetime.datetime.now())
     print("Programm Version: ", PROGRAMM_VERSION)
     print("Python Version: ", sys.version)
     print("Qt Version: ", QtCore.qVersion())
@@ -53,6 +56,7 @@ if __name__ == "__main__":
     print("Verwendete MS ODBC Driver Version: ", SQL_DRIVER_USED_VERSION_MS_DRIVER)
     print("Verwendete FreeTDS Driver Version: ", SQL_DRIVER_USED_VERSION_FreeTDS, " ",
           SQL_DRIVER_USED_VERSION_FreeTDS_VERSION)
+    print("Arbeitsverzeichnis: ", os.path.abspath("./"))
     print("----------------------------------------------------------------------\n\n")
 
 
