@@ -1,6 +1,9 @@
 # Open Source Bibliothek für MS SQL
+import os
 import pyodbc
 import main
+import time
+
 
 # Klasse, die sich um den Datenaustausch mit dem MS SQL Server kümmert,
 # um die Informationen zu einem Artikel über die EAN zu bekommen
@@ -57,6 +60,7 @@ class DataBaseManager:
                     break
             except Exception as exc:
                 print('Connect to Database failed. ( Try: ?/5 )'.format(i+1), " Error: ", exc)
+                time.sleep(1)
                 self.conn = None
 
         return self.conn
