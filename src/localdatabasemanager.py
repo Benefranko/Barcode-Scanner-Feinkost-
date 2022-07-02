@@ -2,6 +2,7 @@ import datetime
 import sqlite3
 from sqlite3 import Error
 import contextlib
+import logging as log
 
 
 #
@@ -33,79 +34,51 @@ class LocalDataBaseManager:
         try:
             if self.connection is not None:
                 print("WARNING: Already Connected")
+                log.warning("WARNING: Try to connect, but already Connected!")
+                return self.connection
             else:
                 self.connection = sqlite3.connect(file_path)
-            return self.connection
         except Error as exc:
-            print('critical error occurred: {0}. Please save your data and restart application'.format(exc))
+            print('critical error occurred: {0}'.format(exc))
+            log.critical("Konnte keine Verbindung zur lokalen SQL Lite Datenbank herstellen!")
             self.connection = None
             return None
+        log.debug("Erfolgreich mit lokaler SQL Lite Datenbank verbunden!")
+        return self.connection
 
     def get_all_scans(self):
-        if self.connection is None:
-            print("ERROR: Nicht mit lokaler Datenbank verbunden!")
-            return
-        else:
-            with contextlib.closing(self.connection.cursor()) as cur:
-                cur.execute("SELECT * FROM scans")
-                return cur.fetchall()
+        with contextlib.closing(self.connection.cursor()) as cur:
+            cur.execute("SELECT * FROM scans")
+            return cur.fetchall()
 
     def getRange(self, begin, count):
-        if self.connection is None:
-            print("ERROR: Nicht mit lokaler Datenbank verbunden!")
-            return
-        else:
-            with contextlib.closing(self.connection.cursor()) as cur:
-                cur.execute("SELECT * FROM scans LIMIT ?, ?;", [begin, count])
-                return cur.fetchall()
+        with contextlib.closing(self.connection.cursor()) as cur:
+            cur.execute("SELECT * FROM scans LIMIT ?, ?;", [begin, count])
+            return cur.fetchall()
 
     def getItemCount(self):
-        if self.connection is None:
-            print("ERROR: Nicht mit lokaler Datenbank verbunden!")
-            return
-        else:
-            with contextlib.closing(self.connection.cursor()) as cur:
-                cur.execute("SELECT COUNT(0) FROM scans")
-                count = cur.fetchone()[0]
-                if count is None:
-                    return 0
-                else:
-                    return int(count)
+        with contextlib.closing(self.connection.cursor()) as cur:
+            cur.execute("SELECT COUNT(0) FROM scans")
+            count = cur.fetchone()[0]
+            if count is None:
+                return 0
+            else:
+                return int(count)
 
     def count_scans_at_date(self, date: datetime.date):
-        if self.connection is None:
-            print("ERROR: Nicht mit lokaler Datenbank verbunden!")
-            return
-        else:
-            with contextlib.closing(self.connection.cursor()) as cur:
-                cur.execute("SELECT COUNT(1) FROM scans WHERE date = ?", [date.isoformat()])
-                return cur.fetchall()
+        with contextlib.closing(self.connection.cursor()) as cur:
+            cur.execute("SELECT COUNT(1) FROM scans WHERE date = ?", [date.isoformat()])
+            return cur.fetchall()
 
     def add_new_scan(self, k_article, ean):
-        """
-           Create a new scan into the scans table
-           :param k_article:
-           :param ean:
-           :return: scan id
-        """
-        if self.connection is None:
-            print("ERROR: Nicht mit lokaler Datenbank verbunden!")
-            return
-
-        if self.connection:
-            sql = ''' INSERT INTO scans(date,time,kArticle,ean)
-                          VALUES(date('now','localtime'), time('now','localtime'),?,?) '''
-            with contextlib.closing(self.connection.cursor()) as cur:
-                cur.execute(sql, (k_article, ean))
-                self.connection.commit()
-                id_ = cur.lastrowid
-            return id_
+        with contextlib.closing(self.connection.cursor()) as cur:
+            cur.execute(''' INSERT INTO scans(date,time,kArticle,ean)
+                      VALUES(date('now','localtime'), time('now','localtime'),?,?) ''', (k_article, ean))
+            self.connection.commit()
+            id_ = cur.lastrowid
+        return id_
 
     def get_rating_by_k_article(self, k_article):
-        if self.connection is None:
-            print("ERROR: Nicht mit lokaler Datenbank verbunden!")
-            return
-        else:
-            with contextlib.closing(self.connection.cursor()) as cur:
-                cur.execute("SELECT AVG(rating) FROM scans WHERE kArticle = ?", [k_article])
-                return cur.fetchone()
+        with contextlib.closing(self.connection.cursor()) as cur:
+            cur.execute("SELECT AVG(rating) FROM scans WHERE kArticle = ?", [k_article])
+            return cur.fetchone()

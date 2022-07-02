@@ -1,5 +1,6 @@
 from PySide2.QtCore import QEvent, Signal
 from PySide2.QtWidgets import QApplication
+import logging as log
 
 
 # Subclass QApplication, um eigene notify-Methode zu integrieren,
@@ -37,6 +38,7 @@ class MApplication(QApplication):
             # Wenn das Fenster geschlossen werden soll, z.B. mit ALT F4, ignoriere das signal
             if event.type() == QEvent.Close and self.inputBuffer != "quit":
                 print("Prevent Window from closing (Type '[\\r] + \"quit\" + [ALT F4]' to close the Window)...")
+                log.info("Prevent Window from closing! Received QEvent.Close ")
                 event.accept()
                 return True
 
@@ -45,4 +47,5 @@ class MApplication(QApplication):
                 return QApplication.notify(self, receiver, event)
         except Exception as exc:
             print('critical error occurred: {0}. Please save your data and restart application'.format(exc))
+            log.critical("critical error occurred in m_application::notify : ", exc)
             return False

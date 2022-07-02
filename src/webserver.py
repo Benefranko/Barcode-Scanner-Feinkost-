@@ -7,6 +7,7 @@ from threading import Thread
 
 import main
 import localdatabasemanager
+import logging as log
 
 
 # Lokaler einfacher Webserver, um Statistiken zur Nutzung angezeigt zu bekommen
@@ -29,6 +30,7 @@ class Server:
             self.thread = Thread(target=self.run_web_server, args=())
         except Exception as exc:
             print(exc)
+            log.critical("Webserver erstellen ist fehlgeschlagen: ", exc)
             sys.exit(12)
 
     # Starte Server in extra Thread
@@ -60,6 +62,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         # Standard HTTP Sende-Status
         html_status = 200
+        html: str = ""
         try:
             # Je nach URL Pfad / je nach aufgerufener Internetseite:
             sub_paths = self.path.split("/")
@@ -145,7 +148,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                                                 <td>{4}</td>\n
                                         </tr>\n""".format(scan[0], scan[1], scan[2], scan[3], scan[4])
                         html = html.replace("%LINES%", send_data)
-                elif sub_paths[1] ==  "":
+                elif sub_paths[1] == "":
                     html = open("../html/main.html", "r").read()
                 else:
                     html = open("../html/404.html", "r").read()
@@ -157,7 +160,8 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.wfile.write(html.encode("utf-8"))
 
         except Exception as exc:
-            print('critical error occurred: {0}. Please save your data and restart application'.format(exc))
+            print('error occurred: {0}.'.format(exc))
+            log.warning("Es ist ein Fehler im RequestHandler aufgetreten: ", exc)
             self.send_response(500)
             self.send_header('content-type', 'text/html')
             self.end_headers()

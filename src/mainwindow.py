@@ -9,6 +9,8 @@ from PySide2.QtWidgets import QMainWindow
 from databasemanager import DataBaseManager
 from localdatabasemanager import LocalDataBaseManager
 
+import logging as log
+
 
 # Klasse steuert die Grafik und managed die Datenbanken
 
@@ -107,6 +109,7 @@ class MainWindow(QMainWindow):
         pix = QPixmap(img_path)
         if pix.isNull():
             print("Konnte Bild nicht laden: ", img_path)
+            log.error("Konnte Bild nicht laden: ", img_path)
         else:
             self.window.frame.setPixmap(pix.scaled(pix.toImage().size() / 2.25))
 
@@ -115,6 +118,7 @@ class MainWindow(QMainWindow):
         pix = QPixmap(img_path)
         if pix.isNull():
             print("Konnte Bild nicht laden: ", img_path)
+            log.error("Konnte Bild nicht laden: ", img_path)
         else:
             self.window.img1.setPixmap(pix.scaled(pix.toImage().size() / 5.5))
 
@@ -123,6 +127,7 @@ class MainWindow(QMainWindow):
         pix = QPixmap(img_path)
         if pix.isNull():
             print("Konnte Bild nicht laden: ", img_path)
+            log.error("Konnte Bild nicht laden: ", img_path)
         else:
             self.window.logo.setPixmap(pix.scaled(pix.toImage().size() / 4))
             self.window.Innkaufhauslogo.setPixmap(pix.scaled(pix.toImage().size() / 4))
@@ -132,6 +137,7 @@ class MainWindow(QMainWindow):
         pix = QPixmap(img_path)
         if pix.isNull():
             print("Konnte Bild nicht laden: ", img_path)
+            log.error("Konnte Bild nicht laden: ", img_path)
         else:
             label = QLabel(self)
             label.setAlignment(Qt.AlignHCenter)
@@ -144,6 +150,10 @@ class MainWindow(QMainWindow):
                 l2.addWidget(QLabel("Aberfeldy 12 years Single Highland Whisky 40,0% vol., 0,7l "))
                 l2.addWidget(QLabel("Duft: Rauch, Ananas, Getreide, Toast, Honig Geschmack:"))
                 l2.addWidget(QLabel("      aromatisch, fruchtig, lieblich, weich, cremig"))
+            else:
+                print("Missing Layout in UI!")
+                log.error("Missing Layout in UI!")
+
         ####
         # DATA BASES
         ####
@@ -156,7 +166,6 @@ class MainWindow(QMainWindow):
         # Stelle Verbindung mit lokaler SQL Lite Datenbank her
         self.loc_db_mngr = LocalDataBaseManager()
         if self.loc_db_mngr.connect(sql_lite_path) is None:
-            print("Failed to open Database!")
             raise Exception("Konnte Verbindung mit der SQL Lite Datenbank nicht herstellen")
         else:
             self.loc_db_mngr.create_table()
@@ -177,7 +186,8 @@ class MainWindow(QMainWindow):
             ui_file.close()
             return self.window
         except Exception as exc:
-            print('critical error occurred: {0}. Please save your data and restart application'.format(exc))
+            print('Konnte Gui aus Ui.Datei nicht laden!'.format(exc))
+            log.critical("Konnte Gui aus Ui.Datei nicht laden!")
             return None
 
     def timerEvent(self, event: QTimerEvent) -> None:
@@ -202,6 +212,7 @@ class MainWindow(QMainWindow):
             data = self.databasemanager.get_data_by_ean(int(scan_article_ean))
         except Exception as exc:
             print("INVALID SCAN: Can't cast to int: '", scan_article_ean, "': ", exc)
+            log.info("Ungültiger Scan: Can't cast to int: ", scan_article_ean, "': ", exc )
             self.event_handler("LOAD_ARTICLE_FAILED", scan_article_ean)
             return
 
@@ -242,6 +253,7 @@ class MainWindow(QMainWindow):
             self.window.p_name.setFont(font)
         else:
             self.event_handler("LOAD_ARTICLE_FAILED", scan_article_ean)
+            log.info("LOAD_ARTICLE_FAILED: ", scan_article_ean, "': data.Artikelname == \"\"" )
             return
 
         # Artikel Preis
@@ -371,6 +383,7 @@ class MainWindow(QMainWindow):
 
         if not handled:
             print("WARNUNG: Die Aktion" + action + " wurde nicht bearbeitet!")
+            log.warning("Die Aktion" + action + " wurde nicht bearbeitet!")
 
     # Entferne alle Elemente aus Werbung-Layout
     def clear_advertise_list(self):
