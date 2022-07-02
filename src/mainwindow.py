@@ -1,5 +1,5 @@
 from enum import Enum
-
+import os
 from PySide2.QtCore import QFile, QTimerEvent, Qt
 from PySide2.QtCore import Slot
 from PySide2.QtGui import QImage, QPixmap, QFontMetrics, QFont
@@ -102,6 +102,8 @@ class MainWindow(QMainWindow):
         # MainWindow Nach-Einstellungen
         self.setWindowTitle("Feinkost Barcode Scanner")
 
+        print(os.path.abspath("./"))
+
         # Lade Grafiken
         # "Kein Bild gefunden"-Grafik...
         img_path: str = "../images/no_picture_found.jpg"
@@ -112,12 +114,8 @@ class MainWindow(QMainWindow):
             self.window.frame.setPixmap(pix.scaled(pix.toImage().size() / 2.25))
 
         # "Barcode Scanner Bild mit Handy Beispiel"-Grafik
-        try:
-            img_path = "../images/sunmi_scan.png"
-            pix = QPixmap(img_path)
-        except Exception as exc:
-            print("Konnte Bild nicht laden: ", img_path, " wegen ", exc)
-
+        img_path = "../images/sunmi_scan.png"
+        pix = QPixmap(img_path)
         if pix.isNull():
             print("Konnte Bild nicht laden: ", img_path)
         else:
