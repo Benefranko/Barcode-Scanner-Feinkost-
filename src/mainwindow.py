@@ -168,7 +168,11 @@ class MainWindow(QMainWindow):
         if self.loc_db_mngr.connect(sql_lite_path) is None:
             raise Exception("Konnte Verbindung mit der SQL Lite Datenbank nicht herstellen")
         else:
-            self.loc_db_mngr.create_table()
+            try:
+                self.loc_db_mngr.create_table()
+            except Exception as e:
+                raise Exception("Das erstellen der Tabellen in der lokalen SQL Lite Datenbank ist fehlgeschlagen: {0}"
+                                .format(e))
 
         ####
         # EVENTS SIGNALS SLOTS TIMER
@@ -318,7 +322,11 @@ class MainWindow(QMainWindow):
             self.special_price_red_line.hide()
 
         # Füge den Scan der lokalen Statistiken-Datenbank hinzu:
-        self.loc_db_mngr.add_new_scan(data.kArtikel, scan_article_ean)
+        try:
+            self.loc_db_mngr.add_new_scan(data.kArtikel, scan_article_ean)
+        except Exception as e:
+            print("Error: Das speichern des Scans für Statistiken ist fehlgeschlagen! ", e)
+            log.error("Error: Das speichern des Scans für Statistiken ist fehlgeschlagen: {0}".format(e))
         return
 
     # Eventhandler: Je nach Objektzustand führe die übergebenen Aktionen aus

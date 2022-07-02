@@ -160,7 +160,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.wfile.write(html.encode("utf-8"))
 
         except Exception as exc:
-            print('error occurred: {0}.'.format(exc))
+            print('Es ist ein Fehler im RequestHandler aufgetreten: {0}.'.format(exc))
             log.warning("Es ist ein Fehler im RequestHandler aufgetreten: {0}".format(exc))
             self.send_response(500)
             self.send_header('content-type', 'text/html')

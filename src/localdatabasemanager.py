@@ -19,12 +19,10 @@ class LocalDataBaseManager:
                                 );"""
 
     def create_table(self):
-        try:
-            with contextlib.closing(self.connection.cursor()) as c:
-                c.execute(self.sql_create_table)
-        except Error as e:
-            self.connection = None
-            print(e)
+        with contextlib.closing(self.connection.cursor()) as c:
+            c.execute(self.sql_create_table)
+            log.info("Erfolgreich mit lokaler SQL Lite Datenbank verbunden und Tables erstellt!")
+            print("Erfolgreich mit lokaler SQL Lite Datenbank verbunden und Tables erstellt!")
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.connection.close()
@@ -43,8 +41,6 @@ class LocalDataBaseManager:
             log.critical("Konnte keine Verbindung zur lokalen SQL Lite Datenbank herstellen!")
             self.connection = None
             return None
-        log.info("Erfolgreich mit lokaler SQL Lite Datenbank verbunden!")
-        print("Erfolgreich mit lokaler SQL Lite Datenbank verbunden!")
         return self.connection
 
     def get_all_scans(self):

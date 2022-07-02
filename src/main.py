@@ -115,7 +115,9 @@ if __name__ == "__main__":
         ret = m_app.exec_()
 
     except Exception as exc:
+        print("\nError: Critical: ", exc)
         log.critical(exc)
+
 
     # Stoppe lokalen Server und beende das Programm
     w_server.stop_listen()
