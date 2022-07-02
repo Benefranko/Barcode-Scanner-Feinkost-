@@ -45,7 +45,7 @@ if __name__ == "__main__":
     d_name = os.path.dirname(abspath)
     os.chdir(d_name)
 
-    logging.basicConfig(filename='/.feinkostBarcodeScannerLog.log', level=logging.DEBUG)
+    logging.basicConfig(filename='./../Dokumentation/feinkostBarcodeScannerLog.log', level=logging.DEBUG)
     logger = logging.getLogger()
     sys.stderr.write = logger.error
     sys.stdout.write = logger.info
