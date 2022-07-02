@@ -43,7 +43,7 @@ class LocalDataBaseManager:
             log.critical("Konnte keine Verbindung zur lokalen SQL Lite Datenbank herstellen!")
             self.connection = None
             return None
-        log.debug("Erfolgreich mit lokaler SQL Lite Datenbank verbunden!")
+        log.info("Erfolgreich mit lokaler SQL Lite Datenbank verbunden!")
         print("Erfolgreich mit lokaler SQL Lite Datenbank verbunden!")
         return self.connection
 

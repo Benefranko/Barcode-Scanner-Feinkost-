@@ -212,7 +212,7 @@ class MainWindow(QMainWindow):
             data = self.databasemanager.get_data_by_ean(int(scan_article_ean))
         except Exception as exc:
             print("INVALID SCAN: Can't cast to int: '", scan_article_ean, "': ", exc)
-            log.info("Ungültiger Scan: Can't cast to int: {0}: {1}".format(scan_article_ean, exc))
+            log.warning("Ungültiger Scan: Can't cast to int: {0}: {1}".format(scan_article_ean, exc))
             self.event_handler("LOAD_ARTICLE_FAILED", scan_article_ean)
             return
 
@@ -395,4 +395,5 @@ class MainWindow(QMainWindow):
     @Slot(str)
     def new_scan(self, value):
         # Gib den Scan dem Event-Handler weiter...
+        log.info("Neuen Barcode Scan erhalten: {0}".format(value))
         self.event_handler("NEW_SCAN", value)
