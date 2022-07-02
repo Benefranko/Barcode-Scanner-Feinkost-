@@ -40,10 +40,11 @@ if __name__ == "__main__":
         if sys.argv[1] == "--help":
             print("Mit diesem Programm sollen Kunden durch das Scannen eines Produkt Bar Codes zusätzliche "
                   "Informationen zu diesem über die JTL-Wawi MS SQL Datenbank bekommen.")
-            print("Mit '", sys.argv[1], " -platform offscreen' können sie das Programm ohne Fenster starten")
+            print("Mit '", sys.argv[0], " -platform offscreen' können sie das Programm ohne Fenster starten")
+            exit()
 
     print("Programm Start: ", datetime.datetime.now())
-    print("------------------------------------")
+    print("----------------------------------------------------------")
     print("Programm Version: ", PROGRAMM_VERSION)
     print("Python Version: ", sys.version)
     print("Qt Version: ", QtCore.qVersion())
@@ -52,7 +53,7 @@ if __name__ == "__main__":
     print("Verwendete MS ODBC Driver Version: ", SQL_DRIVER_USED_VERSION_MS_DRIVER)
     print("Verwendete FreeTDS Driver Version: ", SQL_DRIVER_USED_VERSION_FreeTDS, " ",
           SQL_DRIVER_USED_VERSION_FreeTDS_VERSION)
-    print("------------------------------------\n\n")
+    print("----------------------------------------------------------\n\n")
 
 
     # MApplication
