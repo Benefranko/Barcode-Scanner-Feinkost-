@@ -112,8 +112,12 @@ class MainWindow(QMainWindow):
             self.window.frame.setPixmap(pix.scaled(pix.toImage().size() / 2.25))
 
         # "Barcode Scanner Bild mit Handy Beispiel"-Grafik
-        img_path = "../images/sunmi_scan.png"
-        pix = QPixmap(img_path)
+        try:
+            img_path = "../images/sunmi_scan.png"
+            pix = QPixmap(img_path)
+        except Exception as exc:
+            print("Konnte Bild nicht laden: ", img_path, " wegen ", exc)
+
         if pix.isNull():
             print("Konnte Bild nicht laden: ", img_path)
         else:
