@@ -19,7 +19,7 @@ PROGRAMM_VERSION: str = "0.9.1"
 
 SQL_DRIVER_USED_VERSION_MS_DRIVER: str = "{ODBC Driver 18 for SQL Server}"
 SQL_DRIVER_USED_VERSION_FreeTDS: str = "{FreeTDS}"
-SQL_DRIVER_USED_VERSION_FreeTDS_VERSION = 7.4
+SQL_DRIVER_USED_VERSION_FreeTDS_VERSION: str = "7.4"
 
 # Pfad zu lokaler Datenbank, die zum Speichern der Statistiken der Nutzung, sowie der Bewertung dient
 local_db_path: str = "./sqlLiteDB.db"
