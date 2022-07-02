@@ -2,8 +2,10 @@ import datetime
 import sqlite3
 from sqlite3 import Error
 import contextlib
-import logging as log
 
+import logging
+from pathlib import Path
+log = logging.getLogger(Path(__file__).name)
 
 #
 

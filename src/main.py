@@ -1,16 +1,16 @@
-import sys
 import mapplication
 import mainwindow
 import webserver
-
+import logger
 # Für Informationsausgabe
-from PySide2 import QtCore
-import pyodbc
-import sqlite3
+
 import datetime
 import os
-import logging as log
+import sys
 
+import logging
+from pathlib import Path
+log = logging.getLogger(Path(__file__).name)
 
 # Einstellungen
 
@@ -49,9 +49,8 @@ if __name__ == "__main__":
     d_name = os.path.dirname(abspath)
     os.chdir(d_name)
 
-    # Setup Logfile Path
-    log.basicConfig(filename=log_file_path, level=log.DEBUG,
-                    format='%(asctime)s: %(levelname)s: %(message)s', datefmt='%d-%b-%y %H:%M:%S')
+    # Tee stderr to log and to console
+    logger.setup(log_file_path)
 
     # Wenn --help aufgerufen wird, gib kurze Information aus
     if len(sys.argv) > 1:
@@ -62,32 +61,8 @@ if __name__ == "__main__":
             print("Mit '", sys.argv[0], " -platform offscreen' können sie das Programm ohne Fenster starten")
             exit()
 
-    # Log....
-    log.debug("\n\n------------------------------------------------------------------\n")
-    log.debug("Programm Start: {0}".format(datetime.datetime.now()))
-    log.debug("Programm Version: {0}".format(PROGRAMM_VERSION))
-    log.debug("Python Version: {0}".format(sys.version))
-    log.debug("Qt Version: {0}".format(QtCore.qVersion()))
-    log.debug("PyODBC Version: {0}".format(pyodbc.version))
-    log.debug("SQL Lite3 Version: {0}".format(sqlite3.version))
-    log.debug("Unterstützte MS ODBC Driver Version: {0}".format(SQL_DRIVER_USED_VERSION_MS_DRIVER))
-    log.debug("Unterstützte FreeTDS Driver Version: {0} {1}".format(SQL_DRIVER_USED_VERSION_FreeTDS,
-              SQL_DRIVER_USED_VERSION_FreeTDS_VERSION))
-    log.debug("Arbeitsverzeichnis: {0}".format(os.path.abspath("./")))
-
-    # Infoausgabe
-    print("------------------------------------------------------------------")
-    print("Programm Start: ", datetime.datetime.now())
-    print("Programm Version: ", PROGRAMM_VERSION)
-    print("Python Version: ", sys.version)
-    print("Qt Version: ", QtCore.qVersion())
-    print("PyODBC Version: ", pyodbc.version)
-    print("SQL Lite3 Version: ", sqlite3.version)
-    print("Unterstützte MS ODBC Driver Version: ", SQL_DRIVER_USED_VERSION_MS_DRIVER)
-    print("Unterstützte FreeTDS Driver Version: ", SQL_DRIVER_USED_VERSION_FreeTDS, " ",
-          SQL_DRIVER_USED_VERSION_FreeTDS_VERSION)
-    print("Arbeitsverzeichnis: ", os.path.abspath("./"))
-    print("------------------------------------------------------------------")
+    # Print All Versions and write it also to log
+    logger.print_debug_versions()
 
     # MApplication
     m_app = None
@@ -118,7 +93,8 @@ if __name__ == "__main__":
         print("\nError: Critical: ", exc)
         log.critical(exc)
 
-
     # Stoppe lokalen Server und beende das Programm
     w_server.stop_listen()
+    log.info("Programm Stop: {0}\n----------------------------------------------------------------"
+             .format(datetime.datetime.now()))
     sys.exit(ret)

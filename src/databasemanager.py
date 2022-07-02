@@ -3,8 +3,11 @@ import os
 import pyodbc
 import main
 import time
-import logging as log
 
+
+import logging
+from pathlib import Path
+log = logging.getLogger(Path(__file__).name)
 
 # Klasse, die sich um den Datenaustausch mit dem MS SQL Server kümmert,
 # um die Informationen zu einem Artikel über die EAN zu bekommen
@@ -98,7 +101,7 @@ class DataBaseManager:
                 count += 1
             if count != 1:
                 print("WARNUNG: Keinen oder mehrere Einträge gefunden:", count)
-                log.warning("WARNUNG: Keinen oder mehrere Einträge gefunden: {0}".format(count))
+                log.warning("WARNUNG: Keinen oder mehrere Einträge gefunden: {0} für Artikel EAN={1}".format(count, ean))
             return row
 
         except Exception as exc:

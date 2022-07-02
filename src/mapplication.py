@@ -1,6 +1,10 @@
 from PySide2.QtCore import QEvent, Signal
 from PySide2.QtWidgets import QApplication
-import logging as log
+
+
+import logging
+from pathlib import Path
+log = logging.getLogger(Path(__file__).name)
 
 
 # Subclass QApplication, um eigene notify-Methode zu integrieren,
@@ -45,7 +49,12 @@ class MApplication(QApplication):
             # Wenn kein KeyPressEvent vorliegt, leite das Event an die Basisklasse weiter
             else:
                 return QApplication.notify(self, receiver, event)
+        except KeyboardInterrupt as exc:
+            print('KeyboardInterrupt: {0}'.format(exc))
+            log.info("KeyboardInterruption in m_application::notify : {0}".format(exc))
+            QApplication.quit()
+            return False
         except Exception as exc:
-            print('critical error occurred: {0}. Please save your data and restart application'.format(exc))
-            log.critical("critical error occurred in m_application::notify : {0}".format(exc))
+            log.critical("Exception in m_application::notify : {0}".format(exc))
+            QApplication.quit()
             return False

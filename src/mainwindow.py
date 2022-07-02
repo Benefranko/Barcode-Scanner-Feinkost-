@@ -9,7 +9,10 @@ from PySide2.QtWidgets import QMainWindow
 from databasemanager import DataBaseManager
 from localdatabasemanager import LocalDataBaseManager
 
-import logging as log
+
+import logging
+from pathlib import Path
+log = logging.getLogger(Path(__file__).name)
 
 
 # Klasse steuert die Grafik und managed die Datenbanken
@@ -403,5 +406,5 @@ class MainWindow(QMainWindow):
     @Slot(str)
     def new_scan(self, value):
         # Gib den Scan dem Event-Handler weiter...
-        log.info("Neuen Barcode Scan erhalten: {0}".format(value))
+        log.debug("Neuen Barcode Scan erhalten: {0}".format(value))
         self.event_handler("NEW_SCAN", value)

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="de">
+	<head>
+		<meta charset="utf-8">
+		<title>Barcodescanner Statistiken</title>
+		<style>
+			body{
+				margin-left: 20px;
+			}
+			.switch_button {
+				width: 80px;
+				height: 30px;
+				font-size:18px
+			}
+		</style>
+	</head>
+	<body>
+		<h1 style="font-size:28px">Protokollierung:</h1>
+		<div style="font-size:18px">
+			DEBUG - Nachrichten:
+			<button class="switch_button" onclick="debugSwitch()" id="debug-button" style="color: red" >AUS</button>
+		</div>
+		<div style="font-size:18px; margin-top: 20px">
+			INFO - Nachrichten:
+			<button class="switch_button" onclick="infoSwitch()" id="info-button" style="color: green" >EIN</button>
+		</div>
+		<div style="font-size:18px; margin-top: 20px">
+			WARNING - Nachrichten:
+			<button class="switch_button" onclick="warningSwitch()" id="warning-button" style="color: green" >EIN</button>
+		</div>
+		<div style="font-size:18px; margin-top: 20px">
+			ERROR - Nachrichten:
+			<button class="switch_button" onclick="errorSwitch()" id="error-button" style="color: green" >EIN</button>
+		</div>
+		<div style="font-size:18px; margin-top: 20px">
+			CRITICAL - Nachrichten:
+			<button class="switch_button" onclick="criticalSwitch()" id="critical-button" style="color: green" >EIN</button>
+		</div>
+
+		<div style="height: 20px">
+		</div>
+		<a style="color: blue; text-decoration: none; font-size: 28px;" href="/">Zur Startseite</a>
+		<div style="height: 20px">
+		</div>
+		%DATA%
+
+		<script>
+			function debugSwitch() {
+				button = document.getElementById("debug-button");
+				if( button.textContent == "EIN" ) {
+					button.textContent = "AUS";
+					button.style.color = "red";
+				 	list = document.getElementsByName("debug");
+    				for(i = 0; i < list.length; i++) {
+      					list[i].style.display = "none";
+    				}
+				} else {
+					button.textContent = "EIN";
+					button.style.color = "green";
+					list = document.getElementsByName("debug");
+    				for(i = 0; i < list.length; i++) {
+      					list[i].style.display = "block";
+    				}
+				}
+			}
+
+    		function infoSwitch() {
+				button = document.getElementById("info-button");
+				if( button.textContent == "EIN" ) {
+					button.textContent = "AUS";
+					button.style.color = "red";
+				 	list = document.getElementsByName("info");
+    				for(i = 0; i < list.length; i++) {
+      					list[i].style.display = "none";
+    				}
+				} else {
+					button.textContent = "EIN";
+					button.style.color = "green";
+					list = document.getElementsByName("info");
+    				for(i = 0; i < list.length; i++) {
+      					list[i].style.display = "block";
+    				}
+				}
+			}
+
+    		function warningSwitch() {
+				button = document.getElementById("warning-button");
+				if( button.textContent == "EIN" ) {
+					button.textContent = "AUS";
+					button.style.color = "red";
+				 	list = document.getElementsByName("warning");
+    				for(i = 0; i < list.length; i++) {
+      					list[i].style.display = "none";
+    				}
+				} else {
+					button.textContent = "EIN";
+					button.style.color = "green";
+					list = document.getElementsByName("warning");
+    				for(i = 0; i < list.length; i++) {
+      					list[i].style.display = "block";
+    				}
+				}
+			}
+
+    		function errorSwitch() {
+				button = document.getElementById("error-button");
+				if( button.textContent == "EIN" ) {
+					button.textContent = "AUS";
+					button.style.color = "red";
+				 	list = document.getElementsByName("error");
+    				for(i = 0; i < list.length; i++) {
+      					list[i].style.display = "none";
+    				}
+				} else {
+					button.textContent = "EIN";
+					button.style.color = "green";
+					list = document.getElementsByName("error");
+    				for(i = 0; i < list.length; i++) {
+      					list[i].style.display = "block";
+    				}
+				}
+			}
+
+    		function criticalSwitch() {
+				button = document.getElementById("critical-button");
+				if( button.textContent == "EIN" ) {
+					button.textContent = "AUS";
+					button.style.color = "red";
+				 	list = document.getElementsByName("critical");
+    				for(i = 0; i < list.length; i++) {
+      					list[i].style.display = "none";
+    				}
+				} else {
+					button.textContent = "EIN";
+					button.style.color = "green";
+					list = document.getElementsByName("critical");
+    				for(i = 0; i < list.length; i++) {
+      					list[i].style.display = "block";
+    				}
+				}
+			}
+		</script>
+	</body>
+</html>
