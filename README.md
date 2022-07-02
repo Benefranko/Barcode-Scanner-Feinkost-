@@ -2,6 +2,15 @@
 
 Mit diesem Programm sollen Kunden durch das Scannen eines Produkt Bar Codes zusätzliche Informationen zu diesem bekommen.
 
+
+# Autostart:
+``sudo apt install cron``
+Und mit ``crontab -e`` folgendes hinzufügen:
+
+````
+@reboot python3.7 /path/to/the/project/main.py
+````
+
 # Installlation kurz:
 ````
 sudo wget -qO - https://raw.githubusercontent.com/tvdsluijs/sh-python-installer/main/python.sh | sudo bash -s 3.10.0
