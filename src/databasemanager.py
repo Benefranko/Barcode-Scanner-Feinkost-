@@ -1,13 +1,12 @@
 # Open Source Bibliothek für MS SQL
-import os
 import pyodbc
 import main
 import time
 
-
 import logging
 from pathlib import Path
 log = logging.getLogger(Path(__file__).name)
+
 
 # Klasse, die sich um den Datenaustausch mit dem MS SQL Server kümmert,
 # um die Informationen zu einem Artikel über die EAN zu bekommen
@@ -38,7 +37,8 @@ class DataBaseManager:
                     print("Verwende Driver: ODBC Driver 18 for SQL Server...")
                     log.debug("Verwende Driver: ODBC Driver 18 for SQL Server...")
 
-                    self.conn = pyodbc.connect(driver=main.SQL_DRIVER_USED_VERSION_MS_DRIVER, server=ip + "," + str(port),
+                    self.conn = pyodbc.connect(driver=main.SQL_DRIVER_USED_VERSION_MS_DRIVER, server=ip + "," +
+                                               str(port),
                                                database=db,
                                                user=usr,
                                                password=pw,
@@ -101,7 +101,8 @@ class DataBaseManager:
                 count += 1
             if count != 1:
                 print("WARNUNG: Keinen oder mehrere Einträge gefunden:", count)
-                log.warning("WARNUNG: Keinen oder mehrere Einträge gefunden: {0} für Artikel EAN={1}".format(count, ean))
+                log.warning("WARNUNG: Keinen oder mehrere Einträge gefunden: {0} für Artikel EAN={1}"
+                            .format(count, ean))
             return row
 
         except Exception as exc:
