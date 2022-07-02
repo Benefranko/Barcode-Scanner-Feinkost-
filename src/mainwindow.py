@@ -1,13 +1,10 @@
-import os
-import sys
 from enum import Enum
-from pathlib import Path
 
 from PySide2.QtCore import QFile, QTimerEvent, Qt
 from PySide2.QtCore import Slot
 from PySide2.QtGui import QImage, QPixmap, QFontMetrics, QFont
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QLabel, QFrame, QVBoxLayout, QApplication
+from PySide2.QtWidgets import QLabel, QFrame, QVBoxLayout
 from PySide2.QtWidgets import QMainWindow
 
 from databasemanager import DataBaseManager
@@ -107,34 +104,54 @@ class MainWindow(QMainWindow):
 
         # Lade Grafiken
         # "Kein Bild gefunden"-Grafik...
-        pix = QPixmap("../images/no_picture_found.jpg")
-        self.window.frame.setPixmap(pix.scaled(pix.toImage().size() / 2.25))
+        img_path: str = "../images/no_picture_found.jpg"
+        pix = QPixmap(img_path)
+        if pix.isNull():
+            print("Konnte Bild nicht laden: ", img_path)
+        else:
+            self.window.frame.setPixmap(pix.scaled(pix.toImage().size() / 2.25))
 
         # "Barcode Scanner Bild mit Handy Beispiel"-Grafik
-        pix = QPixmap("../images/sunmi_scan.png")
-        self.window.img1.setPixmap(pix.scaled(pix.toImage().size() / 5.5))
+        img_path = "../images/sunmi_scan.png"
+        pix = QPixmap(img_path)
+        if pix.isNull():
+            print("Konnte Bild nicht laden: ", img_path)
+        else:
+            self.window.img1.setPixmap(pix.scaled(pix.toImage().size() / 5.5))
 
         # InnKaufHaus-Logo-Grafik
-        pix = QPixmap("../images/logo.jpg")
-        self.window.logo.setPixmap(pix.scaled(pix.toImage().size() / 4))
-        self.window.Innkaufhauslogo.setPixmap(pix.scaled(pix.toImage().size() / 4))
+        img_path = "../images/logo.jpg"
+        pix = QPixmap(img_path)
+        if pix.isNull():
+            print("Konnte Bild nicht laden: ", img_path)
+        else:
+            self.window.logo.setPixmap(pix.scaled(pix.toImage().size() / 4))
+            self.window.Innkaufhauslogo.setPixmap(pix.scaled(pix.toImage().size() / 4))
 
-        pix = QPixmap("../images/5-sterne_v3.png")
-        self.window.Sternenbewertungen.setPixmap(pix.scaled(pix.toImage().size() / 4))
+        img_path = "../images/5-sterne_v3.png"
+        pix = QPixmap(img_path)
+        if pix.isNull():
+            print("Konnte Bild nicht laden: ", img_path)
+        else:
+            self.window.Sternenbewertungen.setPixmap(pix.scaled(pix.toImage().size() / 4))
 
         # Example Advertise
-        pix = QPixmap("../images/example.jpg")
-        label = QLabel(self)
-        label.setAlignment(Qt.AlignHCenter)
-        label.setPixmap(pix.scaled(pix.toImage().size() / 2.5))
-        layout = self.window.groupBoxAdvertise.layout()
-        if layout is not None and label is not None:
-            layout.addWidget(label)
-            l2 = QVBoxLayout()
-            layout.addLayout(l2, 0, 1)
-            l2.addWidget(QLabel("Aberfeldy 12 years Single Highland Whisky 40,0% vol., 0,7l "))
-            l2.addWidget(QLabel("Duft: Rauch, Ananas, Getreide, Toast, Honig Geschmack:"))
-            l2.addWidget(QLabel("      aromatisch, fruchtig, lieblich, weich, cremig"))
+        img_path = "../images/example.jpg"
+        pix = QPixmap(img_path)
+        if pix.isNull():
+            print("Konnte Bild nicht laden: ", img_path)
+        else:
+            label = QLabel(self)
+            label.setAlignment(Qt.AlignHCenter)
+            label.setPixmap(pix.scaled(pix.toImage().size() / 2.5))
+            layout = self.window.groupBoxAdvertise.layout()
+            if layout is not None and label is not None:
+                layout.addWidget(label)
+                l2 = QVBoxLayout()
+                layout.addLayout(l2, 0, 1)
+                l2.addWidget(QLabel("Aberfeldy 12 years Single Highland Whisky 40,0% vol., 0,7l "))
+                l2.addWidget(QLabel("Duft: Rauch, Ananas, Getreide, Toast, Honig Geschmack:"))
+                l2.addWidget(QLabel("      aromatisch, fruchtig, lieblich, weich, cremig"))
         ####
         # DATA BASES
         ####
