@@ -47,5 +47,5 @@ class MApplication(QApplication):
                 return QApplication.notify(self, receiver, event)
         except Exception as exc:
             print('critical error occurred: {0}. Please save your data and restart application'.format(exc))
-            log.critical("critical error occurred in m_application::notify : ", exc)
+            log.critical("critical error occurred in m_application::notify : {0}".format(exc))
             return False

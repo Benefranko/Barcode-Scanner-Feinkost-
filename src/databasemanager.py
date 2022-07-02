@@ -5,6 +5,7 @@ import main
 import time
 import logging as log
 
+
 # Klasse, die sich um den Datenaustausch mit dem MS SQL Server kümmert,
 # um die Informationen zu einem Artikel über die EAN zu bekommen
 class DataBaseManager:
@@ -39,35 +40,36 @@ class DataBaseManager:
                                                user=usr,
                                                password=pw,
                                                encrypt="no")
-                    print("Verbunden")
+                    print("Erfolgreich mit MS SQL Server verbunden über ODBC Driver 18")
                     log.info("Erfolgreich mit MS SQL Server verbunden über ODBC Driver 18")
 
                     break
 
                 elif "FreeTDS" in driver_names:
                     print("Verwende Driver: FreeTDS ", main.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION, "...")
-                    log.debug("Verwende Driver: FreeTDS ", main.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION, "...")
+                    log.debug("Verwende Driver: FreeTDS {0} ...".format(main.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION))
 
                     self.conn = pyodbc.connect('DRIVER={0}; SERVER={1}; PORT={2}; DATABASE={3}; UID={4}; PWD={5}; '
                                                'TDS_Version={6};'.format(main.SQL_DRIVER_USED_VERSION_FreeTDS,
                                                                          ip, port, db,usr, pw,
                                                                          main.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION))
-                    print("Verbunden")
-                    log.info("Erfolgreich mit MS SQL Server verbunden über FreeTDS Driver "
-                             + main.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION)
+                    print("Erfolgreich mit MS SQL Server verbunden über FreeTDS Driver "
+                          + main.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION)
+                    log.info("Erfolgreich mit MS SQL Server verbunden über FreeTDS Driver {0} ".format(
+                             main.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION))
                     break
                 else:
                     print('Error: No suitable driver found. Cannot connect.')
                     log.critical('Error: No suitable driver found. Cannot connect.')
                     print("All installed driver: ", pyodbc.drivers())
-                    log.debug("All installed driver: ", pyodbc.drivers())
+                    log.debug("All installed driver: {0}".format(pyodbc.drivers()))
                     self.conn = None
                     break
             except Exception as exc:
                 print('Connect to Database failed. ( Try: {0}/10 )'.format(i+1), " Error: ", exc,
                       " Warte 1 Sekunde...")
-                log.warning('Connect to Database failed. ( Try: {0}/10 )'.format(i+1), " Error: ",
-                            exc, " Warte 1 Sekunde...")
+                log.warning('Connect to Database failed. ( Try: {0}/10 ) Error: {1} - Warte 1 Sekunde...'
+                            .format(i+1, exc))
 
                 time.sleep(1)
                 self.conn = None
@@ -96,7 +98,7 @@ class DataBaseManager:
                 count += 1
             if count != 1:
                 print("WARNUNG: Keinen oder mehrere Einträge gefunden:", count)
-                log.warning("WARNUNG: Keinen oder mehrere Einträge gefunden:", count)
+                log.warning("WARNUNG: Keinen oder mehrere Einträge gefunden: {0}".format(count))
             return row
 
         except Exception as exc:

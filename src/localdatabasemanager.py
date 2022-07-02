@@ -44,6 +44,7 @@ class LocalDataBaseManager:
             self.connection = None
             return None
         log.debug("Erfolgreich mit lokaler SQL Lite Datenbank verbunden!")
+        print("Erfolgreich mit lokaler SQL Lite Datenbank verbunden!")
         return self.connection
 
     def get_all_scans(self):

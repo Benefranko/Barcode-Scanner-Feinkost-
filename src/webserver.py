@@ -30,7 +30,7 @@ class Server:
             self.thread = Thread(target=self.run_web_server, args=())
         except Exception as exc:
             print(exc)
-            log.critical("Webserver erstellen ist fehlgeschlagen: ", exc)
+            log.critical("Webserver erstellen ist fehlgeschlagen: {0}".format(exc))
             sys.exit(12)
 
     # Starte Server in extra Thread
@@ -161,7 +161,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         except Exception as exc:
             print('error occurred: {0}.'.format(exc))
-            log.warning("Es ist ein Fehler im RequestHandler aufgetreten: ", exc)
+            log.warning("Es ist ein Fehler im RequestHandler aufgetreten: {0}".format(exc))
             self.send_response(500)
             self.send_header('content-type', 'text/html')
             self.end_headers()

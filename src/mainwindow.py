@@ -109,7 +109,7 @@ class MainWindow(QMainWindow):
         pix = QPixmap(img_path)
         if pix.isNull():
             print("Konnte Bild nicht laden: ", img_path)
-            log.error("Konnte Bild nicht laden: ", img_path)
+            log.error("Konnte Bild nicht laden: {0}".format(img_path))
         else:
             self.window.frame.setPixmap(pix.scaled(pix.toImage().size() / 2.25))
 
@@ -118,7 +118,7 @@ class MainWindow(QMainWindow):
         pix = QPixmap(img_path)
         if pix.isNull():
             print("Konnte Bild nicht laden: ", img_path)
-            log.error("Konnte Bild nicht laden: ", img_path)
+            log.error("Konnte Bild nicht laden: {0}".format(img_path))
         else:
             self.window.img1.setPixmap(pix.scaled(pix.toImage().size() / 5.5))
 
@@ -127,7 +127,7 @@ class MainWindow(QMainWindow):
         pix = QPixmap(img_path)
         if pix.isNull():
             print("Konnte Bild nicht laden: ", img_path)
-            log.error("Konnte Bild nicht laden: ", img_path)
+            log.error("Konnte Bild nicht laden: {0}".format(img_path))
         else:
             self.window.logo.setPixmap(pix.scaled(pix.toImage().size() / 4))
             self.window.Innkaufhauslogo.setPixmap(pix.scaled(pix.toImage().size() / 4))
@@ -137,7 +137,7 @@ class MainWindow(QMainWindow):
         pix = QPixmap(img_path)
         if pix.isNull():
             print("Konnte Bild nicht laden: ", img_path)
-            log.error("Konnte Bild nicht laden: ", img_path)
+            log.error("Konnte Bild nicht laden: {0}".format(img_path))
         else:
             label = QLabel(self)
             label.setAlignment(Qt.AlignHCenter)
@@ -212,7 +212,7 @@ class MainWindow(QMainWindow):
             data = self.databasemanager.get_data_by_ean(int(scan_article_ean))
         except Exception as exc:
             print("INVALID SCAN: Can't cast to int: '", scan_article_ean, "': ", exc)
-            log.info("Ungültiger Scan: Can't cast to int: ", scan_article_ean, "': ", exc )
+            log.info("Ungültiger Scan: Can't cast to int: {0}: {1}".format(scan_article_ean, exc))
             self.event_handler("LOAD_ARTICLE_FAILED", scan_article_ean)
             return
 
@@ -253,7 +253,7 @@ class MainWindow(QMainWindow):
             self.window.p_name.setFont(font)
         else:
             self.event_handler("LOAD_ARTICLE_FAILED", scan_article_ean)
-            log.info("LOAD_ARTICLE_FAILED: ", scan_article_ean, "': data.Artikelname == \"\"" )
+            log.info("LOAD_ARTICLE_FAILED: {0} -> data.Artikelname == \"\" ".format(scan_article_ean))
             return
 
         # Artikel Preis
@@ -383,7 +383,7 @@ class MainWindow(QMainWindow):
 
         if not handled:
             print("WARNUNG: Die Aktion" + action + " wurde nicht bearbeitet!")
-            log.warning("Die Aktion" + action + " wurde nicht bearbeitet!")
+            log.warning("Die Aktion {0} wurde nicht bearbeitet!".format(action))
 
     # Entferne alle Elemente aus Werbung-Layout
     def clear_advertise_list(self):

@@ -50,7 +50,8 @@ if __name__ == "__main__":
     os.chdir(d_name)
 
     # Setup Logfile Path
-    log.basicConfig(filename=log_file_path, level=log.DEBUG)
+    log.basicConfig(filename=log_file_path, level=log.DEBUG,
+                    format='%(asctime)s: %(levelname)s: %(message)s', datefmt='%d-%b-%y %H:%M:%S')
 
     # Wenn --help aufgerufen wird, gib kurze Information aus
     if len(sys.argv) > 1:
@@ -62,18 +63,19 @@ if __name__ == "__main__":
             exit()
 
     # Log....
-    log.debug("Programm Start: ", datetime.datetime.now())
-    log.debug("Programm Version: ", PROGRAMM_VERSION)
-    log.debug("Python Version: ", sys.version)
-    log.debug("Qt Version: ", QtCore.qVersion())
-    log.debug("PyODBC Version: ", pyodbc.version)
-    log.debug("SQL Lite3 Version: ", sqlite3.version)
-    log.debug("Unterstützte MS ODBC Driver Version: ", SQL_DRIVER_USED_VERSION_MS_DRIVER)
-    log.debug("Unterstützte FreeTDS Driver Version: ", SQL_DRIVER_USED_VERSION_FreeTDS, " ",
-              SQL_DRIVER_USED_VERSION_FreeTDS_VERSION)
-    log.debug("Arbeitsverzeichnis: ", os.path.abspath("./"))
+    log.debug("Programm Start: {0}".format(datetime.datetime.now()))
+    log.debug("Programm Version: {0}".format(PROGRAMM_VERSION))
+    log.debug("Python Version: {0}".format(sys.version))
+    log.debug("Qt Version: {0}".format(QtCore.qVersion()))
+    log.debug("PyODBC Version: {0}".format(pyodbc.version))
+    log.debug("SQL Lite3 Version: {0}".format(sqlite3.version))
+    log.debug("Unterstützte MS ODBC Driver Version: {0}".format(SQL_DRIVER_USED_VERSION_MS_DRIVER))
+    log.debug("Unterstützte FreeTDS Driver Version: {0} {1}".format(SQL_DRIVER_USED_VERSION_FreeTDS,
+              SQL_DRIVER_USED_VERSION_FreeTDS_VERSION))
+    log.debug("Arbeitsverzeichnis: {0}".format(os.path.abspath("./")))
 
     # Infoausgabe
+    print("------------------------------------------------------------------")
     print("Programm Start: ", datetime.datetime.now())
     print("Programm Version: ", PROGRAMM_VERSION)
     print("Python Version: ", sys.version)
@@ -84,6 +86,7 @@ if __name__ == "__main__":
     print("Unterstützte FreeTDS Driver Version: ", SQL_DRIVER_USED_VERSION_FreeTDS, " ",
           SQL_DRIVER_USED_VERSION_FreeTDS_VERSION)
     print("Arbeitsverzeichnis: ", os.path.abspath("./"))
+    print("------------------------------------------------------------------")
 
     # MApplication
     m_app = None
