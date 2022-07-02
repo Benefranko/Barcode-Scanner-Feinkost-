@@ -58,12 +58,11 @@ if __name__ == "__main__":
     print("Qt Version: ", QtCore.qVersion())
     print("PyODBC Version: ", pyodbc.version)
     print("SQL Lite3 Version: ", sqlite3.version)
-    print("Verwendete MS ODBC Driver Version: ", SQL_DRIVER_USED_VERSION_MS_DRIVER)
-    print("Verwendete FreeTDS Driver Version: ", SQL_DRIVER_USED_VERSION_FreeTDS, " ",
+    print("Unterstützte MS ODBC Driver Version: ", SQL_DRIVER_USED_VERSION_MS_DRIVER)
+    print("Unterstützte FreeTDS Driver Version: ", SQL_DRIVER_USED_VERSION_FreeTDS, " ",
           SQL_DRIVER_USED_VERSION_FreeTDS_VERSION)
     print("Arbeitsverzeichnis: ", os.path.abspath("./"))
     print("----------------------------------------------------------------------\n\n")
-
 
     # MApplication
     m_app = None

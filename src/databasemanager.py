@@ -26,12 +26,15 @@ class DataBaseManager:
             # Verbinde mit MS SQl server unter verwendung des extern installierten ODBC Driver 18
             driver_names = pyodbc.drivers()
             if "ODBC Driver 18 for SQL Server" in driver_names:
+                print("Verwende Driver: ODBC Driver 18 for SQL Server")
                 self.conn = pyodbc.connect(driver=main.SQL_DRIVER_USED_VERSION_MS_DRIVER, server=ip + "," + str(port),
                                            database=db,
                                            user=usr,
                                            password=pw,
                                            encrypt="no")
+
             elif "FreeTDS" in driver_names:
+                print("Verwende Driver: FreeTDS ", main.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION)
                 self.conn = pyodbc.connect('DRIVER={0}; SERVER={1}; PORT={2}; DATABASE={3}; UID={4}; PWD={5}; '
                                            'TDS_Version={6};'.format(main.SQL_DRIVER_USED_VERSION_FreeTDS,
                                                                      ip, port, db,usr, pw,
