@@ -63,6 +63,7 @@ if __name__ == "__main__":
             exit()
 
     # Log....
+    log.debug("\n\n------------------------------------------------------------------\n")
     log.debug("Programm Start: {0}".format(datetime.datetime.now()))
     log.debug("Programm Version: {0}".format(PROGRAMM_VERSION))
     log.debug("Python Version: {0}".format(sys.version))
