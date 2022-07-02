@@ -127,13 +127,6 @@ class MainWindow(QMainWindow):
             self.window.logo.setPixmap(pix.scaled(pix.toImage().size() / 4))
             self.window.Innkaufhauslogo.setPixmap(pix.scaled(pix.toImage().size() / 4))
 
-        img_path = "../images/5-sterne_v3.png"
-        pix = QPixmap(img_path)
-        if pix.isNull():
-            print("Konnte Bild nicht laden: ", img_path)
-        else:
-            self.window.Sternenbewertungen.setPixmap(pix.scaled(pix.toImage().size() / 4))
-
         # Example Advertise
         img_path = "../images/example.jpg"
         pix = QPixmap(img_path)

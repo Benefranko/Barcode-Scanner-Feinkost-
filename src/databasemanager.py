@@ -12,49 +12,52 @@ class DataBaseManager:
 
     def connect(self, ip: str = "PC-MARKUS", port: int = 1433, pw: str = "altinsystems",
                 usr: str = "test", db: str = "Mandant_1"):
-        try:
-            ###
-            # trusted_connection="yes", :
-            #
-            # Specifies whether a user connects through a user account by using either Kerberos [RFC4120] or
-            # another platform-specific authentication as specified by the fIntSecurity field
-            # The valid values are "Yes", "1", or empty string, which are equivalent, or "No".
-            # If the value "No" is not specified, the value "Yes" is used.
-            # If the value is "No", the UID and PWD keys have to be used to establish a connection with the data source.
-            ###
-
-            # Verbinde mit MS SQl server unter verwendung des extern installierten ODBC Driver 18
-            driver_names = pyodbc.drivers()
-            if "ODBC Driver 18 for SQL Server" in driver_names:
-                print("Verwende Driver: ODBC Driver 18 for SQL Server")
-                self.conn = pyodbc.connect(driver=main.SQL_DRIVER_USED_VERSION_MS_DRIVER, server=ip + "," + str(port),
-                                           database=db,
-                                           user=usr,
-                                           password=pw,
-                                           encrypt="no")
-
-            elif "FreeTDS" in driver_names:
-                print("Verwende Driver: FreeTDS ", main.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION)
-                self.conn = pyodbc.connect('DRIVER={0}; SERVER={1}; PORT={2}; DATABASE={3}; UID={4}; PWD={5}; '
-                                           'TDS_Version={6};'.format(main.SQL_DRIVER_USED_VERSION_FreeTDS,
-                                                                     ip, port, db,usr, pw,
-                                                                     main.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION))
+        for i in range(0, 5):
+            try:
                 ###
-                # DRIVER = {FreeTDS};
-                #             SERVER = server.com;
-                #             PORT = 1433;
-                #             DATABASE = dbname;
-                #             UID = user;
-                #             PWD = password;
-                #             TDS_Version = 7.3;
+                # trusted_connection="yes", :
+                #
+                # Specifies whether a user connects through a user account by using either Kerberos [RFC4120] or
+                # another platform-specific authentication as specified by the fIntSecurity field
+                # The valid values are "Yes", "1", or empty string, which are equivalent, or "No".
+                # If the value "No" is not specified, the value "Yes" is used.
+                # If the value is "No", the UID and PWD keys have to be used to establish a connection with the
+                # data source.
                 ###
-            else:
-                print('Error: No suitable driver found. Cannot connect.')
-                print("All installed driver: ", pyodbc.drivers())
+
+                # Verbinde mit MS SQl server unter verwendung des extern installierten ODBC Driver 18
+                driver_names = pyodbc.drivers()
+                if "ODBC Driver 18 for SQL Server" in driver_names:
+                    print("Verwende Driver: ODBC Driver 18 for SQL Server")
+                    self.conn = pyodbc.connect(driver=main.SQL_DRIVER_USED_VERSION_MS_DRIVER, server=ip + "," + str(port),
+                                               database=db,
+                                               user=usr,
+                                               password=pw,
+                                               encrypt="no")
+
+                elif "FreeTDS" in driver_names:
+                    print("Verwende Driver: FreeTDS ", main.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION)
+                    self.conn = pyodbc.connect('DRIVER={0}; SERVER={1}; PORT={2}; DATABASE={3}; UID={4}; PWD={5}; '
+                                               'TDS_Version={6};'.format(main.SQL_DRIVER_USED_VERSION_FreeTDS,
+                                                                         ip, port, db,usr, pw,
+                                                                         main.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION))
+                    ###
+                    # DRIVER = {FreeTDS};
+                    #             SERVER = server.com;
+                    #             PORT = 1433;
+                    #             DATABASE = dbname;
+                    #             UID = user;
+                    #             PWD = password;
+                    #             TDS_Version = 7.3;
+                    ###
+                else:
+                    print('Error: No suitable driver found. Cannot connect.')
+                    print("All installed driver: ", pyodbc.drivers())
+                    self.conn = None
+                    break
+            except Exception as exc:
+                print('Connect to Database failed. ( Try: ?/5 )'.format(i+1), " Error: ", exc)
                 self.conn = None
-        except Exception as exc:
-            print('critical error occurred: {0}. Please save your data and restart application'.format(exc))
-            self.conn = None
 
         return self.conn
 
