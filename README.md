@@ -22,6 +22,7 @@ After=network.target
 [Service]
 Type=oneshot
 ExecStart=/full/path/to/the/project/main.py
+User=pi
 
 [Install]
 WantedBy=multi-user.target
@@ -32,6 +33,7 @@ und aktivieren sie den Dienst mit: \
 ``sudo systemctl daemon-reload`` \
 ``sudo systemctl enable feinkostBarcodeScanner``
 
+Der User (pi) sollte dabei keine Adminrechte haben!
 
 # Installlation kurz:
 ````

@@ -9,6 +9,8 @@ import pyodbc
 import sqlite3
 import datetime
 import os
+import logging
+
 
 # Einstellungen
 
@@ -38,6 +40,10 @@ item_count_on_web_server_list: int = 50
 
 
 if __name__ == "__main__":
+    logging.basicConfig(filename='~/.feinkostBarcodeScannerLog.log', level=logging.DEBUG)
+    logger = logging.getLogger()
+    sys.stderr.write = logger.error
+    sys.stdout.write = logger.info
 
     # Change Working Directory to the one this file is in
     abspath = os.path.abspath(__file__)
