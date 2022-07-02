@@ -3,31 +3,49 @@
 Mit diesem Programm sollen Kunden durch das Scannen eines Produkt Bar Codes zusätzliche Informationen zu diesem bekommen.
 
 
-# Autostart:
+# Autostart mit Cronjobs:
 ``sudo apt install cron``
 Und mit ``crontab -e`` folgendes hinzufügen:
 
 ````
 @reboot python3.7 /path/to/the/project/main.py
 ````
+# Autostart mit Systemd:
+
+Erstellen sie die Datei ``/etc/systemd/system/feinkostBarcodeScanner.service``
+mit folgendem Inhalt:
+````
+[Unit]
+Description=Mit diesem Programm sollen Kunden durch das Scannen eines Produkt Bar Codes zusätzliche Informationen zu diesem bekommen.
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/full/path/to/the/project/main.py
+
+[Install]
+WantedBy=multi-user.target
+
+````
+
+und aktivieren sie den Dienst mit: \
+``sudo systemctl daemon-reload`` \
+``sudo systemctl enable feinkostBarcodeScanner``
+
 
 # Installlation kurz:
 ````
-sudo wget -qO - https://raw.githubusercontent.com/tvdsluijs/sh-python-installer/main/python.sh | sudo bash -s 3.10.0
-
+#Driver
 sudo apt install tdsodbc freetds-dev freetds-bin unixodbc-dev
 
-sudo echo "[FreeTDS]
+# Save driver Location for Driver Loader
+sudo tee -a "/etc/odbcinst.ini" "[FreeTDS]
 Description=FreeTDS Driver
 Driver=/usr/lib/arm-linux-gnueabihf/odbc/libtdsodbc.so
-Setup=/usr/lib/arm-linux-gnueabihf/odbc/libtdsS.so
-TDS_Version = 7.4" >> /etc/odbcinst.ini
+Setup=/usr/lib/arm-linux-gnueabihf/odbc/libtdsS.so"
 
-sudo apt install python3-pyodbc
-
-sudo apt install *PySide2.*
-
-sudo apt install python-enum34
+#Driver Loader & Graphics
+sudo apt install python3-pyodbc python3-PySide2.* python-enum34
 ````
 
 
