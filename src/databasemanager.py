@@ -32,7 +32,7 @@ class DataBaseManager:
                                            password=pw,
                                            encrypt="no")
             elif "FreeTDS" in driver_names:
-                self.conn = pyodbc.connect('DRIVER="{0}"; SERVER={1}; PORT={2}; DATABASE={3}; UID={4}; PWD={5}; '
+                self.conn = pyodbc.connect('DRIVER={0}; SERVER={1}; PORT={2}; DATABASE={3}; UID={4}; PWD={5}; '
                                            'TDS_Version={6};'.format(main.SQL_DRIVER_USED_VERSION_FreeTDS,
                                                                      ip, port, db,usr, pw,
                                                                      main.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION))

@@ -23,6 +23,8 @@ sudo apt install python-enum34
 
 
 # Dependencies
+unixODBC-bin
+unixODBC-dev
 
 ## Python 3.10
 für z.B: match!
