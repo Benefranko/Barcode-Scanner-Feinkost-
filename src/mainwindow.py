@@ -107,34 +107,46 @@ class MainWindow(QMainWindow):
 
         # Lade Grafiken
         # "Kein Bild gefunden"-Grafik...
-        pix = QPixmap("../images/no_picture_found.jpg")
+        pix: QPixmap = QPixmap("../images/no_picture_found.jpg")
         self.window.frame.setPixmap(pix.scaled(pix.toImage().size() / 2.25))
 
         # "Barcode Scanner Bild mit Handy Beispiel"-Grafik
         pix = QPixmap("../images/sunmi_scan.png")
-        self.window.img1.setPixmap(pix.scaled(pix.toImage().size() / 5.5))
+        if pix is None:
+            print("Missing Image: ../images/sunmi_scan.png")
+        else:
+            self.window.img1.setPixmap(pix.scaled(pix.toImage().size() / 5.5))
 
         # InnKaufHaus-Logo-Grafik
         pix = QPixmap("../images/logo.jpg")
-        self.window.logo.setPixmap(pix.scaled(pix.toImage().size() / 4))
-        self.window.Innkaufhauslogo.setPixmap(pix.scaled(pix.toImage().size() / 4))
+        if pix is None:
+            print("Missing Image: ../images/logo.jpg")
+        else:
+            self.window.logo.setPixmap(pix.scaled(pix.toImage().size() / 4))
+            self.window.Innkaufhauslogo.setPixmap(pix.scaled(pix.toImage().size() / 4))
 
         pix = QPixmap("../images/5-sterne_v3.png")
-        self.window.Sternenbewertungen.setPixmap(pix.scaled(pix.toImage().size() / 4))
+        if pix is None:
+            print("Missing Image: ../images/5-sterne_v3.png")
+        else:
+            self.window.Sternenbewertungen.setPixmap(pix.scaled(pix.toImage().size() / 4))
 
         # Example Advertise
         pix = QPixmap("../images/example.jpg")
-        label = QLabel(self)
-        label.setAlignment(Qt.AlignHCenter)
-        label.setPixmap(pix.scaled(pix.toImage().size() / 2.5))
-        layout = self.window.groupBoxAdvertise.layout()
-        if layout is not None and label is not None:
-            layout.addWidget(label)
-            l2 = QVBoxLayout()
-            layout.addLayout(l2, 0, 1)
-            l2.addWidget(QLabel("Aberfeldy 12 years Single Highland Whisky 40,0% vol., 0,7l "))
-            l2.addWidget(QLabel("Duft: Rauch, Ananas, Getreide, Toast, Honig Geschmack:"))
-            l2.addWidget(QLabel("      aromatisch, fruchtig, lieblich, weich, cremig"))
+        if pix is None:
+            print("Missing Image: ../images/example.jpg")
+        else:
+            label = QLabel(self)
+            label.setAlignment(Qt.AlignHCenter)
+            label.setPixmap(pix.scaled(pix.toImage().size() / 2.5))
+            layout = self.window.groupBoxAdvertise.layout()
+            if layout is not None and label is not None:
+                layout.addWidget(label)
+                l2 = QVBoxLayout()
+                layout.addLayout(l2, 0, 1)
+                l2.addWidget(QLabel("Aberfeldy 12 years Single Highland Whisky 40,0% vol., 0,7l "))
+                l2.addWidget(QLabel("Duft: Rauch, Ananas, Getreide, Toast, Honig Geschmack:"))
+                l2.addWidget(QLabel("      aromatisch, fruchtig, lieblich, weich, cremig"))
         ####
         # DATA BASES
         ####
