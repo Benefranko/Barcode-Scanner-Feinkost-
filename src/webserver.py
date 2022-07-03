@@ -75,7 +75,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                     html_string = open("../html/monatsstatus.html", "r").read()
                     now = datetime.now()
                     days_of_month = calendar.monthrange(now.year, now.month)[1]
-                    day_of_month = int(now.strftime("%d"))
+                    day_of_month = int(now.strftime("%d")) - 1
 
                     scan_list = [0] * days_of_month
                     for day in range(0, day_of_month + 1):
@@ -201,3 +201,36 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         self.loc_db_mngr = None
         return
+
+    def do_POST(self):
+        content_length = int(self.headers['Content-Length'])  # <--- Gets the size of data
+        post_data = self.rfile.read(content_length)  # <--- Gets the data itself
+        html_string: str = ""
+        html_status: int = 200
+
+        try:
+            if self.path == "/log.html":
+                if "password=pass&" in str(post_data):
+                    fo = open(main.log_file_path, "w")
+                    fo.truncate()
+                    fo.close()
+                    self.do_GET()
+                    return
+                else:
+                    html_string = "Falsches Passwort"
+            else:
+                html_string = open("../html/404.html", "r").read()
+                html_status = 404
+
+            self.send_response(html_status)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            self.wfile.write(html_string.encode("utf-8"))
+
+        except Exception as exc:
+            print('Es ist ein Fehler im RequestHandler aufgetreten: {0}.'.format(exc))
+            log.warning("Es ist ein Fehler im RequestHandler aufgetreten: {0}".format(exc))
+            self.send_response(500)
+            self.send_header('content-type', 'text/html')
+            self.end_headers()
+            self.wfile.write("<h1>Ein unerwartetes Problem ist aufgetreten!</h1>".encode("utf-8"))

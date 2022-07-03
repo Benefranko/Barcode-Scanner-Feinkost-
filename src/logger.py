@@ -57,7 +57,7 @@ class LoggerWriter:
         message = message.rstrip()
         if message != "\n" and message != "":
             print(message)
-            if "] \"GET /" not in message:
+            if "] \"GET /" not in message and  "] \"POST /" not in message:
                 self.level(message)
 
     # def flush(self):
