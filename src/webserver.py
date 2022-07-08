@@ -189,7 +189,15 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.send_response(html_status)
             self.send_header('content-type', 'text/html')
             self.end_headers()
-            self.wfile.write(html_string.encode("utf-8"))
+            # Write Funktion in eigenem try-catch statement, um Html-Fehler senden zu können, wenn im SQL Teil
+            # etwas fehlschlägt!
+            try:
+                self.wfile.write(html_string.encode("utf-8"))
+            except Exception as exc:
+                print('Es ist ein Fehler im RequestHandler aufgetreten: write() failed: {0}.'.format(exc))
+                log.warning("Es ist ein Fehler im RequestHandler aufgetreten: write() failed: {0}".format(exc))
+                self.loc_db_mngr = None
+                return
 
         except Exception as exc:
             print('Es ist ein Fehler im RequestHandler aufgetreten: {0}.'.format(exc))
@@ -217,7 +225,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                     self.do_GET()
                     return
                 else:
-                    html_string = "Falsches Passwort"
+                    html_string = open("../html/tabelle-falsches-pw.html", "r").read()
+
             else:
                 html_string = open("../html/404.html", "r").read()
                 html_status = 404
