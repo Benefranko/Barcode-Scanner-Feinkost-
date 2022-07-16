@@ -15,7 +15,7 @@ log = logging.getLogger(Path(__file__).name)
 # Einstellungen
 
 # Programm Version
-PROGRAMM_VERSION: str = "0.9.1"
+PROGRAMM_VERSION: str = "0.9.6"
 
 SQL_DRIVER_USED_VERSION_MS_DRIVER: str = "{ODBC Driver 18 for SQL Server}"
 SQL_DRIVER_USED_VERSION_FreeTDS: str = "{FreeTDS}"
