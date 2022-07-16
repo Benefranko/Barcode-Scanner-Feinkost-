@@ -42,6 +42,9 @@ item_count_on_web_server_list: int = 100
 # Pfad zur Logdatei
 log_file_path: str = './../Dokumentation/feinkostBarcodeScannerLog.log'
 
+# rename or delete logFile: ( RENAME | DELETE ):
+log_file_delete_mode: str = "RENAME"
+
 
 if __name__ == "__main__":
     # Change Working Directory to the one this file is in
@@ -58,18 +61,18 @@ if __name__ == "__main__":
             log.debug(sys.argv)
             print("Mit diesem Programm sollen Kunden durch das Scannen eines Produkt Bar Codes zusätzliche "
                   "Informationen zu diesem über die JTL-Wawi MS SQL Datenbank bekommen.")
-            print("Mit '", sys.argv[0], " -platform offscreen' können sie das Programm ohne Fenster starten")
+            print("Mit '", sys.argv[0], " -platform off-screen' können sie das Programm ohne Fenster starten")
             exit()
 
     # Print All Versions and write it also to log
     logger.print_debug_versions()
 
     # MApplication
-    m_app = None
+    m_app: mapplication = None
     # Lokalen Statistiken Server
-    w_server = None
+    w_server: webserver = None
     # Rückgabewert QApplication
-    ret = None
+    ret: int = 0
 
     try:
         # Starte Lokalen Statistiken Server
@@ -97,4 +100,8 @@ if __name__ == "__main__":
     w_server.stop_listen()
     log.info("Programm Stop: {0}\n----------------------------------------------------------------"
              .format(datetime.datetime.now()))
+
+    logger.cleanup()
+
+    print("Programm wird mit Rückgabewert ({0}) beendet.".format(ret))
     sys.exit(ret)

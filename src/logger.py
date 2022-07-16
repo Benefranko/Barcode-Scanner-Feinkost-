@@ -20,6 +20,10 @@ def setup(log_file_path: str):
     sys.stderr = LoggerWriter(logging.getLogger().error)
 
 
+def cleanup():
+    sys.stderr = sys.__stderr__
+
+
 def print_debug_versions():
     # Log....
     log.info("-------------------Programm Start: {0}-------------------".format(main.datetime.datetime.now()))

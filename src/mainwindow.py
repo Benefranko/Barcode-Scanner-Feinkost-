@@ -1,17 +1,17 @@
 from enum import Enum
-from PySide2.QtCore import QFile, QTimerEvent, Qt
+from PySide2.QtCore import QFile, QTimerEvent, Qt, QIODevice
 from PySide2.QtCore import Slot
 from PySide2.QtGui import QImage, QPixmap, QFontMetrics, QFont
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QLabel, QFrame, QVBoxLayout
+from PySide2.QtWidgets import QLabel, QFrame, QVBoxLayout, QWidget
 from PySide2.QtWidgets import QMainWindow
 
 from databasemanager import DataBaseManager
 from localdatabasemanager import LocalDataBaseManager
 
-
 import logging
 from pathlib import Path
+
 log = logging.getLogger(Path(__file__).name)
 
 
@@ -20,33 +20,36 @@ log = logging.getLogger(Path(__file__).name)
 class MainWindow(QMainWindow):
     # Constants
     # Dauer der Zeit, wie lange die Information zu einem Produkt angezeigt werden, in Sekunden
-    SHOW_TIME = 15
+    SHOW_TIME: int = 15
     # auer der Zeit, wie lange "Keine Informationen zu diesem Produkt gefunden" angezeigt wird, in Sekunden
-    SHOW_TIME_NOTHING_FOUND = 8
+    SHOW_TIME_NOTHING_FOUND: int = 8
     # Dauer der Zeit zwischen einem Wechsel der Warte-Anzeige in Sekunden
-    CHANGE_ADVERTISE_TIME = 15
+    CHANGE_ADVERTISE_TIME: int = 15
+    # Dauer der Zeit, wie lange die Information zum Hersteller angezeigt werden, in Sekunden
+    SHOW_PRODUCER_INFOS_TIME: int = 20
+
     # Höhe des roten Balkens, der den normalen Preis durchstreicht (für Sonderpreis) in Pixel
-    SPECIAL_PRICE_RED_LINE_HEIGHT = 5
+    SPECIAL_PRICE_RED_LINE_HEIGHT: int = 5
     # Abstand zwischen normalen Preis und Sonderpreis in Pixel
-    SPACE_BETWEEN_PRICE_AND_SPECIAL_PRICE = 10
+    SPACE_BETWEEN_PRICE_AND_SPECIAL_PRICE: int = 10
     # Schriftgröße des Sonderpreises
-    SPECIAL_PRICE_FONT_SIZE = 18
+    SPECIAL_PRICE_FONT_SIZE: int = 18
 
     # Attributes
     # Sekundenspeicher für rückwärts zählenden Timer für Informationsanzeige
-    showTimeTimer = SHOW_TIME
+    showTimeTimer: int = SHOW_TIME
     # Sekundenspeicher für rückwärts zählenden Timer für Wechsel der Warte-Anzeige
-    changeAdvertiseTimer = CHANGE_ADVERTISE_TIME
+    changeAdvertiseTimer: int = CHANGE_ADVERTISE_TIME
     # Haupt Sekunden-Timer ID
-    timerID = -1
+    timerID: int = -1
     # Auf Hauptseite: Unterseite für Werbungen: Index
     advertise_page_index: int = 0
 
     # Objects
     # DataBaseManager für MS SQL Anbindung
-    databasemanager = None
+    databasemanager: DataBaseManager = None
     # Hauptfenster mit ganzem Userinterface
-    window = None
+    window: QWidget = None
     # Roter Balken für Sonderpreis
     special_price_red_line = None
     # Textlabel für Sonderpreis
@@ -59,6 +62,7 @@ class MainWindow(QMainWindow):
         UNKNOWN = 0
         SHOW_PRODUCT_DESCRIPTION = 1
         WAIT_FOR_SCAN = 2
+        SHOW_PRODUCER_INFOS = 3
 
     state = STATES.SHOW_PRODUCT_DESCRIPTION
 
@@ -69,7 +73,6 @@ class MainWindow(QMainWindow):
     def __init__(self, sql_lite_path, msql_ip, msql_port, ui_file_path, parent=None):
         # Falls Fenster ein übergeordnetes Objekt erhält, übergib dieses der Basisklasse QMainWindow
         super(MainWindow, self).__init__(parent)
-
         ####
         # USER INTERFACE
         ####
@@ -105,6 +108,16 @@ class MainWindow(QMainWindow):
 
         # MainWindow Nach-Einstellungen
         self.setWindowTitle("Feinkost Barcode Scanner")
+
+        ###
+        # Verbinde SIGNALS und SLOTS
+        ###
+
+        # Weitere Information zum Hersteller anzeigen Button wird mit Funktion clickMoreInfosHerstellerButton verbunden
+        self.window.pushButton_more_infos_hersteller.clicked.connect(self.clickMoreInfosHerstellerButton)
+        # Zurück von Hersteller Anzeigen Seite zu Infos-Seite wird mit Funktion verbunden
+        self.window.pushButton_back_from_hersteller_page.clicked.connect(
+            self.click_pushButton_back_from_hersteller_page)
 
         # Lade Grafiken
         # "Kein Bild gefunden"-Grafik...
@@ -188,10 +201,17 @@ class MainWindow(QMainWindow):
         try:
             # Lade UI aus einer Datei...
             ui_file = QFile(ui_path)
-            ui_file.open(QFile.ReadOnly)
-            self.window = QUiLoader().load(ui_file, self)
+            if not ui_file.open(QIODevice.ReadOnly):
+                print(f"Cannot open {ui_path}: {ui_file.errorString()}")
+                return None
+            loader = QUiLoader()
+            self.window = loader.load(ui_file, self)
             ui_file.close()
-            return self.window
+            if not self.window:
+                print(loader.errorString())
+                return None
+            else:
+                return self.window
         except Exception as exc:
             print('Konnte Gui aus Ui.Datei nicht laden!'.format(exc))
             log.critical("Konnte Gui aus Ui.Datei nicht laden!")
@@ -200,6 +220,17 @@ class MainWindow(QMainWindow):
     def timerEvent(self, event: QTimerEvent) -> None:
         # Leite jede Sekunde Event TIMER an EventHandler weiter
         self.event_handler("TIMER")
+
+    @Slot()
+    def clickMoreInfosHerstellerButton(self):
+        log.debug("Weitere Informationen zum Hersteller {0} angefragt.".format(self.window.hersteller.text()))
+        self.event_handler("BUTTON_MORE_PRODUCER_INFOS_CLICKED")
+        return
+
+    @Slot()
+    def click_pushButton_back_from_hersteller_page(self):
+        self.event_handler("BUTTON_BACK_TO_INFOS_CLICKED")
+        return
 
     def new_advertise(self):
         # Hier Code zur Auswahl neuer Werbung einbauen
@@ -349,11 +380,11 @@ class MainWindow(QMainWindow):
                 self.newScanHandling(value)
                 return
             # Timer wurde erreicht-> Wechsle die Warte-Auf-Eingabe Seite, bzw zeige neue Werbung an
-            if action == "CHANGE_ADVERTISE":
+            elif action == "CHANGE_ADVERTISE":
                 self.new_advertise()
                 return
             # (jede Sekunde) Sekunden-Timer-Event
-            if action == "TIMER":
+            elif action == "TIMER":
                 # wenn Timer_MAX erreicht wurde, führe Aktion CHANGE_ADVERTISE aus, sonst timer--
                 if self.changeAdvertiseTimer > 1:
                     self.changeAdvertiseTimer -= 1
@@ -369,13 +400,19 @@ class MainWindow(QMainWindow):
                 self.state = self.STATES.WAIT_FOR_SCAN
                 return
 
-            if action == "LOAD_ARTICLE_FAILED":
+            elif action == "LOAD_ARTICLE_FAILED":
                 self.window.stackedWidget.setCurrentIndex(2)
                 self.showTimeTimer = self.SHOW_TIME_NOTHING_FOUND
                 return
+            elif action == "BUTTON_MORE_PRODUCER_INFOS_CLICKED":
+                # Setzte Zeit auf Maximalwert zurück: auf SHOW_PRODUCER_INFOS_TIME Anzeigezeit
+                self.showTimeTimer = self.SHOW_PRODUCER_INFOS_TIME
+                self.state = self.STATES.SHOW_PRODUCER_INFOS
+                self.window.stackedWidget.setCurrentIndex(3)
+                return
 
             # (jede Sekunde) Sekunden-Timer-Event
-            if action == "TIMER":
+            elif action == "TIMER":
                 # Wenn Anzeige-Zeit erreicht wurde, wechsle wieder auf Startseite / Objektzustand-"Warte auf Scan"
                 if self.showTimeTimer > 1:
                     self.showTimeTimer -= 1
@@ -385,9 +422,39 @@ class MainWindow(QMainWindow):
                 return
             # Wenn während Informationsanzeige ein neues Produkt gescannt wird,
             # aktualisiere die Anzeige und resette den Timer
-            if action == "NEW_SCAN":
+            elif action == "NEW_SCAN":
                 self.newScanHandling(value)
                 return
+
+        # Wenn gerade Information zu einem Hersteller angezeigt werden
+        elif self.state == self.STATES.SHOW_PRODUCER_INFOS:
+            # Wenn die Anzeige Zeit ausläuft und action exit aufgerufen wird
+            if action == "EXIT_SHOW_DESCRIPTION":
+                self.window.stackedWidget.setCurrentIndex(0)
+                self.state = self.STATES.WAIT_FOR_SCAN
+                return
+
+            # Wenn der zurück Button gedrückt wird
+            elif action == "BUTTON_BACK_TO_INFOS_CLICKED":
+                self.showTimeTimer = self.SHOW_TIME
+                self.state = self.STATES.SHOW_PRODUCT_DESCRIPTION
+                self.window.stackedWidget.setCurrentIndex(1)
+                return
+
+            elif action == "NEW_SCAN":
+                self.newScanHandling(value)
+                return
+
+            # (jede Sekunde) Sekunden-Timer-Event
+            elif action == "TIMER":
+                # Wenn Anzeige-Zeit erreicht wurde, wechsle wieder auf Startseite / Objektzustand-"Warte auf Scan"
+                if self.showTimeTimer > 1:
+                    self.showTimeTimer -= 1
+                else:
+                    self.showTimeTimer = self.SHOW_TIME
+                    self.event_handler("EXIT_SHOW_DESCRIPTION")
+                return
+
         # Wenn ein Unbekannter Objektzustand vorliegt, wirf Exception
         else:
             raise Exception("Unbekannter Objektzustand: ")

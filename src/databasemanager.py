@@ -134,6 +134,39 @@ class DataBaseManager:
                     return img.bBild
         return None
 
+    def get_hersteller_infos(self):
+        return None
+
+    def get_mengen_preis(self, k_article):
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute("SELECT kArtikel FROM ka WHERE eigenerWert = ?", k_article)
+            article_list = cursor.fetchall()
+            if article_list is None:
+                print("WARNUNG: Keine  gefunden!")
+                log.warning("WARNUNG: Keine  gefunden!")
+                return None
+        except Exception as exc:
+            print('get_mengen_preis: {0}'.format(exc))
+            log.error('get_mengen_preis: {0}'.format(exc))
+            return None
+        return article_list
+
+    def get_advertise_list(self, value):
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute("SELECT kArtikel FROM ka WHERE eigenerWert = ?", value)
+            article_list = cursor.fetchall()
+            if article_list is None:
+                print("WARNUNG: Keine Werbung gefunden!")
+                log.warning("WARNUNG: Keine Werbung gefunden!")
+                return None
+        except Exception as exc:
+            print('get_advertise_list: {0}'.format(exc))
+            log.error('get_advertise_list: {0}'.format(exc))
+            return None
+        return article_list
+
     def get_special_price(self, k_article):
         try:
             cursor = self.conn.cursor()

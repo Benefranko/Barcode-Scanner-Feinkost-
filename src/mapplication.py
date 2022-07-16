@@ -18,7 +18,7 @@ class MApplication(QApplication):
     # Buffer für Eingabe
     inputBuffer: str = ""
     # Signal, verbunden mit NewScan() in MainWindow
-    newScan = Signal(str)
+    newScan: Signal = Signal(str)
 
     def __init__(self, args):
         super(MApplication, self).__init__(args)

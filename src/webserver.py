@@ -1,5 +1,6 @@
 import sys
 import calendar
+import shutil
 
 from http.server import ThreadingHTTPServer, HTTPServer, BaseHTTPRequestHandler
 from datetime import datetime, timedelta
@@ -43,12 +44,13 @@ class Server:
     # Stoppe Server und warte auf Beenden des Threads
     def stop_listen(self):
         self.webserver.shutdown()
-        self.thread.join(3)
+        self.thread.join(10)
 
     # Thread - Funktion: Server wartet auf eingehende TCP Verbindungen und erstellt für jede einen
     # Thread mit einem RequestHandler
     def run_web_server(self):
         self.webserver.serve_forever()
+        return None
 
 
 # Klasse, die eine TCP Verbindung managed
@@ -219,11 +221,26 @@ class RequestHandler(BaseHTTPRequestHandler):
         try:
             if self.path == "/log.html":
                 if "password=pass&" in str(post_data):
-                    fo = open(main.log_file_path, "w")
-                    fo.truncate()
-                    fo.close()
-                    self.do_GET()
-                    return
+                    if main.log_file_delete_mode == "RENAME":
+                        shutil.copyfile(main.log_file_path, main.log_file_path.replace(".log", "") + "_backup_"
+                                        + datetime.now().strftime("%m-%d-%Y_%H-%M-%S") + ".log")
+
+                        fo = open(main.log_file_path, "w")
+                        fo.truncate()
+                        fo.close()
+
+                        self.do_GET()
+                        return
+                    elif main.log_file_delete_mode == "DELETE":
+                        fo = open(main.log_file_path, "w")
+                        fo.truncate()
+                        fo.close()
+                        self.do_GET()
+                        return
+                    else:
+                        log.error("Unbekannter log_file_delete_mode: {0}".format(main.log_file_delete_mode))
+                        self.do_GET()
+                        return
                 else:
                     html_string = open("../html/tabelle-falsches-pw.html", "r").read()
 
