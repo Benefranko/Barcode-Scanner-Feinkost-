@@ -330,7 +330,7 @@ class MainWindow(QMainWindow):
         self.window.label_herstellername.setText(h_infos.cName)
         self.window.textEdit_hersteller_description.setHtml(h_descr.cBeschreibung)
         if h_infos.cHomePage is not "":
-            self.window.textEdit_hersteller_description.append(h_infos.cHomePage)
+            self.window.textEdit_hersteller_description.append(h_infos.cHomepage)
         return "OK"
 
     def newScanHandling(self, scan_article_ean: str):
