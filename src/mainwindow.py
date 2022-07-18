@@ -79,18 +79,18 @@ class MainWindow(QMainWindow):
         # Stop Timer
         self.killTimer(self.timerID)
         # Clear Layouts:
-        try:
-            self.rec_clear_layout(self.window.page_1.layout())
-            self.rec_clear_layout(self.window.page_2.layout())
-            self.rec_clear_layout(self.window.page_3.layout())
-            self.rec_clear_layout(self.window.page_4.layout())
-            self.rec_clear_layout(self.window.page_5.layout())
-            self.rec_clear_layout(self.window.page_6.layout())
+        #try:
+        #    self.rec_clear_layout(self.window.page_1.layout())
+        #    self.rec_clear_layout(self.window.page_2.layout())
+        #    self.rec_clear_layout(self.window.page_3.layout())
+        #    self.rec_clear_layout(self.window.page_4.layout())
+        #    self.rec_clear_layout(self.window.page_5.layout())
+        #    self.rec_clear_layout(self.window.page_6.layout())
 
             # self.rec_clear_layout(self.window.groupBoxAdvertise.layout())
-        except Exception as e:
-            print("Clear Layouts failed: ", e)
-            log.warning("Clear Layouts failed: {0}".format(e))
+        #except Exception as e:
+        #    print("Clear Layouts failed: ", e)
+        #    log.warning("Clear Layouts failed: {0}".format(e))
 
         self.databasemanager.disconnect()
         self.loc_db_mngr.disconnect()
@@ -98,7 +98,6 @@ class MainWindow(QMainWindow):
     def rec_clear_layout(self, layout: QLayout):
         for i in reversed(range(layout.count())):
             item: QLayoutItem = layout.itemAt(i)
-            print("CLEAR WINDGET: ", item, " ( FROM Layout: ", layout, " )")
             if item.layout():
                 self.rec_clear_layout(item.layout())
                 layout.takeAt(i)
@@ -291,14 +290,13 @@ class MainWindow(QMainWindow):
         self.advertise_page_index = (self.advertise_page_index + 1) % len(self.advertise_kArtikel_list)
         k_art: int = self.advertise_kArtikel_list[self.advertise_page_index].kArtikel
         data = self.databasemanager.getDataBykArtikel(k_art)
-        print(data)
 
         descr = self.databasemanager.get_article_description(k_art)
         if descr is None or descr.cBeschreibung == "":
             print("Load Preview Advertise failed: description-object is None or descr.cBeschreibung == '' or Titel is"
                   " '', kArt: ", k_art)
-            log.error("Load Preview Advertise failed: description-object is None or descr.cBeschreibung == ''"
-                      " or Titel is '', kArtikel: {0}".format(k_art))
+            log.warning("Load Preview Advertise failed: description-object is None or descr.cBeschreibung == ''"
+                        " or Titel is '', kArtikel: {0}".format(k_art))
             return None
         else:
             self.window.textEdit_previewdescription.setHtml(descr.cKurzBeschreibung)
@@ -329,8 +327,10 @@ class MainWindow(QMainWindow):
 
         self.window.label_herstellername.setText(h_infos.cName)
         self.window.textEdit_hersteller_description.setHtml(h_descr.cBeschreibung)
-        if h_infos.cHomePage is not "":
-            self.window.textEdit_hersteller_description.append(h_infos.cHomepage)
+        if h_infos.cHomepage is not "":
+            self.window.textEdit_hersteller_description.setTextColor("blue")
+            self.window.textEdit_hersteller_description.append("\n" + h_infos.cHomepage)
+            self.window.textEdit_hersteller_description.setTextColor("black")
         return "OK"
 
     def newScanHandling(self, scan_article_ean: str):

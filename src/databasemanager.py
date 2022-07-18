@@ -158,15 +158,15 @@ class DataBaseManager:
             return None
         return hersteller
 
-    def get_hersteller_description(self, kHersteller):
+    def get_hersteller_description(self, k_hersteller):
         try:
             cursor = self.conn.cursor()
             cursor.execute("SELECT cBeschreibung FROM [dbo].[tHerstellerSprache]"
-                           " WHERE kHersteller = ?", kHersteller)
+                           " WHERE kHersteller = ?", k_hersteller)
             hersteller_desk = cursor.fetchone()
             if hersteller_desk is None:
                 print("WARNUNG: Kein herstellerDescription gefunden!")
-                log.warning("WARNUNG: Kein herstellerDescription gefunden: {0} ".format(kHersteller))
+                log.warning("WARNUNG: Kein herstellerDescription gefunden: {0} ".format(k_hersteller))
                 return None
         except Exception as exc:
             print('get_hersteller_description: {0}'.format(exc))
