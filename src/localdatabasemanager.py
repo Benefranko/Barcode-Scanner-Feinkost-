@@ -26,7 +26,7 @@ class LocalDataBaseManager:
             log.info("Erfolgreich mit lokaler SQL Lite Datenbank verbunden und Tables erstellt!")
             print("Erfolgreich mit lokaler SQL Lite Datenbank verbunden und Tables erstellt!")
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def disconnect(self):
         self.connection.close()
         self.connection = None
 

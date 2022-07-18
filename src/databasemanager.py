@@ -5,6 +5,7 @@ import time
 
 import logging
 from pathlib import Path
+
 log = logging.getLogger(Path(__file__).name)
 
 
@@ -15,6 +16,10 @@ class DataBaseManager:
 
     def __init__(self):
         return
+
+    def disconnect(self):
+        if self.conn:
+            self.conn.close()
 
     def connect(self, ip: str = "PC-MARKUS", port: int = 1433, pw: str = "altinsystems",
                 usr: str = "test", db: str = "Mandant_1"):
@@ -38,7 +43,7 @@ class DataBaseManager:
                     log.debug("Verwende Driver: ODBC Driver 18 for SQL Server...")
 
                     self.conn = pyodbc.connect(driver=main.SQL_DRIVER_USED_VERSION_MS_DRIVER, server=ip + "," +
-                                               str(port),
+                                                                                                     str(port),
                                                database=db,
                                                user=usr,
                                                password=pw,
@@ -59,7 +64,7 @@ class DataBaseManager:
                     print("Erfolgreich mit MS SQL Server verbunden über FreeTDS Driver "
                           + main.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION)
                     log.info("Erfolgreich mit MS SQL Server verbunden über FreeTDS Driver {0} ".format(
-                             main.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION))
+                        main.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION))
                     break
                 else:
                     print('Error: No suitable driver found. Cannot connect.')
@@ -69,10 +74,10 @@ class DataBaseManager:
                     self.conn = None
                     break
             except Exception as exc:
-                print('Connect to Database failed. ( Try: {0}/10 )'.format(i+1), " Error: ", exc,
+                print('Connect to Database failed. ( Try: {0}/10 )'.format(i + 1), " Error: ", exc,
                       " Warte 1 Sekunde...")
                 log.warning('Connect to Database failed. ( Try: {0}/10 ) Error: {1} - Warte 1 Sekunde...'
-                            .format(i+1, exc))
+                            .format(i + 1, exc))
 
                 time.sleep(1)
                 self.conn = None
@@ -134,8 +139,40 @@ class DataBaseManager:
                     return img.bBild
         return None
 
-    def get_hersteller_infos(self):
-        return None
+    def get_hersteller_infos(self, k_article):
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute("SELECT [dbo].[tHersteller].cName, [dbo].[tHersteller].cHomepage, "
+                           "[dbo].[tHersteller].kHersteller FROM [dbo].[tHersteller], "
+                           "[dbo].[tArtikel] "
+                           "WHERE [dbo].[tHersteller].kHersteller = [dbo].[tArtikel].kHersteller AND [dbo].["
+                           "tArtikel].kArtikel = ?", k_article)
+            hersteller = cursor.fetchone()
+            if hersteller is None:
+                print("WARNUNG: Kein hersteller gefunden!")
+                log.warning("WARNUNG: Kein hersteller gefunden: {0} ".format(k_article))
+                return None
+        except Exception as exc:
+            print('get_hersteller_infos: {0}'.format(exc))
+            log.error('get_hersteller_infos: {0}'.format(exc))
+            return None
+        return hersteller
+
+    def get_hersteller_description(self, kHersteller):
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute("SELECT cBeschreibung FROM [dbo].[tHerstellerSprache]"
+                           " WHERE kHersteller = ?", kHersteller)
+            hersteller_desk = cursor.fetchone()
+            if hersteller_desk is None:
+                print("WARNUNG: Kein herstellerDescription gefunden!")
+                log.warning("WARNUNG: Kein herstellerDescription gefunden: {0} ".format(kHersteller))
+                return None
+        except Exception as exc:
+            print('get_hersteller_description: {0}'.format(exc))
+            log.error('get_hersteller_description: {0}'.format(exc))
+            return None
+        return hersteller_desk
 
     def get_mengen_preis(self, k_article):
         try:
@@ -155,7 +192,14 @@ class DataBaseManager:
     def get_advertise_list(self, value):
         try:
             cursor = self.conn.cursor()
-            cursor.execute("SELECT kArtikel FROM ka WHERE eigenerWert = ?", value)
+            cursor.execute("SELECT dbo.tArtikel.kArtikel, dbo.tMerkmalWertSprache.cMetaKeywords  FROM dbo.tArtikel, "
+                           "dbo.tMerkmalWertSprache, dbo.tArtikelMerkmal "
+                           # get tArtikelMerkmal.kMerkmal from tArtikelMerkmal from kArtikel
+                           "WHERE dbo.tArtikel.kArtikel = dbo.tArtikelMerkmal.kArtikel "
+                           # get tMerkmalWertSprache line with tArtikelMerkmal.kMerkmal
+                           "AND dbo.tMerkmalWertSprache.kMerkmalWert = dbo.tArtikelMerkmal.kMerkmalWert "
+                           # get all aktive kArtikel
+                           "AND dbo.tMerkmalWertSprache.cMetaKeywords = ?", value)
             article_list = cursor.fetchall()
             if article_list is None:
                 print("WARNUNG: Keine Werbung gefunden!")
@@ -183,10 +227,23 @@ class DataBaseManager:
             log.error('get_special_price: {0}'.format(exc))
             return None
 
+    def getDataBykArtikel(self, kArtikel):
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute("SELECT * FROM dbo.tArtikel WHERE kArtikel = ?", kArtikel)
+            # check if there are more than one special price?!
+            # if cursor.fetchall() is not None...
+            return cursor.fetchone()
+
+        except Exception as exc:
+            print('getDataBykArtikel: {0}'.format(exc))
+            log.error('getDataBykArtikel: {0}'.format(exc))
+            return None
+
     def get_article_description(self, k_article):
         try:
             cursor = self.conn.cursor()
-            cursor.execute("SELECT cBeschreibung ,cKurzBeschreibung ,cUrlPfad FROM [dbo].[tArtikelBeschreibung] WHERE"
+            cursor.execute("SELECT cBeschreibung ,cKurzBeschreibung, cName FROM [dbo].[tArtikelBeschreibung] WHERE"
                            " dbo.tArtikelBeschreibung.kArtikel = ?", k_article)
             # check if there are more than one special price?!
             # if cursor.fetchall() is not None...

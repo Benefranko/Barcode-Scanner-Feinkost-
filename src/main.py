@@ -45,6 +45,8 @@ log_file_path: str = './../Dokumentation/feinkostBarcodeScannerLog.log'
 # rename or delete logFile: ( RENAME | DELETE ):
 log_file_delete_mode: str = "RENAME"
 
+# Merkmal MetaLine aktive value
+wawi_advertise_aktive_meta_keyword: str = 'ANZEIGEN=TRUE'
 
 if __name__ == "__main__":
     # Change Working Directory to the one this file is in
@@ -73,6 +75,7 @@ if __name__ == "__main__":
     w_server: webserver = None
     # Rückgabewert QApplication
     ret: int = 0
+    m_win: mainwindow = None
 
     try:
         # Starte Lokalen Statistiken Server
@@ -91,6 +94,8 @@ if __name__ == "__main__":
 
         # Warte auf exit signal
         ret = m_app.exec_()
+
+        m_win.cleanUp()
 
     except Exception as exc:
         print("\nError: Critical: ", exc)

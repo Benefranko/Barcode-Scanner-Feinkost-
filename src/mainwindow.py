@@ -3,11 +3,12 @@ from PySide2.QtCore import QFile, QTimerEvent, Qt, QIODevice
 from PySide2.QtCore import Slot
 from PySide2.QtGui import QImage, QPixmap, QFontMetrics, QFont
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QLabel, QFrame, QVBoxLayout, QWidget
+from PySide2.QtWidgets import QLabel, QFrame, QVBoxLayout, QWidget, QLayout, QLayoutItem
 from PySide2.QtWidgets import QMainWindow
 
 from databasemanager import DataBaseManager
 from localdatabasemanager import LocalDataBaseManager
+import main
 
 import logging
 from pathlib import Path
@@ -57,6 +58,10 @@ class MainWindow(QMainWindow):
     # LocalDataBaseManager für SQL Lite Anbindung zum Speichern von Statistiken
     loc_db_mngr: LocalDataBaseManager = None
 
+    # Liste mit Werbung → muss aktualisiert werden! Entweder mit später über Web implementierter Funktion oder über
+    # täglichen Reboot!
+    advertise_kArtikel_list = None
+
     # Enum mit Objektzuständen - Warte auf Scan - Zeige Scan an
     class STATES(Enum):
         UNKNOWN = 0
@@ -66,9 +71,40 @@ class MainWindow(QMainWindow):
 
     state = STATES.SHOW_PRODUCT_DESCRIPTION
 
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        print("__exit__")
+
     # Stoppe Sekunden Timer im Destruktor
-    def __exit__(self, exc_type, exc_value, traceback):
+    def cleanUp(self):
+        # Stop Timer
         self.killTimer(self.timerID)
+        # Clear Layouts:
+        try:
+            self.rec_clear_layout(self.window.page_1.layout())
+            self.rec_clear_layout(self.window.page_2.layout())
+            self.rec_clear_layout(self.window.page_3.layout())
+            self.rec_clear_layout(self.window.page_4.layout())
+            self.rec_clear_layout(self.window.page_5.layout())
+            self.rec_clear_layout(self.window.page_6.layout())
+
+            # self.rec_clear_layout(self.window.groupBoxAdvertise.layout())
+        except Exception as e:
+            print("Clear Layouts failed: ", e)
+            log.warning("Clear Layouts failed: {0}".format(e))
+
+        self.databasemanager.disconnect()
+        self.loc_db_mngr.disconnect()
+
+    def rec_clear_layout(self, layout: QLayout):
+        for i in reversed(range(layout.count())):
+            item: QLayoutItem = layout.itemAt(i)
+            print("CLEAR WINDGET: ", item, " ( FROM Layout: ", layout, " )")
+            if item.layout():
+                self.rec_clear_layout(item.layout())
+                layout.takeAt(i)
+
+            elif item.widget():
+                layout.takeAt(i).widget().setParent(None)
 
     def __init__(self, sql_lite_path, msql_ip, msql_port, ui_file_path, parent=None):
         # Falls Fenster ein übergeordnetes Objekt erhält, übergib dieses der Basisklasse QMainWindow
@@ -85,7 +121,7 @@ class MainWindow(QMainWindow):
         # Lege Startzustand Fest und zeige dementsprechende Seite an
         self.state = self.STATES.WAIT_FOR_SCAN
         self.window.stackedWidget.setCurrentIndex(0)
-        self.window.stackedWidget_advertise.setCurrentIndex(0)
+        self.window.stackedWidget_advertise.setCurrentIndex(1)
 
         # Vollbild:
         # self.showFullScreen()
@@ -149,7 +185,8 @@ class MainWindow(QMainWindow):
             self.window.Innkaufhauslogo.setPixmap(pix.scaled(pix.toImage().size() / 4))
 
         # Example Advertise
-        img_path = "../images/example.jpg"
+
+        img_path = "SKIP" "../images/example.jpg"
         pix = QPixmap(img_path)
         if pix.isNull():
             print("Konnte Bild nicht laden: ", img_path)
@@ -189,6 +226,13 @@ class MainWindow(QMainWindow):
             except Exception as e:
                 raise Exception("Das erstellen der Tabellen in der lokalen SQL Lite Datenbank ist fehlgeschlagen: {0}"
                                 .format(e))
+
+        ####
+        # Lade init Data aus dem SQL Server
+        ####
+
+        # Lade Liste mit Artikeln, zu denen die Vorschau angezeigt werden soll...
+        self.advertise_kArtikel_list = self.databasemanager.get_advertise_list(main.wawi_advertise_aktive_meta_keyword)
 
         ####
         # EVENTS SIGNALS SLOTS TIMER
@@ -232,12 +276,62 @@ class MainWindow(QMainWindow):
         self.event_handler("BUTTON_BACK_TO_INFOS_CLICKED")
         return
 
-    def new_advertise(self):
-        # Hier Code zur Auswahl neuer Werbung einbauen
-        self.advertise_page_index = (self.advertise_page_index + 1) % 2
-        self.window.stackedWidget_advertise.setCurrentIndex(self.advertise_page_index)
+    def switchArtikelPreViewPageAndStartPage(self):
+        # Wenn artikel mit Merkmal für Vorschau existieren, lade Neue Anzeige und wechsle zu dieser
+        if self.window.stackedWidget_advertise.currentIndex() == 1 and self.advertise_kArtikel_list is not None:
+            if self.new_advertise() is not None:
+                self.window.stackedWidget_advertise.setCurrentIndex(0)
+        else:
+            # sonst zeige weiter Startseite an
+            self.window.stackedWidget_advertise.setCurrentIndex(1)
 
-        return
+    def new_advertise(self):
+        if self.advertise_kArtikel_list is None:
+            return
+        self.advertise_page_index = (self.advertise_page_index + 1) % len(self.advertise_kArtikel_list)
+        k_art: int = self.advertise_kArtikel_list[self.advertise_page_index].kArtikel
+        data = self.databasemanager.getDataBykArtikel(k_art)
+        print(data)
+
+        descr = self.databasemanager.get_article_description(k_art)
+        if descr is None or descr.cBeschreibung == "":
+            print("Load Preview Advertise failed: description-object is None or descr.cBeschreibung == '' or Titel is"
+                  " '', kArt: ", k_art)
+            log.error("Load Preview Advertise failed: description-object is None or descr.cBeschreibung == ''"
+                      " or Titel is '', kArtikel: {0}".format(k_art))
+            return None
+        else:
+            self.window.textEdit_previewdescription.setHtml(descr.cKurzBeschreibung)
+            self.window.Advertise_artikel_name.setText(descr.cName)
+            self.window.textEdit_previewdescription.setFont(QFont("Arial", 9))
+            self.window.textEdit_previewdescription.setAlignment(Qt.AlignCenter)
+
+        content = self.databasemanager.get_first_image(data.kArtikel)
+        if content is not None:
+            img = QImage()
+            assert img.loadFromData(content)
+            self.window.VorschauBild1.setPixmap(QPixmap.fromImage(img).scaled(100, 300, Qt.KeepAspectRatio))
+        else:
+            # Falls kein Bild vorhanden ist, Lade das "Kein-Bild-vorhanden"-Bild
+            self.window.VorschauBild1.setPixmap(
+                QPixmap("../images/kein-bild-vorhanden.webp").scaled(200, 200, Qt.KeepAspectRatio))
+
+        return k_art
+
+    def loadHerstellerPage(self, kArtikel: str):
+        h_infos = self.databasemanager.get_hersteller_infos(kArtikel)
+        if h_infos is None:
+            return None
+
+        h_descr = self.databasemanager.get_hersteller_description(h_infos.kHersteller)
+        if h_descr is None:
+            return None
+
+        self.window.label_herstellername.setText(h_infos.cName)
+        self.window.textEdit_hersteller_description.setHtml(h_descr.cBeschreibung)
+        if h_infos.cHomePage is not "":
+            self.window.textEdit_hersteller_description.append(h_infos.cHomePage)
+        return "OK"
 
     def newScanHandling(self, scan_article_ean: str):
         # Barcodescanner hat neues Scan registriert...
@@ -355,6 +449,19 @@ class MainWindow(QMainWindow):
             self.special_price_label.hide()
             self.special_price_red_line.hide()
 
+        # Lade Hersteller seite
+        ret = "OK"
+        try:
+            ret = self.loadHerstellerPage(data.kArtikel)
+        except Exception as e:
+            print("Load Herstellerdata failed: {0}".format(e))
+            log.error("Load Herstellerdata failed: {0}".format(e))
+
+        if ret is not None:
+            self.window.pushButton_more_infos_hersteller.show()
+        else:
+            self.window.pushButton_more_infos_hersteller.hide()
+
         # Füge den Scan der lokalen Statistiken-Datenbank hinzu:
         try:
             self.loc_db_mngr.add_new_scan(data.kArtikel, scan_article_ean)
@@ -381,7 +488,7 @@ class MainWindow(QMainWindow):
                 return
             # Timer wurde erreicht-> Wechsle die Warte-Auf-Eingabe Seite, bzw zeige neue Werbung an
             elif action == "CHANGE_ADVERTISE":
-                self.new_advertise()
+                self.switchArtikelPreViewPageAndStartPage()
                 return
             # (jede Sekunde) Sekunden-Timer-Event
             elif action == "TIMER":
