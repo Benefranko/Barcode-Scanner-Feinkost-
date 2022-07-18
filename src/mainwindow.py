@@ -182,30 +182,6 @@ class MainWindow(QMainWindow):
         else:
             self.window.logo.setPixmap(pix.scaled(pix.toImage().size() / 4))
             self.window.Innkaufhauslogo.setPixmap(pix.scaled(pix.toImage().size() / 4))
-
-        # Example Advertise
-
-        img_path = "SKIP" "../images/example.jpg"
-        pix = QPixmap(img_path)
-        if pix.isNull():
-            print("Konnte Bild nicht laden: ", img_path)
-            log.error("Konnte Bild nicht laden: {0}".format(img_path))
-        else:
-            label = QLabel(self)
-            label.setAlignment(Qt.AlignHCenter)
-            label.setPixmap(pix.scaled(pix.toImage().size() / 2.5))
-            layout = self.window.groupBoxAdvertise.layout()
-            if layout is not None and label is not None:
-                layout.addWidget(label)
-                l2 = QVBoxLayout()
-                layout.addLayout(l2, 0, 1)
-                l2.addWidget(QLabel("Aberfeldy 12 years Single Highland Whisky 40,0% vol., 0,7l "))
-                l2.addWidget(QLabel("Duft: Rauch, Ananas, Getreide, Toast, Honig Geschmack:"))
-                l2.addWidget(QLabel("      aromatisch, fruchtig, lieblich, weich, cremig"))
-            else:
-                print("Missing Layout in UI!")
-                log.error("Missing Layout in UI!")
-
         ####
         # DATA BASES
         ####
@@ -292,10 +268,10 @@ class MainWindow(QMainWindow):
         data = self.databasemanager.getDataBykArtikel(k_art)
 
         descr = self.databasemanager.get_article_description(k_art)
-        if descr is None or descr.cBeschreibung == "":
-            print("Load Preview Advertise failed: description-object is None or descr.cBeschreibung == '' or Titel is"
-                  " '', kArt: ", k_art)
-            log.warning("Load Preview Advertise failed: description-object is None or descr.cBeschreibung == ''"
+        if descr is None or descr.cKurzBeschreibung == "":
+            print("Load Preview Advertise failed: description-object is None or descr.cKurzBeschreibung == '' or Titel"
+                  " is '', kArt: ", k_art)
+            log.warning("Load Preview Advertise failed: description-object is None or descr.cKurzBeschreibung == ''"
                         " or Titel is '', kArtikel: {0}".format(k_art))
             return None
         else:
@@ -327,7 +303,7 @@ class MainWindow(QMainWindow):
 
         self.window.label_herstellername.setText(h_infos.cName)
         self.window.textEdit_hersteller_description.setHtml(h_descr.cBeschreibung)
-        if h_infos.cHomepage is not "":
+        if h_infos.cHomepage != "":
             self.window.textEdit_hersteller_description.setTextColor("blue")
             self.window.textEdit_hersteller_description.append("\n" + h_infos.cHomepage)
             self.window.textEdit_hersteller_description.setTextColor("black")
