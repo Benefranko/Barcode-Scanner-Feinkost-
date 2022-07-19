@@ -168,7 +168,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                             self.end_headers()
                             with open("../images/reload.png", 'rb') as file_handle:
                                 bts: bytes = file_handle.read()
-                            self.wfile.write(bts)
+                            self.tryWriteOK(bts)
                             return
                         if sub_paths[2] == "favicon.ico":
                             self.send_response(200)
@@ -176,8 +176,16 @@ class RequestHandler(BaseHTTPRequestHandler):
                             self.end_headers()
                             with open("../images/favicon.ico", 'rb') as file_handle:
                                 bts: bytes = file_handle.read()
-                            self.wfile.write(bts)
+                            self.tryWriteOK(bts)
                             return
+                elif sub_paths[1] == "favicon.ico":
+                    self.send_response(200)
+                    self.send_header('content-type', 'image/x-icon')
+                    self.end_headers()
+                    with open("../images/favicon.ico", 'rb') as file_handle:
+                        bts: bytes = file_handle.read()
+                    self.tryWriteOK(bts)
+                    return
 
                 elif sub_paths[1] == "log.html":
                     html_string = open("../html/log.html", "r").read()
@@ -214,13 +222,10 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.send_response(html_status)
             self.send_header('content-type', 'text/html')
             self.end_headers()
+
             # Write Funktion in eigenem try-catch statement, um Html-Fehler senden zu können, wenn im SQL Teil
             # etwas fehlschlägt!
-            try:
-                self.wfile.write(html_string.encode("utf-8"))
-            except Exception as exc:
-                print('Es ist ein Fehler im RequestHandler aufgetreten: write() failed: {0}.'.format(exc))
-                log.warning("Es ist ein Fehler im RequestHandler aufgetreten: write() failed: {0}".format(exc))
+            if not self.tryWriteOK(html_string.encode("utf-8")):
                 self.loc_db_mngr = None
                 return
 
@@ -230,10 +235,21 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.send_response(500)
             self.send_header('content-type', 'text/html')
             self.end_headers()
-            self.wfile.write("<h1>Ein unerwartetes Problem ist aufgetreten!</h1>".encode("utf-8"))
+            self.tryWriteOK("<h1>Ein unerwartetes Problem ist aufgetreten!</h1>".encode("utf-8"))
 
         self.loc_db_mngr = None
         return
+
+    # Write Funktion in eigenem try-catch statement, um Html-Fehler senden zu können, wenn im SQL Teil
+    # etwas fehlschlägt!
+    def tryWriteOK(self, w_bytes: bytes) -> bool:
+        try:
+            self.wfile.write(w_bytes)
+            return True
+        except Exception as exc:
+            print('Es ist ein Fehler im RequestHandler aufgetreten: write() failed: {0}.'.format(exc))
+            log.warning("Es ist ein Fehler im RequestHandler aufgetreten: write() failed: {0}".format(exc))
+            return False
 
     def do_POST(self):
         content_length = int(self.headers['Content-Length'])  # <--- Gets the size of data
@@ -299,7 +315,10 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.send_response(html_status)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
-            self.wfile.write(html_string.encode("utf-8"))
+
+            if not self.tryWriteOK(html_string.encode("utf-8")):
+                self.loc_db_mngr = None
+                return
 
         except Exception as exc:
             print('Es ist ein Fehler im RequestHandler aufgetreten: {0}.'.format(exc))
@@ -307,4 +326,6 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.send_response(500)
             self.send_header('content-type', 'text/html')
             self.end_headers()
-            self.wfile.write("<h1>Ein unerwartetes Problem ist aufgetreten!</h1>".encode("utf-8"))
+            self.tryWriteOK("<h1>Ein unerwartetes Problem ist aufgetreten!</h1>".encode("utf-8"))
+
+
