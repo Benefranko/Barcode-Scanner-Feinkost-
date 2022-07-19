@@ -44,7 +44,7 @@ local_http_server_port: int = 8888
 # Passwort zum Leeren des Logfiles
 clear_log_file_pw: str = "pass"
 # Anzahl der Elemente auf einer Internetseite beim Webserver
-item_count_on_web_server_list: int = 100
+item_count_on_web_server_list: int = 150
 # rename or delete logFile: ( RENAME | DELETE ):
 log_file_delete_mode: str = "RENAME"
 

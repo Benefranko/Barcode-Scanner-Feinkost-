@@ -15,45 +15,52 @@
 			}
 		</style>
 	</head>
-<body style="background-color: gray">
-		<h1 style="font-size:28px">Protokollierung:</h1>
-		<div style="font-size:18px">
-			DEBUG - Nachrichten:
-			<button class="switch_button" onclick="debugSwitch()" id="debug-button" style="color: red" >AUS</button>
-		</div>
-		<div style="font-size:18px; margin-top: 20px">
-			INFO - Nachrichten:
-			<button class="switch_button" onclick="infoSwitch()" id="info-button" style="color: green" >EIN</button>
-		</div>
-		<div style="font-size:18px; margin-top: 20px">
-			WARNING - Nachrichten:
-			<button class="switch_button" onclick="warningSwitch()" id="warning-button" style="color: green" >EIN</button>
-		</div>
-		<div style="font-size:18px; margin-top: 20px">
-			ERROR - Nachrichten:
-			<button class="switch_button" onclick="errorSwitch()" id="error-button" style="color: green" >EIN</button>
-		</div>
-		<div style="font-size:18px; margin-top: 20px">
-			CRITICAL - Nachrichten:
-			<button class="switch_button" onclick="criticalSwitch()" id="critical-button" style="color: green" >EIN</button>
+	<body>
+		<div  style="background-color: gray" >
+			<div style="display: flex; background-color: cyan; height: 100px; align-items: center;justify-content: center;">
+				<h1 style="font-size:28px">Protokollierung:</h1>
+			</div>
+				<div style="font-size:18px; margin-top:50px;">
+					DEBUG - Nachrichten:
+					<button class="switch_button" onclick="debugSwitch()" id="debug-button" style="color: red" >AUS</button>
+				</div>
+				<div style="font-size:18px; margin-top: 20px">
+					INFO - Nachrichten:
+					<button class="switch_button" onclick="infoSwitch()" id="info-button" style="color: green" >EIN</button>
+				</div>
+				<div style="font-size:18px; margin-top: 20px">
+					WARNING - Nachrichten:
+					<button class="switch_button" onclick="warningSwitch()" id="warning-button" style="color: green" >EIN</button>
+				</div>
+				<div style="font-size:18px; margin-top: 20px">
+					ERROR - Nachrichten:
+					<button class="switch_button" onclick="errorSwitch()" id="error-button" style="color: green" >EIN</button>
+				</div>
+				<div style="font-size:18px; margin-top: 20px">
+					CRITICAL - Nachrichten:
+					<button class="switch_button" onclick="criticalSwitch()" id="critical-button" style="color: green" >EIN</button>
+				</div>
+
+				<div style="height: 20px">
+				</div>
+				<p>Gesamten Verlauf unwiderruflich entfernen?</p>
+				<form action="" method="post">
+					Passwort:
+					<input type="password" name="password" value="">
+					<input type="submit" name="deleteLog" value="Leeren">
+
+				</form>
+
+
+				<div style="height: 20px">
+				</div>
+				<a style="color: blue; text-decoration: none; font-size: 28px;" href="/">Zur Startseite</a>
+				<div style="height: 20px">
+				</div>
 		</div>
 
-		<div style="height: 20px">
-		</div>
-		<p>Gesamten Verlauf unwiderruflich entfernen?</p>
-		<form action="" method="post">
-			Passwort:
-			<input type="password" name="password" value="">
-			<input type="submit" name="deleteLog" value="Leeren">
+		<h2>Protokoll:</h2>
 
-		</form>
-
-
-		<div style="height: 20px">
-		</div>
-		<a style="color: blue; text-decoration: none; font-size: 28px;" href="/">Zur Startseite</a>
-		<div style="height: 20px">
-		</div>
 		%DATA%
 
 		<script>
