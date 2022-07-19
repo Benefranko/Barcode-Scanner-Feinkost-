@@ -62,7 +62,7 @@ log_file_path: str = './../Dokumentation/feinkostBarcodeScannerLog.log'
 ####
 
 # Pfad zu Qt-Designer Formulardatei: Die Grafik wurde nämlich mithilfe des Qt Creators erstellt.
-ui_file_path: str = "../src/form_ALT.ui"
+ui_file_path: str = "../src/form.ui"
 
 # Dauer der Zeit, wie lange die Information zu einem Produkt angezeigt werden, in Sekunden
 SHOW_TIME: int = 15
