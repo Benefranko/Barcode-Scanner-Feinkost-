@@ -2,7 +2,7 @@ import sys
 import calendar
 import shutil
 
-from http.server import ThreadingHTTPServer, HTTPServer, BaseHTTPRequestHandler
+from http.server import ThreadingHTTPServer, HTTPServer, BaseHTTPRequestHandler, SimpleHTTPRequestHandler
 from datetime import datetime, timedelta
 from threading import Thread
 
@@ -11,20 +11,18 @@ import localdatabasemanager
 
 import logging
 from pathlib import Path
+
 log = logging.getLogger(Path(__file__).name)
-
-
 
 
 # Lokaler einfacher Webserver, um Statistiken zur Nutzung angezeigt zu bekommen
 class Server:
-
     # Attribute
-    listenPort: str = ""
-    listenIP: int = -1
+    listenPort: int = -1
+    listenIP: str = ""
 
     # Objekte
-    webserver: HTTPServer = None
+    webserver: ThreadingHTTPServer = None
     thread: Thread = None
 
     # Konstruktor: Erstelle Server
@@ -32,7 +30,6 @@ class Server:
         self.listenIP = l_ip
         self.listenPort = l_port
         try:
-            self.webserver = ThreadingHTTPServer((l_ip, l_port), RequestHandler)
             self.thread = Thread(target=self.run_web_server, args=())
         except Exception as exc:
             print(exc)
@@ -45,19 +42,23 @@ class Server:
 
     # Stoppe Server und warte auf Beenden des Threads
     def stop_listen(self):
-        self.webserver.shutdown()
+        if self.webserver:
+            self.webserver.shutdown()
         self.thread.join(10)
 
     # Thread - Funktion: Server wartet auf eingehende TCP Verbindungen und erstellt für jede einen
     # Thread mit einem RequestHandler
     def run_web_server(self):
-        self.webserver.serve_forever()
+        with ThreadingHTTPServer((self.listenIP, self.listenPort), RequestHandler) as server:
+            self.webserver = server
+            server.serve_forever()
+        self.webserver = None
         return None
 
 
 # Klasse, die eine TCP Verbindung managed
 class RequestHandler(BaseHTTPRequestHandler):
-
+    # class RequestHandler(SimpleHTTPRequestHandler):
     # Objekte
     loc_db_mngr = None
 
@@ -115,7 +116,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         for scan in s_list:
                             scan_d = datetime.fromisoformat(scan[1])
                             if scan_d.year == current_year and scan_d.month == m:
-                                scan_list[m-1] += 1
+                                scan_list[m - 1] += 1
                     html_string = html_string.replace("%DATA_DATA_SET_1%", str(scan_list))
 
                 # Erweiterbar mit tabelle/INDEX, mit immer nur 100 Items auf einer seite mit nächster
@@ -159,6 +160,25 @@ class RequestHandler(BaseHTTPRequestHandler):
                     html_string = open("../html/main.html", "r").read()
                 elif sub_paths[1] == "settings.html":
                     html_string = open("../html/settings.html", "r").read()
+                elif sub_paths[1] == "images":
+                    if len(sub_paths) == 3:
+                        if sub_paths[2] == "reload.png":
+                            self.send_response(200)
+                            self.send_header('content-type', 'image/png')
+                            self.end_headers()
+                            with open("../images/reload.png", 'rb') as file_handle:
+                                bts: bytes = file_handle.read()
+                            self.wfile.write(bts)
+                            return
+                        if sub_paths[2] == "favicon.ico":
+                            self.send_response(200)
+                            self.send_header('content-type', 'image/x-icon')
+                            self.end_headers()
+                            with open("../images/favicon.ico", 'rb') as file_handle:
+                                bts: bytes = file_handle.read()
+                            self.wfile.write(bts)
+                            return
+
                 elif sub_paths[1] == "log.html":
                     html_string = open("../html/log.html", "r").read()
                     text: str = ""
@@ -259,7 +279,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                     log.warning("Clear/Delete failed: Wrong password: ".format(str(post_data)))
 
             if self.path == "/settings.html":
-                if "ReloadAdvertiseListButton=TRUE" in str(post_data):
+                if "ReloadAdvertiseListButton=TRUE" in str(post_data) \
+                        or ("ReloadAdvertiseListButton.x" in
+                            str(post_data) and "ReloadAdvertiseListButton.y" in str(post_data)):
                     settings.want_reload_advertise = True
                     print("Reload Advertise List")
                     log.info("Reload Advertise List")
