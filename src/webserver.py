@@ -6,12 +6,14 @@ from http.server import ThreadingHTTPServer, HTTPServer, BaseHTTPRequestHandler
 from datetime import datetime, timedelta
 from threading import Thread
 
-import main
+import settings
 import localdatabasemanager
 
 import logging
 from pathlib import Path
 log = logging.getLogger(Path(__file__).name)
+
+
 
 
 # Lokaler einfacher Webserver, um Statistiken zur Nutzung angezeigt zu bekommen
@@ -63,7 +65,7 @@ class RequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         # Stelle Verbindung mit lokaler Datenbank her, um Statistiken auslesen zu können
         self.loc_db_mngr = localdatabasemanager.LocalDataBaseManager()
-        self.loc_db_mngr.connect(main.local_db_path)
+        self.loc_db_mngr.connect(settings.local_db_path)
 
         # Standard HTTP Sende-Status
         html_status = 200
@@ -126,7 +128,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         html_string = open("../html/tabelle.html", "r").read()
                         page: int = int(sub_paths[2])
                         page_count: int = int(self.loc_db_mngr.getItemCount() /
-                                              main.item_count_on_web_server_list)
+                                              settings.item_count_on_web_server_list)
                         html_string = html_string.replace("%LAST%", str(page_count))
                         html_string = html_string.replace("%CURRENT%", str(page))
 
@@ -141,8 +143,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                         else:
                             html_string = html_string.replace("%BACK%", str(page - 1))
 
-                        s_list = self.loc_db_mngr.getRange(main.item_count_on_web_server_list * page,
-                                                           main.item_count_on_web_server_list)
+                        s_list = self.loc_db_mngr.getRange(settings.item_count_on_web_server_list * page,
+                                                           settings.item_count_on_web_server_list)
                         send_data = ""
                         for scan in s_list:
                             send_data += """<tr>\n
@@ -155,11 +157,12 @@ class RequestHandler(BaseHTTPRequestHandler):
                         html_string = html_string.replace("%LINES%", send_data)
                 elif sub_paths[1] == "":
                     html_string = open("../html/main.html", "r").read()
-
+                elif sub_paths[1] == "settings.html":
+                    html_string = open("../html/settings.html", "r").read()
                 elif sub_paths[1] == "log.html":
                     html_string = open("../html/log.html", "r").read()
                     text: str = ""
-                    with open(main.log_file_path, "r") as file:
+                    with open(settings.log_file_path, "r") as file:
                         last: str = ""
                         for line in file:
                             text += "<p "
@@ -220,31 +223,54 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         try:
             if self.path == "/log.html":
-                if "password=pass&" in str(post_data):
-                    if main.log_file_delete_mode == "RENAME":
-                        shutil.copyfile(main.log_file_path, main.log_file_path.replace(".log", "") + "_backup_"
+                print("Try to clear log...")
+                log.debug("Try to clear log...")
+
+                if "password=" + settings.clear_log_file_pw + "&" in str(post_data):
+                    if settings.log_file_delete_mode == "RENAME":
+                        shutil.copyfile(settings.log_file_path, settings.log_file_path.replace(".log", "") + "_backup_"
                                         + datetime.now().strftime("%m-%d-%Y_%H-%M-%S") + ".log")
 
-                        fo = open(main.log_file_path, "w")
+                        fo = open(settings.log_file_path, "w")
                         fo.truncate()
                         fo.close()
+
+                        print("Log renamed")
+                        log.info("Log renamed")
 
                         self.do_GET()
                         return
-                    elif main.log_file_delete_mode == "DELETE":
-                        fo = open(main.log_file_path, "w")
+                    elif settings.log_file_delete_mode == "DELETE":
+                        fo = open(settings.log_file_path, "w")
                         fo.truncate()
                         fo.close()
+
+                        print("Log deleted")
+                        log.info("Log deleted")
+
                         self.do_GET()
                         return
                     else:
-                        log.error("Unbekannter log_file_delete_mode: {0}".format(main.log_file_delete_mode))
+                        log.error("Unbekannter log_file_delete_mode: {0}".format(settings.log_file_delete_mode))
                         self.do_GET()
                         return
                 else:
-                    html_string = open("../html/tabelle-falsches-pw.html", "r").read()
+                    print("Clear/Delete failed: Wrong password: ".format(str(post_data)))
+                    log.warning("Clear/Delete failed: Wrong password: ".format(str(post_data)))
+
+            if self.path == "/settings.html":
+                if "ReloadAdvertiseListButton=TRUE" in str(post_data):
+                    settings.want_reload_advertise = True
+                    print("Reload Advertise List")
+                    log.info("Reload Advertise List")
+                    self.do_GET()
+                    return
+                else:
+                    print("Unbekannter POST: {0}".format(str(post_data)))
+                    log.warning("Unbekannter POST: {0}".format(str(post_data)))
 
             else:
+                print("Post Seite nicht gefunden: ", self.path)
                 html_string = open("../html/404.html", "r").read()
                 html_status = 404
 

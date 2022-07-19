@@ -4,8 +4,8 @@ import sys
 import os
 import sqlite3
 import logging
-import main
-
+import settings as s
+import datetime
 
 from pathlib import Path
 log = logging.getLogger(Path(__file__).name)
@@ -26,27 +26,27 @@ def cleanup():
 
 def print_debug_versions():
     # Log....
-    log.info("-------------------Programm Start: {0}-------------------".format(main.datetime.datetime.now()))
+    log.info("-------------------Programm Start: {0}-------------------".format(datetime.datetime.now()))
 
     log.debug("{0}[ Programm Version: {1} ] [ Python Version: {2} ] [ Qt Version: {3} ] "
               "[ PyODBC Version: {4} ] [ SQL Lite3 Version: {5} ] [ Unterstützte MS ODBC Driver Version: {6} ] "
               "[ Unterstützte FreeTDS Driver Version: {7} {8} ] "
               "[ Arbeitsverzeichnis: {9} ]".
-              format("", main.PROGRAMM_VERSION, sys.version, QtCore.qVersion(),
-                     pyodbc.version, sqlite3.version, main.SQL_DRIVER_USED_VERSION_MS_DRIVER,
-                     main.SQL_DRIVER_USED_VERSION_FreeTDS, main.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION,
+              format("", s.PROGRAMM_VERSION, sys.version, QtCore.qVersion(),
+                     pyodbc.version, sqlite3.version, s.SQL_DRIVER_USED_VERSION_MS_DRIVER,
+                     s.SQL_DRIVER_USED_VERSION_FreeTDS, s.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION,
                      os.path.abspath("./")))
     # Infoausgabe
     print("------------------------------------------------------------------")
-    print("Programm Start: ", main.datetime.datetime.now())
-    print("Programm Version: ", main.PROGRAMM_VERSION)
+    print("Programm Start: ", datetime.datetime.now())
+    print("Programm Version: ", s.PROGRAMM_VERSION)
     print("Python Version: ", sys.version)
     print("Qt Version: ", QtCore.qVersion())
     print("PyODBC Version: ", pyodbc.version)
     print("SQL Lite3 Version: ", sqlite3.version)
-    print("Unterstützte MS ODBC Driver Version: ", main.SQL_DRIVER_USED_VERSION_MS_DRIVER)
-    print("Unterstützte FreeTDS Driver Version: ", main.SQL_DRIVER_USED_VERSION_FreeTDS, " ",
-          main.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION)
+    print("Unterstützte MS ODBC Driver Version: ", s.SQL_DRIVER_USED_VERSION_MS_DRIVER)
+    print("Unterstützte FreeTDS Driver Version: ", s.SQL_DRIVER_USED_VERSION_FreeTDS, " ",
+          s.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION)
     print("Arbeitsverzeichnis: ", os.path.abspath("./"))
     print("------------------------------------------------------------------")
 

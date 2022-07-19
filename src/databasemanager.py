@@ -1,6 +1,6 @@
 # Open Source Bibliothek für MS SQL
 import pyodbc
-import main
+import settings as s
 import time
 
 import logging
@@ -42,7 +42,7 @@ class DataBaseManager:
                     print("Verwende Driver: ODBC Driver 18 for SQL Server...")
                     log.debug("Verwende Driver: ODBC Driver 18 for SQL Server...")
 
-                    self.conn = pyodbc.connect(driver=main.SQL_DRIVER_USED_VERSION_MS_DRIVER, server=ip + "," +
+                    self.conn = pyodbc.connect(driver=s.SQL_DRIVER_USED_VERSION_MS_DRIVER, server=ip + "," +
                                                                                                      str(port),
                                                database=db,
                                                user=usr,
@@ -54,17 +54,17 @@ class DataBaseManager:
                     break
 
                 elif "FreeTDS" in driver_names:
-                    print("Verwende Driver: FreeTDS ", main.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION, "...")
-                    log.debug("Verwende Driver: FreeTDS {0} ...".format(main.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION))
+                    print("Verwende Driver: FreeTDS ", s.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION, "...")
+                    log.debug("Verwende Driver: FreeTDS {0} ...".format(s.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION))
 
                     self.conn = pyodbc.connect('DRIVER={0}; SERVER={1}; PORT={2}; DATABASE={3}; UID={4}; PWD={5}; '
-                                               'TDS_Version={6};'.format(main.SQL_DRIVER_USED_VERSION_FreeTDS,
+                                               'TDS_Version={6};'.format(s.SQL_DRIVER_USED_VERSION_FreeTDS,
                                                                          ip, port, db, usr, pw,
-                                                                         main.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION))
+                                                                         s.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION))
                     print("Erfolgreich mit MS SQL Server verbunden über FreeTDS Driver "
-                          + main.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION)
+                          + s.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION)
                     log.info("Erfolgreich mit MS SQL Server verbunden über FreeTDS Driver {0} ".format(
-                        main.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION))
+                        s.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION))
                     break
                 else:
                     print('Error: No suitable driver found. Cannot connect.')

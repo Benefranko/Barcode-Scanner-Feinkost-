@@ -29,7 +29,8 @@
    <bool>false</bool>
   </property>
   <property name="styleSheet">
-   <string notr="true">QWidget#_Widget { background-color: qconicalgradient(cx:0, cy:0, angle:129.738, stop:0.310293 rgba(131, 201, 201, 0), stop:0.375 rgba(40, 201, 198, 17), stop:0.423533 rgba(0, 221, 255, 68), stop:0.45 rgba(66, 245, 255, 54), stop:0.477581 rgba(101, 255, 251, 75), stop:0.518717 rgba(98, 255, 244, 45), stop:0.55 rgba(88, 243, 255, 95), stop:0.57754 rgba(98, 244, 255, 73), stop:0.626597 rgba(108, 255, 254, 19), stop:0.687453 rgba(114, 255, 242, 0)); }</string>
+   <string notr="true">QWidget#_Widget { background-color: qconicalgradient(cx:0, cy:0, angle:129.738, stop:0.310293 rgba(131, 201, 201, 0), stop:0.375 rgba(40, 201, 198, 17), stop:0.423533 rgba(0, 221, 255, 68), stop:0.45 rgba(66, 245, 255, 54), stop:0.477581 rgba(101, 255, 251, 75), stop:0.518717 rgba(98, 255, 244, 45), stop:0.55 rgba(88, 243, 255, 95), stop:0.57754 rgba(98, 244, 255, 73), stop:0.626597 rgba(108, 255, 254, 19), stop:0.687453 rgba(114, 255, 242, 0)); }
+QWidget#Widget { background-color: &quot;white&quot; }</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="1" column="1" rowspan="2">

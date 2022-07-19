@@ -8,7 +8,7 @@ from PySide2.QtWidgets import QMainWindow
 
 from databasemanager import DataBaseManager
 from localdatabasemanager import LocalDataBaseManager
-import main
+import settings as s
 
 import logging
 from pathlib import Path
@@ -19,28 +19,12 @@ log = logging.getLogger(Path(__file__).name)
 # Klasse steuert die Grafik und managed die Datenbanken
 
 class MainWindow(QMainWindow):
-    # Constants
-    # Dauer der Zeit, wie lange die Information zu einem Produkt angezeigt werden, in Sekunden
-    SHOW_TIME: int = 15
-    # auer der Zeit, wie lange "Keine Informationen zu diesem Produkt gefunden" angezeigt wird, in Sekunden
-    SHOW_TIME_NOTHING_FOUND: int = 8
-    # Dauer der Zeit zwischen einem Wechsel der Warte-Anzeige in Sekunden
-    CHANGE_ADVERTISE_TIME: int = 15
-    # Dauer der Zeit, wie lange die Information zum Hersteller angezeigt werden, in Sekunden
-    SHOW_PRODUCER_INFOS_TIME: int = 20
-
-    # Höhe des roten Balkens, der den normalen Preis durchstreicht (für Sonderpreis) in Pixel
-    SPECIAL_PRICE_RED_LINE_HEIGHT: int = 5
-    # Abstand zwischen normalen Preis und Sonderpreis in Pixel
-    SPACE_BETWEEN_PRICE_AND_SPECIAL_PRICE: int = 10
-    # Schriftgröße des Sonderpreises
-    SPECIAL_PRICE_FONT_SIZE: int = 18
 
     # Attributes
     # Sekundenspeicher für rückwärts zählenden Timer für Informationsanzeige
-    showTimeTimer: int = SHOW_TIME
+    showTimeTimer: int = s.SHOW_TIME
     # Sekundenspeicher für rückwärts zählenden Timer für Wechsel der Warte-Anzeige
-    changeAdvertiseTimer: int = CHANGE_ADVERTISE_TIME
+    changeAdvertiseTimer: int = s.CHANGE_ADVERTISE_TIME
     # Haupt Sekunden-Timer ID
     timerID: int = -1
     # Auf Hauptseite: Unterseite für Werbungen: Index
@@ -79,7 +63,7 @@ class MainWindow(QMainWindow):
         # Stop Timer
         self.killTimer(self.timerID)
         # Clear Layouts:
-        #try:
+        # try:
         #    self.rec_clear_layout(self.window.page_1.layout())
         #    self.rec_clear_layout(self.window.page_2.layout())
         #    self.rec_clear_layout(self.window.page_3.layout())
@@ -87,8 +71,8 @@ class MainWindow(QMainWindow):
         #    self.rec_clear_layout(self.window.page_5.layout())
         #    self.rec_clear_layout(self.window.page_6.layout())
 
-            # self.rec_clear_layout(self.window.groupBoxAdvertise.layout())
-        #except Exception as e:
+        # self.rec_clear_layout(self.window.groupBoxAdvertise.layout())
+        # except Exception as e:
         #    print("Clear Layouts failed: ", e)
         #    log.warning("Clear Layouts failed: {0}".format(e))
 
@@ -138,7 +122,7 @@ class MainWindow(QMainWindow):
         # init Sonderpreis Label
         self.special_price_label = QLabel(self.window.groupBox_infos)
         self.special_price_label.setStyleSheet("color: rgba(255, 0, 0, 255)")
-        self.special_price_label.setFont(QFont("Segoe UI", self.SPECIAL_PRICE_FONT_SIZE, QFont.Bold))
+        self.special_price_label.setFont(QFont("Segoe UI", s.SPECIAL_PRICE_FONT_SIZE, QFont.Bold))
         self.special_price_label.hide()
 
         # MainWindow Nach-Einstellungen
@@ -207,7 +191,7 @@ class MainWindow(QMainWindow):
         ####
 
         # Lade Liste mit Artikeln, zu denen die Vorschau angezeigt werden soll...
-        self.advertise_kArtikel_list = self.databasemanager.get_advertise_list(main.wawi_advertise_aktive_meta_keyword)
+        self.advertise_kArtikel_list = self.databasemanager.get_advertise_list(s.wawi_advertise_aktive_meta_keyword)
 
         ####
         # EVENTS SIGNALS SLOTS TIMER
@@ -253,16 +237,29 @@ class MainWindow(QMainWindow):
 
     def switchArtikelPreViewPageAndStartPage(self):
         # Wenn artikel mit Merkmal für Vorschau existieren, lade Neue Anzeige und wechsle zu dieser
-        if self.window.stackedWidget_advertise.currentIndex() == 1 and self.advertise_kArtikel_list is not None:
-            if self.new_advertise() is not None:
-                self.window.stackedWidget_advertise.setCurrentIndex(0)
-        else:
-            # sonst zeige weiter Startseite an
+        try:
+            if s.want_reload_advertise:
+                s.want_reload_advertise = False
+                self.advertise_kArtikel_list = self.databasemanager.get_advertise_list(
+                    s.wawi_advertise_aktive_meta_keyword)
+
+            if self.window.stackedWidget_advertise.currentIndex() == 1 and self.advertise_kArtikel_list is not None:
+                if self.new_advertise() is not None:
+                    self.window.stackedWidget_advertise.setCurrentIndex(0)
+            else:
+                # sonst zeige weiter Startseite an
+                self.window.stackedWidget_advertise.setCurrentIndex(1)
+
+        except Exception as e:
+            print("Failed to load new Advertise: {0}".format(e))
+            log.error("Failed to load new Advertise: {0}".format(e))
             self.window.stackedWidget_advertise.setCurrentIndex(1)
 
     def new_advertise(self):
-        if self.advertise_kArtikel_list is None:
+        if self.advertise_kArtikel_list is None or len(self.advertise_kArtikel_list) == 0:
+            # Advertise List is Empty
             return
+
         self.advertise_page_index = (self.advertise_page_index + 1) % len(self.advertise_kArtikel_list)
         k_art: int = self.advertise_kArtikel_list[self.advertise_page_index].kArtikel
         data = self.databasemanager.getDataBykArtikel(k_art)
@@ -292,8 +289,8 @@ class MainWindow(QMainWindow):
 
         return k_art
 
-    def loadHerstellerPage(self, kArtikel: str):
-        h_infos = self.databasemanager.get_hersteller_infos(kArtikel)
+    def loadHerstellerPage(self, k_artikel: str):
+        h_infos = self.databasemanager.get_hersteller_infos(k_artikel)
         if h_infos is None:
             return None
 
@@ -312,7 +309,7 @@ class MainWindow(QMainWindow):
     def newScanHandling(self, scan_article_ean: str):
         # Barcodescanner hat neues Scan registriert...
         # Setzte Anzeige Timer zurück und ändere Objektzustand
-        self.showTimeTimer = self.SHOW_TIME
+        self.showTimeTimer = s.SHOW_TIME
         self.state = self.STATES.SHOW_PRODUCT_DESCRIPTION
 
         # Versuche Informationen vom MS SQL Server zu dem Artikel abzufragen
@@ -327,7 +324,7 @@ class MainWindow(QMainWindow):
         if data is None:
             # Wenn keine Informationen zu dem Artikel gefunden werden kann, welche zu "nichts-gefunden"-Seite
             self.window.stackedWidget.setCurrentIndex(2)
-            self.showTimeTimer = self.SHOW_TIME_NOTHING_FOUND
+            self.showTimeTimer = s.SHOW_TIME_NOTHING_FOUND
             return
 
         # Wechsle aktuelle Seite zur Startseite, um das Layout zu aktualisieren, damit auch die Positionen der
@@ -408,13 +405,13 @@ class MainWindow(QMainWindow):
             self.special_price_red_line.setGeometry(self.window.preis.x(),
                                                     self.window.preis.y() + 0.5 * self.window.preis.height(),
                                                     br_price.width(),
-                                                    self.SPECIAL_PRICE_RED_LINE_HEIGHT)
+                                                    s.SPECIAL_PRICE_RED_LINE_HEIGHT)
             # Lege Position des Streichpreises fest:    x = normal_preis.x + normal_preis.breite + KONSTANT: Abstand
             #                                      y = normal_preis.y - ( sonder_preis.höhe - 0.5 * normal_preis.höhe )
             #                                      breite = sonder_preis.breite + 2
             #                                      höhe   = sonder_preis.höhe
             self.special_price_label.setGeometry(self.window.preis.x() + br_price.width()
-                                                 + self.SPACE_BETWEEN_PRICE_AND_SPECIAL_PRICE,
+                                                 + s.SPACE_BETWEEN_PRICE_AND_SPECIAL_PRICE,
                                                  self.window.preis.y() - ((br_special_price.height() * 0.5
                                                                            - 0.5 * br_price.height())),
                                                  br_special_price.width() + 2,
@@ -472,7 +469,7 @@ class MainWindow(QMainWindow):
                 if self.changeAdvertiseTimer > 1:
                     self.changeAdvertiseTimer -= 1
                 else:
-                    self.changeAdvertiseTimer = self.CHANGE_ADVERTISE_TIME
+                    self.changeAdvertiseTimer = s.CHANGE_ADVERTISE_TIME
                     self.event_handler("CHANGE_ADVERTISE")
                 return
 
@@ -485,11 +482,11 @@ class MainWindow(QMainWindow):
 
             elif action == "LOAD_ARTICLE_FAILED":
                 self.window.stackedWidget.setCurrentIndex(2)
-                self.showTimeTimer = self.SHOW_TIME_NOTHING_FOUND
+                self.showTimeTimer = s.SHOW_TIME_NOTHING_FOUND
                 return
             elif action == "BUTTON_MORE_PRODUCER_INFOS_CLICKED":
                 # Setzte Zeit auf Maximalwert zurück: auf SHOW_PRODUCER_INFOS_TIME Anzeigezeit
-                self.showTimeTimer = self.SHOW_PRODUCER_INFOS_TIME
+                self.showTimeTimer = s.SHOW_PRODUCER_INFOS_TIME
                 self.state = self.STATES.SHOW_PRODUCER_INFOS
                 self.window.stackedWidget.setCurrentIndex(3)
                 return
@@ -519,7 +516,7 @@ class MainWindow(QMainWindow):
 
             # Wenn der zurück Button gedrückt wird
             elif action == "BUTTON_BACK_TO_INFOS_CLICKED":
-                self.showTimeTimer = self.SHOW_TIME
+                self.showTimeTimer = s.SHOW_TIME
                 self.state = self.STATES.SHOW_PRODUCT_DESCRIPTION
                 self.window.stackedWidget.setCurrentIndex(1)
                 return
@@ -534,7 +531,7 @@ class MainWindow(QMainWindow):
                 if self.showTimeTimer > 1:
                     self.showTimeTimer -= 1
                 else:
-                    self.showTimeTimer = self.SHOW_TIME
+                    self.showTimeTimer = s.SHOW_TIME
                     self.event_handler("EXIT_SHOW_DESCRIPTION")
                 return
 
@@ -545,12 +542,6 @@ class MainWindow(QMainWindow):
         if not handled:
             print("WARNUNG: Die Aktion" + action + " wurde nicht bearbeitet!")
             log.warning("Die Aktion {0} wurde nicht bearbeitet!".format(action))
-
-    # Entferne alle Elemente aus Werbung-Layout
-    def clear_advertise_list(self):
-        layout = self.window.groupBox.layout
-        for i in reversed(range(layout().count())):
-            self.window.groupBox.layout().itemAt(i).widget().deleteLater()
 
     # Funktion (Slot), die mit dem Signal aus MApplication verbunden ist, und bei einem Scan aufgerufen wird
     @Slot(str)

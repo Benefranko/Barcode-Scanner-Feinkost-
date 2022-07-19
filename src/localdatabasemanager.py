@@ -7,7 +7,6 @@ import logging
 from pathlib import Path
 log = logging.getLogger(Path(__file__).name)
 
-#
 
 class LocalDataBaseManager:
     connection = None
