@@ -20,6 +20,9 @@ class MApplication(QApplication):
     # Signal, verbunden mit NewScan() in MainWindow
     newScan: Signal = Signal(str)
 
+    # don't block quit if try to exit
+    want_exiting: bool = False
+
     def __init__(self, args):
         super(MApplication, self).__init__(args)
 
@@ -40,7 +43,7 @@ class MApplication(QApplication):
                 return True
 
             # Wenn das Fenster geschlossen werden soll, z.B. mit ALT F4, ignoriere das signal
-            if event.type() == QEvent.Close and self.inputBuffer != "quit":
+            if not self.want_exiting and event.type() == QEvent.Close and self.inputBuffer != "quit":
                 print("Prevent Window from closing (Type '[\\r] + \"quit\" + [ALT F4]' to close the Window)...")
                 log.info("Prevent Window from closing! Received QEvent.Close ")
                 event.accept()
@@ -52,9 +55,11 @@ class MApplication(QApplication):
         except KeyboardInterrupt as exc:
             print('KeyboardInterrupt: {0}'.format(exc))
             log.info("KeyboardInterruption in m_application::notify : {0}".format(exc))
+            self.want_exiting = True
             QApplication.quit()
             return False
         except Exception as exc:
             log.critical("Exception in m_application::notify : {0}".format(exc))
+            self.want_exiting = True
             QApplication.quit()
             return False

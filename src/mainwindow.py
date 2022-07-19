@@ -107,12 +107,12 @@ class MainWindow(QMainWindow):
         self.window.stackedWidget_advertise.setCurrentIndex(1)
 
         # Vollbild:
-        # self.showFullScreen()
-        self.setFixedSize(800, 400)
-        self.setWindowFlags(Qt.CustomizeWindowHint | Qt.FramelessWindowHint)
+        # # self.showFullScreen()
+        # self.setFixedSize(800, 400)
+        # self.setWindowFlags(Qt.CustomizeWindowHint | Qt.FramelessWindowHint)
 
         # init Sonderpreis red HLine...
-        self.special_price_red_line = QFrame(self.window.groupBox_infos)
+        self.special_price_red_line = QFrame(self.window.widget_preis)
         self.special_price_red_line.setFrameShape(QFrame.HLine)
         # self.special_price_red_line.setFixedHeight(20)
         self.special_price_red_line.setLineWidth(6)
@@ -120,7 +120,7 @@ class MainWindow(QMainWindow):
         self.special_price_red_line.hide()
 
         # init Sonderpreis Label
-        self.special_price_label = QLabel(self.window.groupBox_infos)
+        self.special_price_label = QLabel(self.window.widget_preis)
         self.special_price_label.setStyleSheet("color: rgba(255, 0, 0, 255)")
         self.special_price_label.setFont(QFont("Segoe UI", s.SPECIAL_PRICE_FONT_SIZE, QFont.Bold))
         self.special_price_label.hide()
@@ -338,11 +338,11 @@ class MainWindow(QMainWindow):
         if content is not None:
             img = QImage()
             assert img.loadFromData(content)
-            self.window.img.setPixmap(QPixmap.fromImage(img).scaled(200, 200, Qt.KeepAspectRatio))
+            self.window.img.setPixmap(QPixmap.fromImage(img).scaled(400, 400, Qt.KeepAspectRatio))
         else:
             # Falls kein Bild vorhanden ist, Lade das "Kein-Bild-vorhanden"-Bild
             self.window.img.setPixmap(
-                QPixmap("../images/kein-bild-vorhanden.webp").scaled(200, 200, Qt.KeepAspectRatio))
+                QPixmap("../images/kein-bild-vorhanden.webp").scaled(400, 400, Qt.KeepAspectRatio))
 
         # Aktualisiere die Labels im User Interface mit den Werten aus der Datenbank...
 
@@ -364,9 +364,9 @@ class MainWindow(QMainWindow):
         # Artikel Preis
         self.window.preis.setText(str(float(int(data[28] * 100)) / 100) + " €")
         # Artikel Inhalt
-        self.window.inhalt.setText("value")
+        # self.window.inhalt.setText("value")
         # Artikel Nummer
-        self.window.p_num.setText(str(data.Artikelnummer))
+        # self.window.p_num.setText(str(data.Artikelnummer))
         # Artikel Hersteller
         self.window.hersteller.setText(data.Hersteller)
         # Artikel Beschreibung - diese muss aus extra Datenbank geladen werden
@@ -402,9 +402,9 @@ class MainWindow(QMainWindow):
             #                                            y = normal_preis.y + ( 0.5 * normal_preis.höhe )
             #                                       breite = sonder_preis.breite
             #                                       höhe   = KONSTANT: SPECIAL_PRICE_RED_LINE_HEIGHT
-            self.special_price_red_line.setGeometry(self.window.preis.x(),
+            self.special_price_red_line.setGeometry(self.window.preis.x() - 5,
                                                     self.window.preis.y() + 0.5 * self.window.preis.height(),
-                                                    br_price.width(),
+                                                    br_price.width() + 10,
                                                     s.SPECIAL_PRICE_RED_LINE_HEIGHT)
             # Lege Position des Streichpreises fest:    x = normal_preis.x + normal_preis.breite + KONSTANT: Abstand
             #                                      y = normal_preis.y - ( sonder_preis.höhe - 0.5 * normal_preis.höhe )
@@ -497,7 +497,7 @@ class MainWindow(QMainWindow):
                 if self.showTimeTimer > 1:
                     self.showTimeTimer -= 1
                 else:
-                    self.showTimeTimer = self.SHOW_TIME
+                    self.showTimeTimer = s.SHOW_TIME
                     self.event_handler("EXIT_SHOW_DESCRIPTION")
                 return
             # Wenn während Informationsanzeige ein neues Produkt gescannt wird,
