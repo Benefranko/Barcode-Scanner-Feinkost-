@@ -107,7 +107,7 @@ class MainWindow(QMainWindow):
         self.window.stackedWidget_advertise.setCurrentIndex(1)
 
         # Vollbild:
-        # # self.showFullScreen()
+        self.showFullScreen()
         # self.setFixedSize(800, 400)
         # self.setWindowFlags(Qt.CustomizeWindowHint | Qt.FramelessWindowHint)
 
@@ -146,7 +146,7 @@ class MainWindow(QMainWindow):
             print("Konnte Bild nicht laden: ", img_path)
             log.error("Konnte Bild nicht laden: {0}".format(img_path))
         else:
-            self.window.frame.setPixmap(pix.scaled(pix.toImage().size() / 2.25))
+            self.window.frame.setPixmap(pix.scaled(pix.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
 
         # "Barcode Scanner Bild mit Handy Beispiel"-Grafik
         img_path = "../images/sunmi_scan.png"
@@ -155,7 +155,7 @@ class MainWindow(QMainWindow):
             print("Konnte Bild nicht laden: ", img_path)
             log.error("Konnte Bild nicht laden: {0}".format(img_path))
         else:
-            self.window.img1.setPixmap(pix.scaled(pix.toImage().size() / 5.5))
+            self.window.img1.setPixmap(pix.scaled(pix.size() / 2, Qt.KeepAspectRatio, Qt.SmoothTransformation))
 
         # InnKaufHaus-Logo-Grafik
         img_path = "../images/logo.jpg"
@@ -164,8 +164,8 @@ class MainWindow(QMainWindow):
             print("Konnte Bild nicht laden: ", img_path)
             log.error("Konnte Bild nicht laden: {0}".format(img_path))
         else:
-            self.window.logo.setPixmap(pix.scaled(pix.toImage().size() / 4))
-            self.window.Innkaufhauslogo.setPixmap(pix.scaled(pix.toImage().size() / 4))
+            self.window.logo.setPixmap(pix.scaled(pix.toImage().size() / 2, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            self.window.Innkaufhauslogo.setPixmap(pix.scaled(pix.toImage().size() / 2, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         ####
         # DATA BASES
         ####
@@ -281,11 +281,11 @@ class MainWindow(QMainWindow):
         if content is not None:
             img = QImage()
             assert img.loadFromData(content)
-            self.window.VorschauBild1.setPixmap(QPixmap.fromImage(img).scaled(100, 300, Qt.KeepAspectRatio))
+            self.window.VorschauBild1.setPixmap(QPixmap.fromImage(img).scaled(self.window.VorschauBild1.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
         else:
             # Falls kein Bild vorhanden ist, Lade das "Kein-Bild-vorhanden"-Bild
             self.window.VorschauBild1.setPixmap(
-                QPixmap("../images/kein-bild-vorhanden.webp").scaled(200, 200, Qt.KeepAspectRatio))
+                QPixmap("../images/kein-bild-vorhanden.webp").scaled(self.window.VorschauBild1.size() / 1.5, Qt.KeepAspectRatio, Qt.SmoothTransformation))
 
         return k_art
 
@@ -330,7 +330,9 @@ class MainWindow(QMainWindow):
         # Wechsle aktuelle Seite zur Startseite, um das Layout zu aktualisieren, damit auch die Positionen der
         # Labels aktualisiert werden, um dann auch die richtige Position des Preis-Labels zu erhalten,
         # um den Sonderpreis richtig Positionieren zu können
+
         self.window.stackedWidget.setCurrentIndex(0)
+        self.window.stackedWidget.setCurrentIndex(1)
 
         # Lade Grafik aus MS SQL Datenbank zu dem Artikel
         # Verwende dazu das erste vorhandene Bild, das es gibt
@@ -338,11 +340,14 @@ class MainWindow(QMainWindow):
         if content is not None:
             img = QImage()
             assert img.loadFromData(content)
-            self.window.img.setPixmap(QPixmap.fromImage(img).scaled(400, 400, Qt.KeepAspectRatio))
+            p = QPixmap.fromImage(img).scaled(self.window.img.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            self.window.img.setPixmap(p)
         else:
             # Falls kein Bild vorhanden ist, Lade das "Kein-Bild-vorhanden"-Bild
             self.window.img.setPixmap(
-                QPixmap("../images/kein-bild-vorhanden.webp").scaled(400, 400, Qt.KeepAspectRatio))
+                QPixmap("../images/kein-bild-vorhanden.webp").scaled(self.window.img.size() / 1.5, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+
+        self.window.stackedWidget.setCurrentIndex(0)
 
         # Aktualisiere die Labels im User Interface mit den Werten aus der Datenbank...
 
@@ -351,9 +356,10 @@ class MainWindow(QMainWindow):
             self.window.p_name.setText(data.Artikelname)
             # Passe Font Size so an, dass ganzer Name angezeigt wird
             font: QFont = QFont("Areal")
-            font.setPixelSize(30)
+            font.setPixelSize(s.PRODUCT_MAX_FONT_SIZE)
             font.setBold(True)
-            while QFontMetrics(font).boundingRect(self.window.p_name.text()).width() > 555:
+            font.setUnderline(True)
+            while QFontMetrics(font).boundingRect(self.window.p_name.text()).width() > self.window.p_name.width():
                 font.setPixelSize(font.pixelSize() - 1)
             self.window.p_name.setFont(font)
         else:
@@ -363,19 +369,27 @@ class MainWindow(QMainWindow):
 
         # Artikel Preis
         self.window.preis.setText(str(float(int(data[28] * 100)) / 100) + " €")
+
         # Artikel Inhalt
         # self.window.inhalt.setText("value")
-        # Artikel Nummer
-        # self.window.p_num.setText(str(data.Artikelnummer))
+
         # Artikel Hersteller
-        self.window.hersteller.setText(data.Hersteller)
+        if data.Hersteller is None or data.Hersteller == "":
+            self.window.hersteller.hide()
+            self.window.hersteller_label.hide()
+        else:
+            self.window.hersteller.setText(data.Hersteller)
+            self.window.hersteller.show()
+            self.window.hersteller_label.show()
+
         # Artikel Beschreibung - diese muss aus extra Datenbank geladen werden
         descript = self.databasemanager.get_article_description(data.kArtikel)
         if descript is None or descript.cBeschreibung == "":
-            self.window.groupBox_beschreibung.hide()
+            self.window.groupBox_beschreibung.setTitle("")
+            self.window.description.setHtml("")
         else:
             self.window.description.setHtml(descript.cBeschreibung)
-            self.window.groupBox_beschreibung.show()
+            self.window.groupBox_beschreibung.setTitle("Beschreibung:")
 
         # Erneuter Seitenwechsel, um Layout-update zu erzwingen
         self.window.stackedWidget.setCurrentIndex(1)

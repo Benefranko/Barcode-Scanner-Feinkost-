@@ -4,7 +4,7 @@
 ####
 
 # Programm Version
-PROGRAMM_VERSION: str = "0.9.6"
+PROGRAMM_VERSION: str = "0.9.9"
 
 
 ####
@@ -78,6 +78,8 @@ SPECIAL_PRICE_RED_LINE_HEIGHT: int = 5
 # Abstand zwischen normalen Preis und Sonderpreis in Pixel
 SPACE_BETWEEN_PRICE_AND_SPECIAL_PRICE: int = 10
 # Schriftgröße des Sonderpreises
-SPECIAL_PRICE_FONT_SIZE: int = 18
+SPECIAL_PRICE_FONT_SIZE: int = 50
+# PRODUKT Max Font Size in Pixel
+PRODUCT_MAX_FONT_SIZE: int = 40
 
 
