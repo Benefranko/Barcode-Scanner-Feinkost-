@@ -42,7 +42,7 @@ QWidget#Widget { background-color: &quot;white&quot; }</string>
    <item>
     <widget class="QStackedWidget" name="stackedWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="page_1">
       <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -1117,52 +1117,52 @@ border: 0px solid red; </string>
         <number>50</number>
        </property>
        <item>
-        <spacer name="verticalSpacer_11">
+        <spacer name="verticalSpacer_17">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>40</height>
+           <height>10</height>
           </size>
          </property>
         </spacer>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_6">
-         <item>
-          <widget class="QLabel" name="label_16">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="font">
-            <font>
-             <pointsize>16</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Hersteller:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_herstellername">
-           <property name="font">
-            <font>
-             <pointsize>16</pointsize>
-             <bold>true</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string>Herstellername</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <widget class="QLabel" name="label_herstellername">
+         <property name="font">
+          <font>
+           <pointsize>25</pointsize>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Herstellername</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_11">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>80</height>
+          </size>
+         </property>
+        </spacer>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_11">

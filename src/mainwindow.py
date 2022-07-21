@@ -496,7 +496,7 @@ class MainWindow(QMainWindow):
             self.window.inhalt.show()
             self.window.label_inhalt.show()
         else:
-            print("Konnte den Inhalt nicht laden! Produkt EAN: {0}".format(scan_article_ean))
+            print("WARNUNG: Konnte den Inhalt nicht laden! Produkt EAN: {0}".format(scan_article_ean))
             log.warning("Konnte den Inhalt nicht laden! Produkt EAN: {0}".format(scan_article_ean))
             self.window.inhalt.hide()
             self.window.label_inhalt.hide()

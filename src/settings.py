@@ -4,7 +4,7 @@
 ####
 
 # Programm Version
-PROGRAMM_VERSION: str = "1.0.0"
+PROGRAMM_VERSION: str = "1.0.1"
 
 
 ####
@@ -67,7 +67,7 @@ log_file_path: str = './../Dokumentation/feinkostBarcodeScannerLog.log'
 ui_file_path: str = "../src/form.ui"
 
 # Dauer der Zeit, wie lange die Information zu einem Produkt angezeigt werden, in Sekunden
-SHOW_TIME: int = 15
+SHOW_TIME: int = 30
 # auer der Zeit, wie lange "Keine Informationen zu diesem Produkt gefunden" angezeigt wird, in Sekunden
 SHOW_TIME_NOTHING_FOUND: int = 8
 # Dauer der Zeit zwischen einem Wechsel der Warte-Anzeige in Sekunden
