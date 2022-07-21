@@ -281,7 +281,7 @@ class MainWindow(QMainWindow):
         if content is not None:
             img = QImage()
             assert img.loadFromData(content)
-            self.window.VorschauBild1.setPixmap(QPixmap.fromImage(img).scaled(self.window.VorschauBild1.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            self.window.VorschauBild1.setPixmap(QPixmap.fromImage(img).scaled(400, 400, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         else:
             # Falls kein Bild vorhanden ist, Lade das "Kein-Bild-vorhanden"-Bild
             self.window.VorschauBild1.setPixmap(
