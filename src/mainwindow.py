@@ -19,7 +19,6 @@ log = logging.getLogger(Path(__file__).name)
 # Klasse steuert die Grafik und managed die Datenbanken
 
 class MainWindow(QMainWindow):
-
     # Attributes
     # Sekundenspeicher für rückwärts zählenden Timer für Informationsanzeige
     showTimeTimer: int = s.SHOW_TIME
@@ -164,8 +163,10 @@ class MainWindow(QMainWindow):
             print("Konnte Bild nicht laden: ", img_path)
             log.error("Konnte Bild nicht laden: {0}".format(img_path))
         else:
-            self.window.logo.setPixmap(pix.scaled(pix.toImage().size() / 2, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-            self.window.Innkaufhauslogo.setPixmap(pix.scaled(pix.toImage().size() / 2, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            self.window.logo.setPixmap(
+                pix.scaled(pix.toImage().size() / 2, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            self.window.Innkaufhauslogo.setPixmap(
+                pix.scaled(pix.toImage().size() / 2, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         ####
         # DATA BASES
         ####
@@ -192,7 +193,10 @@ class MainWindow(QMainWindow):
 
         # Lade Liste mit Artikeln, zu denen die Vorschau angezeigt werden soll...
         self.advertise_kArtikel_list = self.databasemanager.get_advertise_list(s.wawi_advertise_aktive_meta_keyword)
-
+        if self.advertise_kArtikel_list is None or len(self.advertise_kArtikel_list) < 2:
+            print("Not more than 1 Advertise found !")
+            log.warning("Not more than 1 Advertise found !")
+            return
         ####
         # EVENTS SIGNALS SLOTS TIMER
         ####
@@ -242,6 +246,10 @@ class MainWindow(QMainWindow):
                 s.want_reload_advertise = False
                 self.advertise_kArtikel_list = self.databasemanager.get_advertise_list(
                     s.wawi_advertise_aktive_meta_keyword)
+                if self.advertise_kArtikel_list is None or len(self.advertise_kArtikel_list) < 2:
+                    print("Not more than 1 Advertise found !")
+                    log.warning("Not more than 1 Advertise found !")
+                    return
 
             if self.window.stackedWidget_advertise.currentIndex() == 1 and self.advertise_kArtikel_list is not None:
                 if self.new_advertise() is not None:
@@ -256,38 +264,59 @@ class MainWindow(QMainWindow):
             self.window.stackedWidget_advertise.setCurrentIndex(1)
 
     def new_advertise(self):
-        if self.advertise_kArtikel_list is None or len(self.advertise_kArtikel_list) == 0:
+        if self.advertise_kArtikel_list is None or len(self.advertise_kArtikel_list) < 2:
             # Advertise List is Empty
             return
 
-        self.advertise_page_index = (self.advertise_page_index + 1) % len(self.advertise_kArtikel_list)
-        k_art: int = self.advertise_kArtikel_list[self.advertise_page_index].kArtikel
-        data = self.databasemanager.getDataBykArtikel(k_art)
+        for i in range(0, 2):
+            self.advertise_page_index = (self.advertise_page_index + 1) % len(self.advertise_kArtikel_list)
+            k_art: int = self.advertise_kArtikel_list[self.advertise_page_index].kArtikel
+            data = self.databasemanager.getDataBykArtikel(k_art)
 
-        descr = self.databasemanager.get_article_description(k_art)
-        if descr is None or descr.cKurzBeschreibung == "":
-            print("Load Preview Advertise failed: description-object is None or descr.cKurzBeschreibung == '' or Titel"
-                  " is '', kArt: ", k_art)
-            log.warning("Load Preview Advertise failed: description-object is None or descr.cKurzBeschreibung == ''"
-                        " or Titel is '', kArtikel: {0}".format(k_art))
-            return None
-        else:
-            self.window.textEdit_previewdescription.setHtml(descr.cKurzBeschreibung)
-            self.window.Advertise_artikel_name.setText(descr.cName)
-            self.window.textEdit_previewdescription.setFont(QFont("Arial", 9))
-            self.window.textEdit_previewdescription.setAlignment(Qt.AlignCenter)
+            descr = self.databasemanager.get_article_description(k_art)
+            if descr is None or descr.cKurzBeschreibung == "":
+                print(
+                    "Load Preview Advertise failed: description-object is None or descr.cKurzBeschreibung == '' or Titel"
+                    " is '', kArt: ", k_art)
+                log.warning("Load Preview Advertise failed: description-object is None or descr.cKurzBeschreibung == ''"
+                            " or Titel is '', kArtikel: {0}".format(k_art))
+                return None
+            else:
+                if i == 0:
+                    self.window.textEdit_previewdescription.setHtml(descr.cKurzBeschreibung)
+                    self.window.Advertise_artikel_name.setText(descr.cName)
+                    self.window.textEdit_previewdescription.setFont(QFont("Arial", 14))
+                    self.window.textEdit_previewdescription.setAlignment(Qt.AlignCenter)
+                else:
+                    self.window.textEdit_prevdescr2.setHtml(descr.cKurzBeschreibung)
+                    self.window.advertise2_articel_name.setText(descr.cName)
+                    self.window.textEdit_prevdescr2.setFont(QFont("Arial", 14))
+                    self.window.textEdit_prevdescr2.setAlignment(Qt.AlignCenter)
 
-        content = self.databasemanager.get_first_image(data.kArtikel)
-        if content is not None:
-            img = QImage()
-            assert img.loadFromData(content)
-            self.window.VorschauBild1.setPixmap(QPixmap.fromImage(img).scaled(400, 400, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        else:
-            # Falls kein Bild vorhanden ist, Lade das "Kein-Bild-vorhanden"-Bild
-            self.window.VorschauBild1.setPixmap(
-                QPixmap("../images/kein-bild-vorhanden.webp").scaled(self.window.VorschauBild1.size() / 1.5, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            content = self.databasemanager.get_first_image(data.kArtikel)
+            if content is not None:
+                img = QImage()
+                assert img.loadFromData(content)
+                if i == 0:
+                    self.window.VorschauBild1.setPixmap(
+                        QPixmap.fromImage(img).scaled(400, 400, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+                else:
+                    self.window.vorschaubild2.setPixmap(
+                        QPixmap.fromImage(img).scaled(400, 400, Qt.KeepAspectRatio, Qt.SmoothTransformation))
 
-        return k_art
+            else:
+                # Falls kein Bild vorhanden ist, Lade das "Kein-Bild-vorhanden"-Bild
+                if i == 0:
+                    self.window.VorschauBild1.setPixmap(
+                        QPixmap("../images/kein-bild-vorhanden.webp").scaled(self.window.VorschauBild1.size() / 1.5,
+                                                                             Qt.KeepAspectRatio,
+                                                                             Qt.SmoothTransformation))
+                else:
+                    self.window.vorschaubild2.setPixmap(
+                        QPixmap("../images/kein-bild-vorhanden.webp").scaled(self.window.VorschauBild1.size() / 1.5,
+                                                                             Qt.KeepAspectRatio,
+                                                                             Qt.SmoothTransformation))
+        return "OK"
 
     def loadHerstellerPage(self, k_artikel: str):
         h_infos = self.databasemanager.get_hersteller_infos(k_artikel)
@@ -301,9 +330,15 @@ class MainWindow(QMainWindow):
         self.window.label_herstellername.setText(h_infos.cName)
         self.window.textEdit_hersteller_description.setHtml(h_descr.cBeschreibung)
         if h_infos.cHomepage != "":
-            self.window.textEdit_hersteller_description.setTextColor("blue")
-            self.window.textEdit_hersteller_description.append("\n" + h_infos.cHomepage)
-            self.window.textEdit_hersteller_description.setTextColor("black")
+            self.window.label_link.setText(h_infos.cHomepage)
+            self.window.label_link.setStyleSheet("QLabel { color : blue; }")
+            self.window.label_link.show()
+            self.window.label_link_text.show()
+
+        else:
+            self.window.label_link.hide()
+            self.window.label_link_text.hide()
+
         return "OK"
 
     def newScanHandling(self, scan_article_ean: str):
@@ -333,20 +368,6 @@ class MainWindow(QMainWindow):
 
         self.window.stackedWidget.setCurrentIndex(0)
         self.window.stackedWidget.setCurrentIndex(1)
-
-        # Lade Grafik aus MS SQL Datenbank zu dem Artikel
-        # Verwende dazu das erste vorhandene Bild, das es gibt
-        content = self.databasemanager.get_first_image(data.kArtikel)
-        if content is not None:
-            img = QImage()
-            assert img.loadFromData(content)
-            p = QPixmap.fromImage(img).scaled(self.window.img.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
-            self.window.img.setPixmap(p)
-        else:
-            # Falls kein Bild vorhanden ist, Lade das "Kein-Bild-vorhanden"-Bild
-            self.window.img.setPixmap(
-                QPixmap("../images/kein-bild-vorhanden.webp").scaled(self.window.img.size() / 1.5, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-
         self.window.stackedWidget.setCurrentIndex(0)
 
         # Aktualisiere die Labels im User Interface mit den Werten aus der Datenbank...
@@ -384,12 +405,31 @@ class MainWindow(QMainWindow):
 
         # Artikel Beschreibung - diese muss aus extra Datenbank geladen werden
         descript = self.databasemanager.get_article_description(data.kArtikel)
-        if descript is None or descript.cBeschreibung == "":
+        if descript is None or descript.cBeschreibung == "" \
+                or descript.cKurzBeschreibung is None or descript.cKurzBeschreibung == "":
             self.window.groupBox_beschreibung.setTitle("")
             self.window.description.setHtml("")
         else:
             self.window.description.setHtml(descript.cBeschreibung)
-            self.window.groupBox_beschreibung.setTitle("Beschreibung:")
+            self.window.groupBox_beschreibung.setTitle("Produktinformationen: \"{0}\""
+                                                       .format(descript.cKurzBeschreibung))
+
+        self.window.stackedWidget.setCurrentIndex(1)
+        self.window.stackedWidget.setCurrentIndex(0)
+
+        # Lade Grafik aus MS SQL Datenbank zu dem Artikel
+        # Verwende dazu das erste vorhandene Bild, das es gibt
+        content = self.databasemanager.get_first_image(data.kArtikel)
+        if content is not None:
+            img = QImage()
+            assert img.loadFromData(content)
+            p = QPixmap.fromImage(img).scaled(self.window.img.size() / 1.3, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            self.window.img.setPixmap(p)
+        else:
+            # Falls kein Bild vorhanden ist, Lade das "Kein-Bild-vorhanden"-Bild
+            self.window.img.setPixmap(
+                QPixmap("../images/kein-bild-vorhanden.webp").scaled(self.window.img.size() / 1.5, Qt.KeepAspectRatio,
+                                                                     Qt.SmoothTransformation))
 
         # Erneuter Seitenwechsel, um Layout-update zu erzwingen
         self.window.stackedWidget.setCurrentIndex(1)
@@ -426,10 +466,11 @@ class MainWindow(QMainWindow):
             #                                      höhe   = sonder_preis.höhe
             self.special_price_label.setGeometry(self.window.preis.x() + br_price.width()
                                                  + s.SPACE_BETWEEN_PRICE_AND_SPECIAL_PRICE,
-                                                 self.window.preis.y() - ((br_special_price.height() * 0.5
-                                                                           - 0.5 * br_price.height())),
+                                                 self.window.preis.y() - int((float(br_special_price.height()) * 0.5
+                                                                              - 0.5 * float(br_price.height()))),
                                                  br_special_price.width() + 2,
                                                  br_special_price.height())
+
         # Wenn kein Sonderpreis vorliegt:
         else:
             # Verstecke Sonderpreis Label und Linie
@@ -448,6 +489,17 @@ class MainWindow(QMainWindow):
             self.window.pushButton_more_infos_hersteller.show()
         else:
             self.window.pushButton_more_infos_hersteller.hide()
+
+        mengen_preis_line = self.databasemanager.get_mengen_preis(k_article=data.kArtikel)
+        if mengen_preis_line:
+            self.window.inhalt.setText(mengen_preis_line)
+            self.window.inhalt.show()
+            self.window.label_inhalt.show()
+        else:
+            print("Konnte den Inhalt nicht laden! Produkt EAN: {0}".format(scan_article_ean))
+            log.warning("Konnte den Inhalt nicht laden! Produkt EAN: {0}".format(scan_article_ean))
+            self.window.inhalt.hide()
+            self.window.label_inhalt.hide()
 
         # Füge den Scan der lokalen Statistiken-Datenbank hinzu:
         try:

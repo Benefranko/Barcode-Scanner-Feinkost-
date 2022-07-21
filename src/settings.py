@@ -4,7 +4,7 @@
 ####
 
 # Programm Version
-PROGRAMM_VERSION: str = "0.9.9"
+PROGRAMM_VERSION: str = "1.0.0"
 
 
 ####
@@ -24,6 +24,8 @@ ms_sql_server_port: int = 18769
 wawi_advertise_aktive_meta_keyword: str = 'ANZEIGEN=TRUE'
 
 want_reload_advertise: bool = False
+
+STEUERSATZ = 0.19
 
 ####
 # SQL Lite Datenbank

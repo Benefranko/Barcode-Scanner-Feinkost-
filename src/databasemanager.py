@@ -43,7 +43,7 @@ class DataBaseManager:
                     log.debug("Verwende Driver: ODBC Driver 18 for SQL Server...")
 
                     self.conn = pyodbc.connect(driver=s.SQL_DRIVER_USED_VERSION_MS_DRIVER, server=ip + "," +
-                                                                                                     str(port),
+                                                                                                  str(port),
                                                database=db,
                                                user=usr,
                                                password=pw,
@@ -176,18 +176,67 @@ class DataBaseManager:
 
     def get_mengen_preis(self, k_article):
         try:
+            # Get: kArtikel, kMassEinheit, fMassMenge, kGrundPreisEinheit, fGrundpreisMenge
             cursor = self.conn.cursor()
-            cursor.execute("SELECT kArtikel FROM ka WHERE eigenerWert = ?", k_article)
-            article_list = cursor.fetchall()
-            if article_list is None:
-                print("WARNUNG: Keine  gefunden!")
-                log.warning("WARNUNG: Keine  gefunden!")
+            cursor.execute(
+                "SELECT kArtikel,fVKNetto, kMassEinheit, fMassMenge, kGrundPreisEinheit, fGrundpreisMenge FROM "
+                "dbo.tArtikel WHERE kArtikel = ?", k_article)
+            article_data = cursor.fetchall()
+            if len(article_data) != 1:
+                print("Error keinen oder mehrere Einträge zu dem k_artikel: {0} gefunden: {1} Stück."
+                      .format(k_article, len(article_data)))
+                log.error("Error keinen oder mehrere Einträge zu dem k_artikel: {0} gefunden: {1} Stück."
+                          .format(k_article, len(article_data)))
                 return None
+
+            # Get Mengeneinheit
+            cursor.execute("SELECT * FROM dbo.tMassEinheit WHERE kMassEinheit = ?", article_data[0].kMassEinheit)
+            mass_table_article = cursor.fetchone()
+            if mass_table_article is None:
+                return None
+
+            cursor.execute("SELECT * FROM dbo.tMassEinheit WHERE kMassEinheit = ?", article_data[0].kGrundPreisEinheit)
+            mass_table_einheit = cursor.fetchone()
+            if mass_table_einheit is None:
+                return None
+
+            # Einheiten Namen
+            cursor.execute("SELECT * FROM dbo.tMassEinheitSprache WHERE kMassEinheit = ?", article_data[0].kMassEinheit)
+            article_einheit = cursor.fetchone()
+            if article_einheit is None:
+                return None
+
+            cursor.execute("SELECT * FROM dbo.tMassEinheitSprache WHERE kMassEinheit = ?",
+                           article_data[0].kGrundPreisEinheit)
+            grundpreis_einheit = cursor.fetchone()
+            if grundpreis_einheit is None:
+                return None
+
+            # Prevent div by 0
+            if article_data[0].fGrundpreisMenge == 0:
+                print("Error: article_data[0].fGrundpreisMenge == 0")
+                return None
+
+            # Wenn der Artikel in der Nenner Einheit gegeben ist -> In Tabelle 0 -> Zum Rechnen 1 benötigt!
+            if mass_table_einheit.fBezugsMassEinheitFaktor == 0:
+                mass_table_einheit.fBezugsMassEinheitFaktor = 1
+
+            einheiten_multiplikator: float = float(mass_table_einheit.fBezugsMassEinheitFaktor
+                                                   / mass_table_article.fBezugsMassEinheitFaktor)
+            mengen_multiplikator: float = float(article_data[0].fGrundpreisMenge / article_data[0].fMassMenge)
+
+            mengen_preis: float = round(float(float(article_data[0].fVKNetto) * einheiten_multiplikator
+                                              * mengen_multiplikator * (1.0 + s.STEUERSATZ)), 2)
+
+            ret_val = str(round(article_data[0].fMassMenge, 2)) + " " + article_einheit.cName + " (" + \
+                str(round(mengen_preis, 2)) + " € / " + str(
+                round(article_data[0].fGrundpreisMenge, 2)) + " " + grundpreis_einheit.cName + ")"
+
         except Exception as exc:
             print('get_mengen_preis: {0}'.format(exc))
             log.error('get_mengen_preis: {0}'.format(exc))
             return None
-        return article_list
+        return ret_val
 
     def get_advertise_list(self, value):
         try:
