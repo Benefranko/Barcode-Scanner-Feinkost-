@@ -71,7 +71,7 @@ SHOW_TIME: int = 30
 # auer der Zeit, wie lange "Keine Informationen zu diesem Produkt gefunden" angezeigt wird, in Sekunden
 SHOW_TIME_NOTHING_FOUND: int = 8
 # Dauer der Zeit zwischen einem Wechsel der Warte-Anzeige in Sekunden
-CHANGE_ADVERTISE_TIME: int = 15
+CHANGE_ADVERTISE_TIME: int = 20
 # Dauer der Zeit, wie lange die Information zum Hersteller angezeigt werden, in Sekunden
 SHOW_PRODUCER_INFOS_TIME: int = 20
 

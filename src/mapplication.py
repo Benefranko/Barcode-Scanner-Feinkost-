@@ -18,8 +18,8 @@ class MApplication(QApplication):
     # Buffer für Eingabe
     inputBuffer: str = ""
     # Signal, verbunden mit NewScan() in MainWindow
-    newScan: Signal = Signal(str)
 
+    newScan: Signal = Signal(str)
     # don't block quit if try to exit
     want_exiting: bool = False
 

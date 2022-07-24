@@ -272,8 +272,19 @@ class MainWindow(QMainWindow):
             self.advertise_page_index = (self.advertise_page_index + 1) % len(self.advertise_kArtikel_list)
             k_art: int = self.advertise_kArtikel_list[self.advertise_page_index].kArtikel
             data = self.databasemanager.getDataBykArtikel(k_art)
-
             descr = self.databasemanager.get_article_description(k_art)
+
+            preis: float = float(data.fVKNetto) * (s.STEUERSATZ + 1)
+            s_preis = self.databasemanager.get_special_price(k_article=k_art)
+            inhalt = self.databasemanager.get_mengen_preis(k_art)
+
+            if inhalt is None or inhalt == "":
+                print(
+                    "Load Preview Advertise failed: get_mengen_preis-object is None or inhalt == ''"
+                    " kArt: ", k_art)
+                log.warning("Load Preview Advertise failed: get_mengen_preis-object is None or inhalt == ''"
+                            ", kArtikel: {0}".format(k_art))
+                return None
             if descr is None or descr.cKurzBeschreibung == "":
                 print(
                     "Load Preview Advertise failed: description-object is None or descr.cKurzBeschreibung == '' or Titel"
@@ -287,11 +298,42 @@ class MainWindow(QMainWindow):
                     self.window.Advertise_artikel_name.setText(descr.cName)
                     self.window.textEdit_previewdescription.setFont(QFont("Arial", 14))
                     self.window.textEdit_previewdescription.setAlignment(Qt.AlignCenter)
+                    self.window.inhalt_preview_1.setText("Inhalt: " + inhalt)
+
+                    self.window.preis_preview_1.setText( str( float(int(preis*100)) / 100 ) + " €")
+                    if s_preis is not None:
+                        p = float(s_preis.fNettoPreis) * (s.STEUERSATZ + 1)
+                        self.window.label_s_price_1.setText(str(float(int(p*100)) / 100 ) + "€ statt")
+                        self.window.preis_preview_1.font().setStrikeOut(True)
+                        f = self.window.preis_preview_1.font()
+                        f.setStrikeOut(True)
+                        self.window.preis_preview_1.setFont(f)
+                    else:
+                        self.window.label_s_price_1.setText("")
+                        f = self.window.preis_preview_1.font()
+                        f.setStrikeOut(False)
+                        self.window.preis_preview_1.setFont(f)
+
                 else:
                     self.window.textEdit_prevdescr2.setHtml(descr.cKurzBeschreibung)
                     self.window.advertise2_articel_name.setText(descr.cName)
                     self.window.textEdit_prevdescr2.setFont(QFont("Arial", 14))
                     self.window.textEdit_prevdescr2.setAlignment(Qt.AlignCenter)
+                    self.window.inhalt_preview_2.setText("Inhalt: " + inhalt)
+
+                    self.window.preis_preview_2.setText( str(float(int(preis*100)) / 100 ) + " €")
+                    if s_preis is not None:
+                        p = float(s_preis.fNettoPreis) * (s.STEUERSATZ + 1)
+                        self.window.label_s_price_2.setText(str(float(int(p*100)) / 100 ) + "€ statt")
+                        f = self.window.preis_preview_2.font()
+                        f.setStrikeOut(True)
+                        self.window.preis_preview_2.setFont(f)
+
+                    else:
+                        self.window.label_s_price_2.setText("")
+                        f = self.window.preis_preview_2.font()
+                        f.setStrikeOut(False)
+                        self.window.preis_preview_2.setFont(f)
 
             content = self.databasemanager.get_first_image(data.kArtikel)
             if content is not None:
@@ -389,7 +431,7 @@ class MainWindow(QMainWindow):
             return
 
         # Artikel Preis
-        self.window.preis.setText(str(float(int(data[28] * 100)) / 100) + " €")
+        self.window.preis.setText(str( float(int(float(data[28])*100 * (s.STEUERSATZ + 1) ) ) / 100 ) + " €")
 
         # Artikel Inhalt
         # self.window.inhalt.setText("value")
@@ -443,7 +485,7 @@ class MainWindow(QMainWindow):
             self.special_price_red_line.show()
 
             # Aktualisiere Sonderpreis-Label mit auf 2-Stellen gerundetem Sonderpreis in €
-            self.special_price_label.setText(str(float(int(special_price.fNettoPreis * 100) / 100)) + " €")
+            self.special_price_label.setText( str( float( int( float(special_price.fNettoPreis) * (s.STEUERSATZ + 1) * 100) / 100 ) ) + " €")
 
             # Berechne Position der "Streich Linie":
             # Breite des Normal-Preis-Textes (Abhängig von Schriftart und Größe)
@@ -490,6 +532,10 @@ class MainWindow(QMainWindow):
         else:
             self.window.pushButton_more_infos_hersteller.hide()
 
+        brutto_preis = data[28] # == später netto_preis * steuersatz
+        if special_price is not None:
+            brutto_preis = float(special_price.fNettoPreis) * (s.STEUERSATZ + 1)
+
         mengen_preis_line = self.databasemanager.get_mengen_preis(k_article=data.kArtikel)
         if mengen_preis_line:
             self.window.inhalt.setText(mengen_preis_line)
@@ -511,103 +557,109 @@ class MainWindow(QMainWindow):
 
     # Eventhandler: Je nach Objektzustand führe die übergebenen Aktionen aus
     def event_handler(self, action, value=None):
-        # Speichere, falls Aktion nicht ausgeführt wurde (für Debug Nachrichten)
-        # für Aktionen, die mehrere If-Statements "erreichen" können, wo kein return am Ende vorliegt.
-        # Wenn diese Funktion in keinem If-Statement an ein return gelangt, wird Warnung ausgegeben
-        handled: bool = False
+        try:
 
-        # Zustands unabhängige Aktionen:
+            # Speichere, falls Aktion nicht ausgeführt wurde (für Debug Nachrichten)
+            # für Aktionen, die mehrere If-Statements "erreichen" können, wo kein return am Ende vorliegt.
+            # Wenn diese Funktion in keinem If-Statement an ein return gelangt, wird Warnung ausgegeben
+            handled: bool = False
 
-        # Zustands spezifische Aktionen:
-        # Zustand: Warte für Barcode Scan:
-        if self.state == self.STATES.WAIT_FOR_SCAN:
-            # Es wurde ein Barcode gescannt-> Ermittle Informationen und zeige diese an
-            if action == "NEW_SCAN":
-                self.newScanHandling(value)
-                return
-            # Timer wurde erreicht-> Wechsle die Warte-Auf-Eingabe Seite, bzw zeige neue Werbung an
-            elif action == "CHANGE_ADVERTISE":
-                self.switchArtikelPreViewPageAndStartPage()
-                return
-            # (jede Sekunde) Sekunden-Timer-Event
-            elif action == "TIMER":
-                # wenn Timer_MAX erreicht wurde, führe Aktion CHANGE_ADVERTISE aus, sonst timer--
-                if self.changeAdvertiseTimer > 1:
-                    self.changeAdvertiseTimer -= 1
-                else:
-                    self.changeAdvertiseTimer = s.CHANGE_ADVERTISE_TIME
-                    self.event_handler("CHANGE_ADVERTISE")
-                return
+            # Zustands unabhängige Aktionen:
 
-        # Zustand: Zeige Produktinformationen:
-        elif self.state == self.STATES.SHOW_PRODUCT_DESCRIPTION:
-            if action == "EXIT_SHOW_DESCRIPTION":
-                self.window.stackedWidget.setCurrentIndex(0)
-                self.state = self.STATES.WAIT_FOR_SCAN
-                return
+            # Zustands spezifische Aktionen:
+            # Zustand: Warte für Barcode Scan:
+            if self.state == self.STATES.WAIT_FOR_SCAN:
+                # Es wurde ein Barcode gescannt-> Ermittle Informationen und zeige diese an
+                if action == "NEW_SCAN":
+                    self.newScanHandling(value)
+                    return
+                # Timer wurde erreicht-> Wechsle die Warte-Auf-Eingabe Seite, bzw zeige neue Werbung an
+                elif action == "CHANGE_ADVERTISE":
+                    self.switchArtikelPreViewPageAndStartPage()
+                    return
+                # (jede Sekunde) Sekunden-Timer-Event
+                elif action == "TIMER":
+                    # wenn Timer_MAX erreicht wurde, führe Aktion CHANGE_ADVERTISE aus, sonst timer--
+                    if self.changeAdvertiseTimer > 1:
+                        self.changeAdvertiseTimer -= 1
+                    else:
+                        self.changeAdvertiseTimer = s.CHANGE_ADVERTISE_TIME
+                        self.event_handler("CHANGE_ADVERTISE")
+                    return
 
-            elif action == "LOAD_ARTICLE_FAILED":
-                self.window.stackedWidget.setCurrentIndex(2)
-                self.showTimeTimer = s.SHOW_TIME_NOTHING_FOUND
-                return
-            elif action == "BUTTON_MORE_PRODUCER_INFOS_CLICKED":
-                # Setzte Zeit auf Maximalwert zurück: auf SHOW_PRODUCER_INFOS_TIME Anzeigezeit
-                self.showTimeTimer = s.SHOW_PRODUCER_INFOS_TIME
-                self.state = self.STATES.SHOW_PRODUCER_INFOS
-                self.window.stackedWidget.setCurrentIndex(3)
-                return
+            # Zustand: Zeige Produktinformationen:
+            elif self.state == self.STATES.SHOW_PRODUCT_DESCRIPTION:
+                if action == "EXIT_SHOW_DESCRIPTION":
+                    self.window.stackedWidget.setCurrentIndex(0)
+                    self.state = self.STATES.WAIT_FOR_SCAN
+                    return
 
-            # (jede Sekunde) Sekunden-Timer-Event
-            elif action == "TIMER":
-                # Wenn Anzeige-Zeit erreicht wurde, wechsle wieder auf Startseite / Objektzustand-"Warte auf Scan"
-                if self.showTimeTimer > 1:
-                    self.showTimeTimer -= 1
-                else:
+                elif action == "LOAD_ARTICLE_FAILED":
+                    self.window.stackedWidget.setCurrentIndex(2)
+                    self.showTimeTimer = s.SHOW_TIME_NOTHING_FOUND
+                    return
+                elif action == "BUTTON_MORE_PRODUCER_INFOS_CLICKED":
+                    # Setzte Zeit auf Maximalwert zurück: auf SHOW_PRODUCER_INFOS_TIME Anzeigezeit
+                    self.showTimeTimer = s.SHOW_PRODUCER_INFOS_TIME
+                    self.state = self.STATES.SHOW_PRODUCER_INFOS
+                    self.window.stackedWidget.setCurrentIndex(3)
+                    return
+
+                # (jede Sekunde) Sekunden-Timer-Event
+                elif action == "TIMER":
+                    # Wenn Anzeige-Zeit erreicht wurde, wechsle wieder auf Startseite / Objektzustand-"Warte auf Scan"
+                    if self.showTimeTimer > 1:
+                        self.showTimeTimer -= 1
+                    else:
+                        self.showTimeTimer = s.SHOW_TIME
+                        self.event_handler("EXIT_SHOW_DESCRIPTION")
+                    return
+                # Wenn während Informationsanzeige ein neues Produkt gescannt wird,
+                # aktualisiere die Anzeige und resette den Timer
+                elif action == "NEW_SCAN":
+                    self.newScanHandling(value)
+                    return
+
+            # Wenn gerade Information zu einem Hersteller angezeigt werden
+            elif self.state == self.STATES.SHOW_PRODUCER_INFOS:
+                # Wenn die Anzeige Zeit ausläuft und action exit aufgerufen wird
+                if action == "EXIT_SHOW_DESCRIPTION":
+                    self.window.stackedWidget.setCurrentIndex(0)
+                    self.state = self.STATES.WAIT_FOR_SCAN
+                    return
+
+                # Wenn der zurück Button gedrückt wird
+                elif action == "BUTTON_BACK_TO_INFOS_CLICKED":
                     self.showTimeTimer = s.SHOW_TIME
-                    self.event_handler("EXIT_SHOW_DESCRIPTION")
-                return
-            # Wenn während Informationsanzeige ein neues Produkt gescannt wird,
-            # aktualisiere die Anzeige und resette den Timer
-            elif action == "NEW_SCAN":
-                self.newScanHandling(value)
-                return
+                    self.state = self.STATES.SHOW_PRODUCT_DESCRIPTION
+                    self.window.stackedWidget.setCurrentIndex(1)
+                    return
 
-        # Wenn gerade Information zu einem Hersteller angezeigt werden
-        elif self.state == self.STATES.SHOW_PRODUCER_INFOS:
-            # Wenn die Anzeige Zeit ausläuft und action exit aufgerufen wird
-            if action == "EXIT_SHOW_DESCRIPTION":
-                self.window.stackedWidget.setCurrentIndex(0)
-                self.state = self.STATES.WAIT_FOR_SCAN
-                return
+                elif action == "NEW_SCAN":
+                    self.newScanHandling(value)
+                    return
 
-            # Wenn der zurück Button gedrückt wird
-            elif action == "BUTTON_BACK_TO_INFOS_CLICKED":
-                self.showTimeTimer = s.SHOW_TIME
-                self.state = self.STATES.SHOW_PRODUCT_DESCRIPTION
-                self.window.stackedWidget.setCurrentIndex(1)
-                return
+                # (jede Sekunde) Sekunden-Timer-Event
+                elif action == "TIMER":
+                    # Wenn Anzeige-Zeit erreicht wurde, wechsle wieder auf Startseite / Objektzustand-"Warte auf Scan"
+                    if self.showTimeTimer > 1:
+                        self.showTimeTimer -= 1
+                    else:
+                        self.showTimeTimer = s.SHOW_TIME
+                        self.event_handler("EXIT_SHOW_DESCRIPTION")
+                    return
 
-            elif action == "NEW_SCAN":
-                self.newScanHandling(value)
-                return
+            # Wenn ein Unbekannter Objektzustand vorliegt, wirf Exception
+            else:
+                raise Exception("Unbekannter Objektzustand: ")
 
-            # (jede Sekunde) Sekunden-Timer-Event
-            elif action == "TIMER":
-                # Wenn Anzeige-Zeit erreicht wurde, wechsle wieder auf Startseite / Objektzustand-"Warte auf Scan"
-                if self.showTimeTimer > 1:
-                    self.showTimeTimer -= 1
-                else:
-                    self.showTimeTimer = s.SHOW_TIME
-                    self.event_handler("EXIT_SHOW_DESCRIPTION")
-                return
+            if not handled:
+                print("WARNUNG: Die Aktion" + action + " wurde nicht bearbeitet!")
+                log.warning("Die Aktion {0} wurde nicht bearbeitet!".format(action))
 
-        # Wenn ein Unbekannter Objektzustand vorliegt, wirf Exception
-        else:
-            raise Exception("Unbekannter Objektzustand: ")
-
-        if not handled:
-            print("WARNUNG: Die Aktion" + action + " wurde nicht bearbeitet!")
-            log.warning("Die Aktion {0} wurde nicht bearbeitet!".format(action))
+        except Exception as e:
+            print("Handle Event ({0})[{1}] failed: [2}".format(action, value, e))
+            log.error("Handle Event ({0})[{1}] failed: [2}".format(action, value, e))
 
     # Funktion (Slot), die mit dem Signal aus MApplication verbunden ist, und bei einem Scan aufgerufen wird
     @Slot(str)

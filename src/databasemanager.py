@@ -225,12 +225,17 @@ class DataBaseManager:
                                                    / mass_table_article.fBezugsMassEinheitFaktor)
             mengen_multiplikator: float = float(article_data[0].fGrundpreisMenge / article_data[0].fMassMenge)
 
-            mengen_preis: float = round(float(float(article_data[0].fVKNetto) * einheiten_multiplikator
-                                              * mengen_multiplikator * (1.0 + s.STEUERSATZ)), 2)
+            preis = float(article_data[0].fVKNetto)
+            s_price = self.get_special_price(k_article)
+            if s_price is not None:
+                preis = float(s_price.fNettoPreis)
 
-            ret_val = str(round(article_data[0].fMassMenge, 2)) + " " + article_einheit.cName + " (" + \
-                str(round(mengen_preis, 2)) + " € / " + str(
-                round(article_data[0].fGrundpreisMenge, 2)) + " " + grundpreis_einheit.cName + ")"
+            mengen_preis: float = float(int(float(preis * einheiten_multiplikator
+                                              * mengen_multiplikator * (1.0 + s.STEUERSATZ)) * 100) / 100)
+
+            ret_val = str( float(int(float(article_data[0].fMassMenge) * 100)) / 100)  + " " + article_einheit.cName + " (" + \
+                str( float( int(mengen_preis * 100)) / 100) + " € / " + str(
+                float(int(article_data[0].fGrundpreisMenge * 100)) / 100) + " " + grundpreis_einheit.cName + ")"
 
         except Exception as exc:
             print('get_mengen_preis: {0}'.format(exc))
