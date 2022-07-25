@@ -17,6 +17,24 @@ class DataBaseManager:
     def __init__(self):
         return
 
+    @staticmethod
+    def roundToStr(num: float) -> str:
+        ret: str = str(round(num, 2))
+        splits = ret.split(".")
+
+        if str == "":
+            print("WARNING: ROUND FAILED: {0} -> {1}".format(num, ret))
+            log.warning("WARNING: ROUND FAILED: {0} -> {1}".format(num, ret))
+            return "0.00"
+        elif len(splits) == 0 or len(splits[1]) == 0:
+            return ret + ".00"
+        elif len(splits[1]) == 1:
+            return ret + "0"
+        elif len(splits[1]) == 2:
+            return ret
+        else:
+            return "0.00"
+
     def disconnect(self):
         if self.conn:
             self.conn.close()
@@ -230,12 +248,11 @@ class DataBaseManager:
             if s_price is not None:
                 preis = float(s_price.fNettoPreis)
 
-            mengen_preis: float = float(int(float(preis * einheiten_multiplikator
-                                              * mengen_multiplikator * (1.0 + s.STEUERSATZ)) * 100) / 100)
+            mengen_preis: float = float(preis * einheiten_multiplikator * mengen_multiplikator * (1.0 + s.STEUERSATZ))
 
-            ret_val = str( float(int(float(article_data[0].fMassMenge) * 100)) / 100)  + " " + article_einheit.cName + " (" + \
-                str( float( int(mengen_preis * 100)) / 100) + " € / " + str(
-                float(int(article_data[0].fGrundpreisMenge * 100)) / 100) + " " + grundpreis_einheit.cName + ")"
+            ret_val = self.roundToStr(float(article_data[0].fMassMenge)) + " " + article_einheit.cName + " (" + \
+                self.roundToStr(mengen_preis) + " € / " + self.roundToStr(float(article_data[0].fGrundpreisMenge)) + " " + \
+                grundpreis_einheit.cName + ")"
 
         except Exception as exc:
             print('get_mengen_preis: {0}'.format(exc))

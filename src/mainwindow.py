@@ -285,6 +285,8 @@ class MainWindow(QMainWindow):
                 log.warning("Load Preview Advertise failed: get_mengen_preis-object is None or inhalt == ''"
                             ", kArtikel: {0}".format(k_art))
                 return None
+            print("aaa2")
+
             if descr is None or descr.cKurzBeschreibung == "":
                 print(
                     "Load Preview Advertise failed: description-object is None or descr.cKurzBeschreibung == '' or Titel"
@@ -300,10 +302,10 @@ class MainWindow(QMainWindow):
                     self.window.textEdit_previewdescription.setAlignment(Qt.AlignCenter)
                     self.window.inhalt_preview_1.setText("Inhalt: " + inhalt)
 
-                    self.window.preis_preview_1.setText( str( float(int(preis*100)) / 100 ) + " €")
+                    self.window.preis_preview_1.setText(self.databasemanager.roundToStr(preis) + " €")
                     if s_preis is not None:
-                        p = float(s_preis.fNettoPreis) * (s.STEUERSATZ + 1)
-                        self.window.label_s_price_1.setText(str(float(int(p*100)) / 100 ) + "€ statt")
+                        p: float = float(s_preis.fNettoPreis) * (s.STEUERSATZ + 1)
+                        self.window.label_s_price_1.setText(self.databasemanager.roundToStr(p) + "€ statt")
                         self.window.preis_preview_1.font().setStrikeOut(True)
                         f = self.window.preis_preview_1.font()
                         f.setStrikeOut(True)
@@ -321,10 +323,10 @@ class MainWindow(QMainWindow):
                     self.window.textEdit_prevdescr2.setAlignment(Qt.AlignCenter)
                     self.window.inhalt_preview_2.setText("Inhalt: " + inhalt)
 
-                    self.window.preis_preview_2.setText( str(float(int(preis*100)) / 100 ) + " €")
+                    self.window.preis_preview_2.setText(self.databasemanager.roundToStr(preis) + " €")
                     if s_preis is not None:
-                        p = float(s_preis.fNettoPreis) * (s.STEUERSATZ + 1)
-                        self.window.label_s_price_2.setText(str(float(int(p*100)) / 100 ) + "€ statt")
+                        p:float = float(s_preis.fNettoPreis) * (s.STEUERSATZ + 1)
+                        self.window.label_s_price_2.setText(self.databasemanager.roundToStr(p) + "€ statt")
                         f = self.window.preis_preview_2.font()
                         f.setStrikeOut(True)
                         self.window.preis_preview_2.setFont(f)
@@ -431,7 +433,7 @@ class MainWindow(QMainWindow):
             return
 
         # Artikel Preis
-        self.window.preis.setText(str( float(int(float(data[28])*100 * (s.STEUERSATZ + 1) ) ) / 100 ) + " €")
+        self.window.preis.setText(str(self.databasemanager.roundToStr(float(data[28]) * (s.STEUERSATZ + 1))) + " €")
 
         # Artikel Inhalt
         # self.window.inhalt.setText("value")
@@ -485,7 +487,7 @@ class MainWindow(QMainWindow):
             self.special_price_red_line.show()
 
             # Aktualisiere Sonderpreis-Label mit auf 2-Stellen gerundetem Sonderpreis in €
-            self.special_price_label.setText( str( float( int( float(special_price.fNettoPreis) * (s.STEUERSATZ + 1) * 100) / 100 ) ) + " €")
+            self.special_price_label.setText(self.databasemanager.roundToStr(float(special_price.fNettoPreis) * (s.STEUERSATZ + 1)) + " €")
 
             # Berechne Position der "Streich Linie":
             # Breite des Normal-Preis-Textes (Abhängig von Schriftart und Größe)
@@ -658,8 +660,8 @@ class MainWindow(QMainWindow):
                 log.warning("Die Aktion {0} wurde nicht bearbeitet!".format(action))
 
         except Exception as e:
-            print("Handle Event ({0})[{1}] failed: [2}".format(action, value, e))
-            log.error("Handle Event ({0})[{1}] failed: [2}".format(action, value, e))
+            print("Handle Event ({0})[{1}] failed: [{2}]".format(action, value, e))
+            log.error("Handle Event ({0})[{1}] failed: [{2}]".format(action, value, e))
 
     # Funktion (Slot), die mit dem Signal aus MApplication verbunden ist, und bei einem Scan aufgerufen wird
     @Slot(str)
