@@ -56,7 +56,7 @@ log_file_delete_mode: str = "RENAME"
 ####
 
 # Pfad zur Logdatei
-log_file_path: str = './../Dokumentation/feinkostBarcodeScannerLog.log'
+log_file_path: str = './../Dokumentation/Logs/feinkostBarcodeScannerLog.log'
 
 
 ####
