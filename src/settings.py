@@ -30,7 +30,7 @@ want_reload_advertise: bool = False
 ####
 
 # Pfad zu lokaler Datenbank, die zum Speichern der Statistiken der Nutzung, sowie der Bewertung dient
-local_db_path: str = "./sqlLiteDB.db"
+local_db_path: str = "../db/sqlLiteDB.db"
 
 
 ####
@@ -62,7 +62,7 @@ log_file_path: str = './../Dokumentation/Logs/feinkostBarcodeScannerLog.log'
 ####
 
 # Pfad zu Qt-Designer Formulardatei: Die Grafik wurde nämlich mithilfe des Qt Creators erstellt.
-ui_file_path: str = "../src/form.ui"
+ui_file_path: str = "../designer-ui/form.ui"
 
 # Dauer der Zeit, wie lange die Information zu einem Produkt angezeigt werden, in Sekunden
 SHOW_TIME: int = 30
