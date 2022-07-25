@@ -22,7 +22,11 @@ if __name__ == "__main__":
     os.chdir(d_name)
 
     # Tee stderr to log and to console
-    logger.setup(s.log_file_path)
+    try:
+        logger.setup(s.log_file_path)
+    except Exception as e:
+        print("Failed to setup Logger: {0}".format(e))
+        sys.exit(99)
 
     # Wenn --help aufgerufen wird, gib kurze Information aus
     if len(sys.argv) > 1:

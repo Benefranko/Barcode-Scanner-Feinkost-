@@ -192,11 +192,12 @@ class MainWindow(QMainWindow):
         ####
 
         # Lade Liste mit Artikeln, zu denen die Vorschau angezeigt werden soll...
-        self.advertise_kArtikel_list = self.databasemanager.get_advertise_list(s.wawi_advertise_aktive_meta_keyword)
+        self.advertise_kArtikel_list = self.databasemanager.getAdvertiseList(s.wawi_advertise_aktive_meta_keyword)
         if self.advertise_kArtikel_list is None or len(self.advertise_kArtikel_list) < 2:
             print("Not more than 1 Advertise found !")
             log.warning("Not more than 1 Advertise found !")
-            return
+            self.advertise_kArtikel_list = None
+
         ####
         # EVENTS SIGNALS SLOTS TIMER
         ####
@@ -244,14 +245,14 @@ class MainWindow(QMainWindow):
         try:
             if s.want_reload_advertise:
                 s.want_reload_advertise = False
-                self.advertise_kArtikel_list = self.databasemanager.get_advertise_list(
+                self.advertise_kArtikel_list = self.databasemanager.getAdvertiseList(
                     s.wawi_advertise_aktive_meta_keyword)
                 if self.advertise_kArtikel_list is None or len(self.advertise_kArtikel_list) < 2:
                     print("Not more than 1 Advertise found !")
                     log.warning("Not more than 1 Advertise found !")
                     return
 
-            if self.window.stackedWidget_advertise.currentIndex() == 1 and self.advertise_kArtikel_list is not None:
+            if self.advertise_kArtikel_list is not None and self.window.stackedWidget_advertise.currentIndex() == 1:
                 if self.new_advertise() is not None:
                     self.window.stackedWidget_advertise.setCurrentIndex(0)
             else:
@@ -271,103 +272,112 @@ class MainWindow(QMainWindow):
         for i in range(0, 2):
             self.advertise_page_index = (self.advertise_page_index + 1) % len(self.advertise_kArtikel_list)
             k_art: int = self.advertise_kArtikel_list[self.advertise_page_index].kArtikel
+
             data = self.databasemanager.getDataBykArtikel(k_art)
-            descr = self.databasemanager.get_article_description(k_art)
-
-            preis: float = float(data.fVKNetto) * (self.databasemanager.getSteuerSatz(data.kSteuerklasse) + 1.0)
-            s_preis = self.databasemanager.get_special_price(k_article=k_art)
-            inhalt = self.databasemanager.get_mengen_preis(k_art)
-
-            if inhalt is None or inhalt == "":
-                print(
-                    "Load Preview Advertise failed: get_mengen_preis-object is None or inhalt == ''"
-                    " kArt: ", k_art)
-                log.warning("Load Preview Advertise failed: get_mengen_preis-object is None or inhalt == ''"
-                            ", kArtikel: {0}".format(k_art))
+            if data is None:
+                print("Failed to load data from advertise article k_artikel={0}".format(k_art))
+                log.error("Failed to load data from advertise article k_artikel={0}".format(k_art))
                 return None
 
-            if descr is None or descr.cKurzBeschreibung == "":
-                print(
-                    "Load Preview Advertise failed: description-object is None or descr.cKurzBeschreibung == '' or Titel"
-                    " is '', kArt: ", k_art)
-                log.warning("Load Preview Advertise failed: description-object is None or descr.cKurzBeschreibung == ''"
-                            " or Titel is '', kArtikel: {0}".format(k_art))
+            descr = self.databasemanager.getArticleDescription(k_art)
+            if descr is None:
+                print("Failed to load article description from advertise article k_artikel={0}".format(k_art))
+                log.error("Failed to load article description from advertise article k_artikel={0}".format(k_art))
                 return None
-            else:
-                if i == 0:
-                    self.window.textEdit_previewdescription.setHtml(descr.cKurzBeschreibung)
-                    self.window.Advertise_artikel_name.setText(descr.cName)
-                    self.window.textEdit_previewdescription.setFont(QFont("Arial", 14))
-                    self.window.textEdit_previewdescription.setAlignment(Qt.AlignCenter)
-                    self.window.inhalt_preview_1.setText("Inhalt: " + inhalt)
 
-                    self.window.preis_preview_1.setText(self.databasemanager.roundToStr(preis) + " €")
-                    if s_preis is not None:
-                        p: float = float(s_preis.fNettoPreis) * (self.databasemanager.getSteuerSatz(data.kSteuerklasse) + 1.0)
-                        self.window.label_s_price_1.setText(self.databasemanager.roundToStr(p) + "€ statt")
-                        self.window.preis_preview_1.font().setStrikeOut(True)
-                        f = self.window.preis_preview_1.font()
-                        f.setStrikeOut(True)
-                        self.window.preis_preview_1.setFont(f)
+            steuersatz: float = self.databasemanager.getSteuerSatz(data.kSteuerklasse)
+            if steuersatz == -1:
+                print("Failed to load steuersatz kSteuerklasse={0}".format(data.kSteuerklasse))
+                log.error("Failed to load steuersatz kSteuerklasse={0}".format(data.kSteuerklasse))
+                return None
+
+            inhalt = self.databasemanager.getMengenPreisStr(k_art)
+            if inhalt is None:
+                print("Failed to load MengenPreis from advertise article k_artikel={0}".format(k_art))
+                log.error("Failed to load MengenPreis from advertise article k_artikel={0}".format(k_art))
+                return None
+
+            preis: float = float(data.fVKNetto) * (steuersatz + 1.0)
+            s_preis = self.databasemanager.getSpecialPrice(k_article=k_art)
+
+            content = self.databasemanager.getFirstImage(data.kArtikel)
+            img: QImage = QImage()
+            if content is None or img.loadFromData(content) is False:
+                if content:
+                    print("Failed to load Image from DB: Invalid Image! (k_artikel={0})".format(k_art))
+                    log.warning("Failed to load Image from DB! Invalid Image! (k_artikel={0})".format(k_art))
+                    if i == 0:
+                        self.window.VorschauBild1.setPixmap(
+                            QPixmap("../images/kein-bild-vorhanden.webp").scaled(self.window.VorschauBild1.size() / 1.5,
+                                                                                 Qt.KeepAspectRatio,
+                                                                                 Qt.SmoothTransformation))
                     else:
-                        self.window.label_s_price_1.setText("")
-                        f = self.window.preis_preview_1.font()
-                        f.setStrikeOut(False)
-                        self.window.preis_preview_1.setFont(f)
-
-                else:
-                    self.window.textEdit_prevdescr2.setHtml(descr.cKurzBeschreibung)
-                    self.window.advertise2_articel_name.setText(descr.cName)
-                    self.window.textEdit_prevdescr2.setFont(QFont("Arial", 14))
-                    self.window.textEdit_prevdescr2.setAlignment(Qt.AlignCenter)
-                    self.window.inhalt_preview_2.setText("Inhalt: " + inhalt)
-
-                    self.window.preis_preview_2.setText(self.databasemanager.roundToStr(preis) + " €")
-                    if s_preis is not None:
-                        p: float = float(s_preis.fNettoPreis) * (self.databasemanager.getSteuerSatz(data.kSteuerklasse) + 1.0)
-                        self.window.label_s_price_2.setText(self.databasemanager.roundToStr(p) + "€ statt")
-                        f = self.window.preis_preview_2.font()
-                        f.setStrikeOut(True)
-                        self.window.preis_preview_2.setFont(f)
-
-                    else:
-                        self.window.label_s_price_2.setText("")
-                        f = self.window.preis_preview_2.font()
-                        f.setStrikeOut(False)
-                        self.window.preis_preview_2.setFont(f)
-
-            content = self.databasemanager.get_first_image(data.kArtikel)
-            if content is not None:
-                img = QImage()
-                assert img.loadFromData(content)
+                        self.window.vorschaubild2.setPixmap(
+                            QPixmap("../images/kein-bild-vorhanden.webp").scaled(self.window.VorschauBild1.size() / 1.5,
+                                                                                 Qt.KeepAspectRatio,
+                                                                                 Qt.SmoothTransformation))
+            else:
+                pix = QPixmap.fromImage(img).scaled(400, 400, Qt.KeepAspectRatio, Qt.SmoothTransformation)
                 if i == 0:
-                    self.window.VorschauBild1.setPixmap(
-                        QPixmap.fromImage(img).scaled(400, 400, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+                    self.window.VorschauBild1.setPixmap(pix)
                 else:
-                    self.window.vorschaubild2.setPixmap(
-                        QPixmap.fromImage(img).scaled(400, 400, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+                    self.window.vorschaubild2.setPixmap(pix)
+
+            if i == 0:
+                self.window.textEdit_previewdescription.setHtml(descr.cKurzBeschreibung)
+                self.window.Advertise_artikel_name.setText(descr.cName)
+                self.window.textEdit_previewdescription.setFont(QFont("Arial", 14))
+                self.window.textEdit_previewdescription.setAlignment(Qt.AlignCenter)
+                self.window.inhalt_preview_1.setText("Inhalt: " + inhalt)
+
+                self.window.preis_preview_1.setText(self.databasemanager.roundToStr(preis) + " €")
+                if s_preis is not None:
+                    p: float = float(s_preis.fNettoPreis) * (steuersatz + 1.0)
+                    self.window.label_s_price_1.setText(self.databasemanager.roundToStr(p) + "€ statt")
+                    self.window.preis_preview_1.font().setStrikeOut(True)
+                    f = self.window.preis_preview_1.font()
+                    f.setStrikeOut(True)
+                    self.window.preis_preview_1.setFont(f)
+                else:
+                    self.window.label_s_price_1.setText("")
+                    f = self.window.preis_preview_1.font()
+                    f.setStrikeOut(False)
+                    self.window.preis_preview_1.setFont(f)
 
             else:
-                # Falls kein Bild vorhanden ist, Lade das "Kein-Bild-vorhanden"-Bild
-                if i == 0:
-                    self.window.VorschauBild1.setPixmap(
-                        QPixmap("../images/kein-bild-vorhanden.webp").scaled(self.window.VorschauBild1.size() / 1.5,
-                                                                             Qt.KeepAspectRatio,
-                                                                             Qt.SmoothTransformation))
+                self.window.textEdit_prevdescr2.setHtml(descr.cKurzBeschreibung)
+                self.window.advertise2_articel_name.setText(descr.cName)
+                self.window.textEdit_prevdescr2.setFont(QFont("Arial", 14))
+                self.window.textEdit_prevdescr2.setAlignment(Qt.AlignCenter)
+                self.window.inhalt_preview_2.setText("Inhalt: " + inhalt)
+
+                self.window.preis_preview_2.setText(self.databasemanager.roundToStr(preis) + " €")
+                if s_preis is not None:
+                    p: float = float(s_preis.fNettoPreis) * (steuersatz + 1.0)
+                    self.window.label_s_price_2.setText(self.databasemanager.roundToStr(p) + "€ statt")
+                    f = self.window.preis_preview_2.font()
+                    f.setStrikeOut(True)
+                    self.window.preis_preview_2.setFont(f)
+
                 else:
-                    self.window.vorschaubild2.setPixmap(
-                        QPixmap("../images/kein-bild-vorhanden.webp").scaled(self.window.VorschauBild1.size() / 1.5,
-                                                                             Qt.KeepAspectRatio,
-                                                                             Qt.SmoothTransformation))
+                    self.window.label_s_price_2.setText("")
+                    f = self.window.preis_preview_2.font()
+                    f.setStrikeOut(False)
+                    self.window.preis_preview_2.setFont(f)
+
         return "OK"
 
     def loadHerstellerPage(self, k_artikel: str):
-        h_infos = self.databasemanager.get_hersteller_infos(k_artikel)
+        h_infos = self.databasemanager.getHerstellerInfos(k_artikel)
         if h_infos is None:
+            print("Keine Hersteller Informationen für Artikel (kArtikel={0}) vorhanden".format(k_artikel))
+            log.warning("Keine Hersteller Informationen für Artikel (kArtikel={0}) vorhanden".format(k_artikel))
             return None
 
-        h_descr = self.databasemanager.get_hersteller_description(h_infos.kHersteller)
+        h_descr = self.databasemanager.getHerstellerDescription(h_infos.kHersteller)
         if h_descr is None:
+            print("Failed to load HerstellerBeschreibung (kArtikel={0})".format(k_artikel))
+            log.warning("Failed to load HerstellerBeschreibung (kArtikel={0})".format(k_artikel))
             return None
 
         self.window.label_herstellername.setText(h_infos.cName)
@@ -382,7 +392,7 @@ class MainWindow(QMainWindow):
             self.window.label_link.hide()
             self.window.label_link_text.hide()
 
-        return "OK"
+        return h_infos.cName
 
     def newScanHandling(self, scan_article_ean: str):
         # Barcodescanner hat neues Scan registriert...
@@ -392,7 +402,7 @@ class MainWindow(QMainWindow):
 
         # Versuche Informationen vom MS SQL Server zu dem Artikel abzufragen
         try:
-            data = self.databasemanager.get_data_by_ean(int(scan_article_ean))
+            data = self.databasemanager.getDataByBarcode(int(scan_article_ean))
         except Exception as exc:
             print("INVALID SCAN: Can't cast to int: '", scan_article_ean, "': ", exc)
             log.warning("Ungültiger Scan: Can't cast to int: {0}: {1}".format(scan_article_ean, exc))
@@ -403,6 +413,20 @@ class MainWindow(QMainWindow):
             # Wenn keine Informationen zu dem Artikel gefunden werden kann, welche zu "nichts-gefunden"-Seite
             self.window.stackedWidget.setCurrentIndex(2)
             self.showTimeTimer = s.SHOW_TIME_NOTHING_FOUND
+            return
+
+        descript = self.databasemanager.getArticleDescription(data.kArtikel)
+        if descript is None:
+            print("Keine Artikelbeschreibung vorhanden! k_artikel={0}".format(data.kArtikel))
+            log.warning("Keine Artikelbeschreibung vorhanden! k_artikel={0}".format(data.kArtikel))
+            self.event_handler("LOAD_ARTICLE_FAILED", scan_article_ean)
+            return
+
+        steuersatz: float = self.databasemanager.getSteuerSatz(data.kSteuerklasse)
+        if steuersatz == -1:
+            print("Failed to get steuersatz kSteuerklasse={0}".format(data.kSteuerklasse))
+            log.error("Failed to get steuersatz kSteuerklasse={0}".format(data.kSteuerklasse))
+            self.event_handler("LOAD_ARTICLE_FAILED", scan_article_ean)
             return
 
         # Wechsle aktuelle Seite zur Startseite, um das Layout zu aktualisieren, damit auch die Positionen der
@@ -416,8 +440,8 @@ class MainWindow(QMainWindow):
         # Aktualisiere die Labels im User Interface mit den Werten aus der Datenbank...
 
         # Artikel Namen
-        if data.Artikelname != "":
-            self.window.p_name.setText(data.Artikelname)
+        if descript.cName != "":
+            self.window.p_name.setText(descript.cName)
             # Passe Font Size so an, dass ganzer Name angezeigt wird
             font: QFont = QFont("Areal")
             font.setPixelSize(s.PRODUCT_MAX_FONT_SIZE)
@@ -432,26 +456,35 @@ class MainWindow(QMainWindow):
             return
 
         # Artikel Preis
-
-        # später ändern:
-        andersdata = self.databasemanager.getDataBykArtikel(data.kArtikel)
-        self.window.preis.setText(str(self.databasemanager.roundToStr(float(data[28]) *
-                                      (self.databasemanager.getSteuerSatz(andersdata.kSteuerklasse) + 1.0))) + " €")
+        self.window.preis.setText(str(self.databasemanager.roundToStr( float(data.fVKNetto) * (steuersatz + 1.0))) + " €")
 
         # Artikel Inhalt
         # self.window.inhalt.setText("value")
 
         # Artikel Hersteller
-        if data.Hersteller is None or data.Hersteller == "":
+        hersteller = None
+        if data.kHersteller == 0:
+            print("Kein Hersteller für den Artikel k_artikel={0} vorhanden!".format(data.kArtikel))
+            log.warning("Kein Hersteller für den Artikel k_artikel={0} vorhanden!".format(data.kArtikel))
+        else:
+            hersteller = self.databasemanager.getHerstellerInfos(k_article=data.kArtikel)
+
+        if hersteller is None or hersteller.cName == "":
             self.window.hersteller.hide()
             self.window.hersteller_label.hide()
+
+            self.window.pushButton_more_infos_hersteller.hide()
         else:
-            self.window.hersteller.setText(data.Hersteller)
+            self.window.hersteller.setText(hersteller.cName)
             self.window.hersteller.show()
             self.window.hersteller_label.show()
+            # Lade Hersteller seite
+            if self.loadHerstellerPage(data.kArtikel) is not None:
+                self.window.pushButton_more_infos_hersteller.show()
+            else:
+                self.window.pushButton_more_infos_hersteller.hide()
 
         # Artikel Beschreibung - diese muss aus extra Datenbank geladen werden
-        descript = self.databasemanager.get_article_description(data.kArtikel)
         if descript is None or descript.cBeschreibung == "" \
                 or descript.cKurzBeschreibung is None or descript.cKurzBeschreibung == "":
             self.window.groupBox_beschreibung.setTitle("")
@@ -466,23 +499,25 @@ class MainWindow(QMainWindow):
 
         # Lade Grafik aus MS SQL Datenbank zu dem Artikel
         # Verwende dazu das erste vorhandene Bild, das es gibt
-        content = self.databasemanager.get_first_image(data.kArtikel)
-        if content is not None:
-            img = QImage()
-            assert img.loadFromData(content)
-            p = QPixmap.fromImage(img).scaled(self.window.img.size() / 1.3, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-            self.window.img.setPixmap(p)
-        else:
-            # Falls kein Bild vorhanden ist, Lade das "Kein-Bild-vorhanden"-Bild
+        content = self.databasemanager.getFirstImage(data.kArtikel)
+        img = QImage()
+
+        if content is None or img.loadFromData(content) is False:
+            if content:
+                print("Failed to load img from db: Invalid Img: k=artikel={0}".format(data.kArtikel))
+                log.warning("Failed to load img from db: Invalid Img: k=artikel={0}".format(data.kArtikel))
             self.window.img.setPixmap(
                 QPixmap("../images/kein-bild-vorhanden.webp").scaled(self.window.img.size() / 1.5, Qt.KeepAspectRatio,
                                                                      Qt.SmoothTransformation))
+        else:
+            p = QPixmap.fromImage(img).scaled(self.window.img.size() / 1.3, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            self.window.img.setPixmap(p)
 
         # Erneuter Seitenwechsel, um Layout-update zu erzwingen
         self.window.stackedWidget.setCurrentIndex(1)
 
         # Überprüfe, ob ein Sonderangebot im Moment vorliegt
-        special_price = self.databasemanager.get_special_price(data.kArtikel)
+        special_price = self.databasemanager.getSpecialPrice(data.kArtikel)
         # wenn ja:
         if special_price is not None:
             # Mach Sonderangebots-Label sichtbar:
@@ -491,7 +526,7 @@ class MainWindow(QMainWindow):
 
             # Aktualisiere Sonderpreis-Label mit auf 2-Stellen gerundetem Sonderpreis in €
             self.special_price_label.setText(self.databasemanager.roundToStr(float(special_price.fNettoPreis)
-                                            * (self.databasemanager.getSteuerSatz(andersdata.kSteuerklasse) + 1)) + " €")
+                                                                             * (steuersatz + 1.0)) + " €")
 
             # Berechne Position der "Streich Linie":
             # Breite des Normal-Preis-Textes (Abhängig von Schriftart und Größe)
@@ -525,32 +560,12 @@ class MainWindow(QMainWindow):
             self.special_price_label.hide()
             self.special_price_red_line.hide()
 
-        # Lade Hersteller seite
-        ret = "OK"
-        try:
-            ret = self.loadHerstellerPage(data.kArtikel)
-        except Exception as e:
-            print("Load Herstellerdata failed: {0}".format(e))
-            log.error("Load Herstellerdata failed: {0}".format(e))
-
-        if ret is not None:
-            self.window.pushButton_more_infos_hersteller.show()
-        else:
-            self.window.pushButton_more_infos_hersteller.hide()
-
-        brutto_preis = data[28] # == später netto_preis * steuersatz
-        if special_price is not None:
-            brutto_preis = float(special_price.fNettoPreis) *\
-                           (self.databasemanager.getSteuerSatz(andersdata.kSteuerklasse) + 1.0)
-
-        mengen_preis_line = self.databasemanager.get_mengen_preis(k_article=data.kArtikel)
-        if mengen_preis_line:
+        mengen_preis_line = self.databasemanager.getMengenPreisStr(k_article=data.kArtikel)
+        if mengen_preis_line is not None:
             self.window.inhalt.setText(mengen_preis_line)
             self.window.inhalt.show()
             self.window.label_inhalt.show()
         else:
-            print("WARNUNG: Konnte den Inhalt nicht laden! Produkt EAN: {0}".format(scan_article_ean))
-            log.warning("Konnte den Inhalt nicht laden! Produkt EAN: {0}".format(scan_article_ean))
             self.window.inhalt.hide()
             self.window.label_inhalt.hide()
 

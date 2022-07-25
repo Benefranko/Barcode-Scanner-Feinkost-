@@ -101,245 +101,152 @@ class DataBaseManager:
 
         return self.conn
 
-    def get_header_list(self):
+    def exec_sql(self, sql, value, fetch_one: bool = True):
         try:
             cursor = self.conn.cursor()
-            cursor.execute('SELECT * FROM ArtikelVerwaltung.vArtikelliste')
-
-            columns = [column[0] for column in cursor.description]
-            return columns
+            if value:
+                cursor.execute(sql, value)
+            else:
+                cursor.execute(sql)
+            if fetch_one:
+                return cursor.fetchone()
+            else:
+                return cursor.fetchall()
         except Exception as exc:
-            print('get_header_list failed: {0}'.format(exc))
-            log.error('get_header_list failed: {0}'.format(exc))
+            print('exec_sql failed ({0})[{1}]: {2}'.format(sql, value, exc))
+            log.error('exec_sql failed ({0})[{1}]: {2}'.format(sql, value, exc))
             return None
 
+    # AUF FEHLER NOCH CHECKEN !!
     def getSteuerSatz(self, steuerklasse) -> float:
-        try:
-            cursor = self.conn.cursor()
-            cursor.execute('SELECT fSteuersatz FROM [Mandant_1].[dbo].[tSteuersatz] WHERE fSteuersatz != 0.0'
-                           ' AND kSteuerklasse = ?', steuerklasse)
-            steuersatz = cursor.fetchone()
-            if steuersatz:
-                return float(steuersatz.fSteuersatz) / 100.0
-            else:
-                print('getSteuerSatz failed!')
-                log.error('getSteuerSatz!')
-                return -1.0
-
-        except Exception as exc:
-            print('getSteuerSatz: {0}'.format(exc))
-            log.error('getSteuerSatz: {0}'.format(exc))
+        steuersatz = self.exec_sql('SELECT fSteuersatz FROM [Mandant_1].[dbo].[tSteuersatz]'
+                                   ' WHERE fSteuersatz != 0.0 AND kSteuerklasse = ?', steuerklasse, True)
+        if steuersatz:
+            return float(steuersatz.fSteuersatz) / 100.0
+        else:
+            print('getSteuerSatz failed!')
+            log.error('getSteuerSatz!')
             return -1.0
 
-    def get_data_by_ean(self, ean):
-        try:
-            cursor = self.conn.cursor()
-            cursor.execute("SELECT * FROM ArtikelVerwaltung.vArtikelliste WHERE vArtikelliste.EAN = ?", ean)
-            row = cursor.fetchone()
-            count = len(cursor.fetchall())
-            if row is not None:
-                count += 1
-            if count != 1:
-                print("WARNUNG: Keinen oder mehrere Einträge gefunden:", count)
-                log.warning("WARNUNG: Keinen oder mehrere Einträge gefunden: {0} für Artikel EAN={1}"
-                            .format(count, ean))
-            return row
+    def getDataByBarcode(self, c_barcode):
+        return self.exec_sql("SELECT * FROM dbo.tArtikel WHERE cBarcode = ?", c_barcode, True)
 
-        except Exception as exc:
-            print('get_data_by_ean: {0}'.format(exc))
-            log.error('get_data_by_ean: {0}'.format(exc))
-            return None
+    def getDataBykArtikel(self, k_artikel):
+        return self.exec_sql("SELECT * FROM dbo.tArtikel WHERE kArtikel = ?", k_artikel, True)
 
-    def get_image_list(self):
-        try:
-            cursor = self.conn.cursor()
-            cursor.execute(
-                " SELECT  dbo.tBild.kBild, dbo.tArtikel.kArtikel, dbo.tBild.bBild FROM dbo.tBild, dbo.tArtikel,"
-                " dbo.tArtikelbildPlattform"
-                " WHERE dbo.tArtikel.kArtikel =  dbo.tArtikelbildPlattform.kArtikel "
-                " AND dbo.tArtikelbildPlattform.kPlattform = 1"
-                " AND dbo.tArtikelbildPlattform.kBild = dbo.tBild.kBild")
-            return cursor.fetchall()
+    def getImageList(self):
+        return self.exec_sql(" SELECT  dbo.tBild.kBild, dbo.tArtikel.kArtikel, dbo.tBild.bBild"
+                             " FROM dbo.tBild, dbo.tArtikel, dbo.tArtikelbildPlattform"
+                             " WHERE dbo.tArtikel.kArtikel = dbo.tArtikelbildPlattform.kArtikel "
+                             " AND dbo.tArtikelbildPlattform.kPlattform = 1"
+                             " AND dbo.tArtikelbildPlattform.kBild = dbo.tBild.kBild", None, False)
 
-        except Exception as exc:
-            print('get_image_list: {0}'.format(exc))
-            log.error('get_image_list: {0}'.format(exc))
-            return None
-
-    def get_first_image(self, k_article):
-        img_list = self.get_image_list()
+    def getFirstImage(self, k_article):
+        img_list = self.getImageList()
         if img_list is not None:
             for img in img_list:
                 if img.kArtikel == k_article:
                     return img.bBild
         return None
 
-    def get_hersteller_infos(self, k_article):
-        try:
-            cursor = self.conn.cursor()
-            cursor.execute("SELECT [dbo].[tHersteller].cName, [dbo].[tHersteller].cHomepage, "
-                           "[dbo].[tHersteller].kHersteller FROM [dbo].[tHersteller], "
-                           "[dbo].[tArtikel] "
-                           "WHERE [dbo].[tHersteller].kHersteller = [dbo].[tArtikel].kHersteller AND [dbo].["
-                           "tArtikel].kArtikel = ?", k_article)
-            hersteller = cursor.fetchone()
-            if hersteller is None:
-                print("WARNUNG: Kein hersteller gefunden!")
-                log.warning("WARNUNG: Kein hersteller gefunden: {0} ".format(k_article))
-                return None
-        except Exception as exc:
-            print('get_hersteller_infos: {0}'.format(exc))
-            log.error('get_hersteller_infos: {0}'.format(exc))
-            return None
-        return hersteller
+    def getHerstellerInfos(self, k_article):
+        return self.exec_sql("SELECT [dbo].[tHersteller].cName, [dbo].[tHersteller].cHomepage, "
+                             "[dbo].[tHersteller].kHersteller FROM [dbo].[tHersteller], [dbo].[tArtikel] "
+                             "WHERE [dbo].[tHersteller].kHersteller = [dbo].[tArtikel].kHersteller AND [dbo].["
+                             "tArtikel].kArtikel = ?", k_article)
 
-    def get_hersteller_description(self, k_hersteller):
-        try:
-            cursor = self.conn.cursor()
-            cursor.execute("SELECT cBeschreibung FROM [dbo].[tHerstellerSprache]"
-                           " WHERE kHersteller = ?", k_hersteller)
-            hersteller_desk = cursor.fetchone()
-            if hersteller_desk is None:
-                print("WARNUNG: Kein herstellerDescription gefunden!")
-                log.warning("WARNUNG: Kein herstellerDescription gefunden: {0} ".format(k_hersteller))
-                return None
-        except Exception as exc:
-            print('get_hersteller_description: {0}'.format(exc))
-            log.error('get_hersteller_description: {0}'.format(exc))
-            return None
-        return hersteller_desk
+    def getHerstellerDescription(self, k_hersteller):
+        return self.exec_sql("SELECT cBeschreibung FROM [dbo].[tHerstellerSprache]"
+                             " WHERE kHersteller = ?", k_hersteller)
 
-    def get_mengen_preis(self, k_article):
-        try:
-            # Get: kArtikel, kMassEinheit, fMassMenge, kGrundPreisEinheit, fGrundpreisMenge
-            cursor = self.conn.cursor()
-            cursor.execute(
-                "SELECT kArtikel,fVKNetto, kMassEinheit, fMassMenge, kGrundPreisEinheit, kSteuerklasse,"
-                " fGrundpreisMenge FROM "
-                "dbo.tArtikel WHERE kArtikel = ?", k_article)
-            article_data = cursor.fetchall()
-            if len(article_data) != 1:
-                print("Error keinen oder mehrere Einträge zu dem k_artikel: {0} gefunden: {1} Stück."
-                      .format(k_article, len(article_data)))
-                log.error("Error keinen oder mehrere Einträge zu dem k_artikel: {0} gefunden: {1} Stück."
-                          .format(k_article, len(article_data)))
-                return None
+    def getMengenPreisStr(self, k_article):
+        data = self.getDataBykArtikel(k_article)
+        if data is None:
+            print("Error keinen Eintrag zu dem k_artikel: {0} gefunden.".format(k_article))
+            log.warning("Error keinen Eintrag zu dem k_artikel: {0} gefunden.".format(k_article))
+            return None
 
             # Get Mengeneinheit
-            cursor.execute("SELECT * FROM dbo.tMassEinheit WHERE kMassEinheit = ?", article_data[0].kMassEinheit)
-            mass_table_article = cursor.fetchone()
-            if mass_table_article is None:
-                return None
+        if data.kMassEinheit == 0:
+            print("WARNUNG: kMassEinheit nicht festgelegt: k_artikel: {0}. -> Kann keinen Grundpreis erzeugen".
+                  format(k_article))
+            log.warning("WARNUNG: kMassEinheit nicht festgelegt: k_artikel: {0}. -> Kann keinen Grundpreis erzeugen".
+                        format(k_article))
+            return None
+        mass_table_article = self.exec_sql("SELECT * FROM dbo.tMassEinheit WHERE kMassEinheit = ?", data.kMassEinheit)
+        if mass_table_article is None:
+            return None
 
-            cursor.execute("SELECT * FROM dbo.tMassEinheit WHERE kMassEinheit = ?", article_data[0].kGrundPreisEinheit)
-            mass_table_einheit = cursor.fetchone()
-            if mass_table_einheit is None:
-                return None
+        mass_table_einheit = self.exec_sql("SELECT * FROM dbo.tMassEinheit WHERE kMassEinheit = ?",
+                                           data.kGrundPreisEinheit)
+        if mass_table_einheit is None:
+            # error
+            return None
 
             # Einheiten Namen
-            cursor.execute("SELECT * FROM dbo.tMassEinheitSprache WHERE kMassEinheit = ?", article_data[0].kMassEinheit)
-            article_einheit = cursor.fetchone()
-            if article_einheit is None:
-                return None
-
-            cursor.execute("SELECT * FROM dbo.tMassEinheitSprache WHERE kMassEinheit = ?",
-                           article_data[0].kGrundPreisEinheit)
-            grundpreis_einheit = cursor.fetchone()
-            if grundpreis_einheit is None:
-                return None
-
-            # Prevent div by 0
-            if article_data[0].fGrundpreisMenge == 0:
-                print("Error: article_data[0].fGrundpreisMenge == 0")
-                return None
-
-            # Wenn der Artikel in der Nenner Einheit gegeben ist -> In Tabelle 0 -> Zum Rechnen 1 benötigt!
-            if mass_table_einheit.fBezugsMassEinheitFaktor == 0:
-                mass_table_einheit.fBezugsMassEinheitFaktor = 1
-
-            einheiten_multiplikator: float = float(mass_table_einheit.fBezugsMassEinheitFaktor
-                                                   / mass_table_article.fBezugsMassEinheitFaktor)
-            mengen_multiplikator: float = float(article_data[0].fGrundpreisMenge / article_data[0].fMassMenge)
-
-            preis = float(article_data[0].fVKNetto)
-            s_price = self.get_special_price(k_article)
-            if s_price is not None:
-                preis = float(s_price.fNettoPreis)
-
-            mengen_preis: float = float(preis * einheiten_multiplikator * mengen_multiplikator *
-                                        (1.0 + self.getSteuerSatz( article_data[0].kSteuerklasse)))
-
-            ret_val = self.roundToStr(float(article_data[0].fMassMenge)) + " " + article_einheit.cName + " (" + \
-                self.roundToStr(mengen_preis) + " € / " + self.roundToStr(float(article_data[0].fGrundpreisMenge)) + " " + \
-                grundpreis_einheit.cName + ")"
-
-        except Exception as exc:
-            print('get_mengen_preis: {0}'.format(exc))
-            log.error('get_mengen_preis: {0}'.format(exc))
-            return None
-        return ret_val
-
-    def get_advertise_list(self, value):
-        try:
-            cursor = self.conn.cursor()
-            cursor.execute("SELECT dbo.tArtikel.kArtikel, dbo.tMerkmalWertSprache.cMetaKeywords  FROM dbo.tArtikel, "
-                           "dbo.tMerkmalWertSprache, dbo.tArtikelMerkmal "
-                           # get tArtikelMerkmal.kMerkmal from tArtikelMerkmal from kArtikel
-                           "WHERE dbo.tArtikel.kArtikel = dbo.tArtikelMerkmal.kArtikel "
-                           # get tMerkmalWertSprache line with tArtikelMerkmal.kMerkmal
-                           "AND dbo.tMerkmalWertSprache.kMerkmalWert = dbo.tArtikelMerkmal.kMerkmalWert "
-                           # get all aktive kArtikel
-                           "AND dbo.tMerkmalWertSprache.cMetaKeywords = ?", value)
-            article_list = cursor.fetchall()
-            if article_list is None:
-                print("WARNUNG: Keine Werbung gefunden!")
-                log.warning("WARNUNG: Keine Werbung gefunden!")
-                return None
-        except Exception as exc:
-            print('get_advertise_list: {0}'.format(exc))
-            log.error('get_advertise_list: {0}'.format(exc))
-            return None
-        return article_list
-
-    def get_special_price(self, k_article):
-        try:
-            cursor = self.conn.cursor()
-            cursor.execute("SELECT fNettoPreis, dEnde FROM [DbeS].[vArtikelSonderpreis] as sp WHERE sp.kArtikel = ?"
-                           " AND sp.cAktiv = 'Y'"
-                           " AND sp.dStart < GETDATE()"
-                           " AND sp.kKundenGruppe = 1", k_article)
-            # check if there are more than one special price?!
-            # if cursor.fetchall() is not None...
-            return cursor.fetchone()
-
-        except Exception as exc:
-            print('get_special_price: {0}'.format(exc))
-            log.error('get_special_price: {0}'.format(exc))
+        article_einheit = self.exec_sql("SELECT * FROM dbo.tMassEinheitSprache WHERE kMassEinheit = ?",
+                                        data.kMassEinheit)
+        if article_einheit is None:
+            # error
             return None
 
-    def getDataBykArtikel(self, kArtikel):
-        try:
-            cursor = self.conn.cursor()
-            cursor.execute("SELECT * FROM dbo.tArtikel WHERE kArtikel = ?", kArtikel)
-            # check if there are more than one special price?!
-            # if cursor.fetchall() is not None...
-            return cursor.fetchone()
+        grundpreis_einheit = self.exec_sql("SELECT * FROM dbo.tMassEinheitSprache WHERE kMassEinheit = ?",
+                                           data.kGrundPreisEinheit)
 
-        except Exception as exc:
-            print('getDataBykArtikel: {0}'.format(exc))
-            log.error('getDataBykArtikel: {0}'.format(exc))
+        steuersatz = self.getSteuerSatz(data.kSteuerklasse)
+        if steuersatz == -1:
+            # error
             return None
 
-    def get_article_description(self, k_article):
-        try:
-            cursor = self.conn.cursor()
-            cursor.execute("SELECT cBeschreibung ,cKurzBeschreibung, cName FROM [dbo].[tArtikelBeschreibung] WHERE"
-                           " dbo.tArtikelBeschreibung.kArtikel = ?", k_article)
-            # check if there are more than one special price?!
-            # if cursor.fetchall() is not None...
-            return cursor.fetchone()
-
-        except Exception as exc:
-            print('get_article_description: {0}'.format(exc))
-            log.error('get_article_description: {0}'.format(exc))
+        if grundpreis_einheit is None:
+            # error
             return None
+
+        # Prevent div by 0
+        if data.fMassMenge == 0:
+            print("Error: data.fMassMenge == 0")
+            return None
+
+        if mass_table_article.fBezugsMassEinheitFaktor == 0:
+            print("Error: mass_table_article.fBezugsMassEinheitFaktor == 0")
+            return None
+
+        # Wenn der Artikel in der Nenner Einheit gegeben ist -> In Tabelle 0 -> Zum Rechnen 1 benötigt!
+        mass_bezugs_faktor = mass_table_einheit.fBezugsMassEinheitFaktor
+        if mass_bezugs_faktor == 0:
+            mass_bezugs_faktor = 1
+
+        einheiten_multiplikator: float = float( mass_bezugs_faktor / mass_table_article.fBezugsMassEinheitFaktor )
+        mengen_multiplikator: float = float(data.fGrundpreisMenge / data.fMassMenge)
+
+        preis = float(data.fVKNetto)
+        s_price = self.getSpecialPrice(k_article)
+        if s_price is not None:
+            preis = float(s_price.fNettoPreis)
+
+        mengen_preis: float = float(preis * einheiten_multiplikator * mengen_multiplikator * (1.0 + steuersatz))
+
+        return self.roundToStr(float(data.fMassMenge)) + " " + article_einheit.cName + " (" + \
+            self.roundToStr(mengen_preis) + " € / " + self.roundToStr(float(data.fGrundpreisMenge)) + " " + \
+            grundpreis_einheit.cName + ")"
+
+    def getAdvertiseList(self, value):
+        return self.exec_sql("SELECT dbo.tArtikel.kArtikel, dbo.tMerkmalWertSprache.cMetaKeywords"
+                             " FROM dbo.tArtikel, dbo.tMerkmalWertSprache, dbo.tArtikelMerkmal "
+                             # get tArtikelMerkmal.kMerkmal from tArtikelMerkmal from kArtikel
+                             "WHERE dbo.tArtikel.kArtikel = dbo.tArtikelMerkmal.kArtikel "
+                             # get tMerkmalWertSprache line with tArtikelMerkmal.kMerkmal
+                             "AND dbo.tMerkmalWertSprache.kMerkmalWert = dbo.tArtikelMerkmal.kMerkmalWert "
+                             # get all aktive kArtikel
+                             "AND dbo.tMerkmalWertSprache.cMetaKeywords = ?", value, False)
+
+    def getSpecialPrice(self, k_article):
+        return self.exec_sql("SELECT fNettoPreis, dEnde FROM [DbeS].[vArtikelSonderpreis] as sp WHERE sp.kArtikel = ?"
+                             " AND sp.cAktiv = 'Y'"
+                             " AND sp.dStart < GETDATE()"
+                             " AND sp.kKundenGruppe = 1", k_article)
+
+    def getArticleDescription(self, k_article):
+        return self.exec_sql("SELECT cBeschreibung ,cKurzBeschreibung, cName FROM [dbo].[tArtikelBeschreibung] WHERE"
+                             " dbo.tArtikelBeschreibung.kArtikel = ?", k_article)
+
