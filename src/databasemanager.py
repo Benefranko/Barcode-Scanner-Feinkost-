@@ -60,8 +60,7 @@ class DataBaseManager:
                     print("Verwende Driver: ODBC Driver 18 for SQL Server...")
                     log.debug("Verwende Driver: ODBC Driver 18 for SQL Server...")
 
-                    self.conn = pyodbc.connect(driver=s.SQL_DRIVER_USED_VERSION_MS_DRIVER, server=ip + "," +
-                                                                                                  str(port),
+                    self.conn = pyodbc.connect(driver=s.SQL_DRIVER_USED_VERSION_MS_DRIVER, server=ip + "," + str(port),
                                                database=db,
                                                user=usr,
                                                password=pw,
@@ -113,6 +112,24 @@ class DataBaseManager:
             print('get_header_list failed: {0}'.format(exc))
             log.error('get_header_list failed: {0}'.format(exc))
             return None
+
+    def getSteuerSatz(self, steuerklasse) -> float:
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute('SELECT fSteuersatz FROM [Mandant_1].[dbo].[tSteuersatz] WHERE fSteuersatz != 0.0'
+                           ' AND kSteuerklasse = ?', steuerklasse)
+            steuersatz = cursor.fetchone()
+            if steuersatz:
+                return float(steuersatz.fSteuersatz) / 100.0
+            else:
+                print('getSteuerSatz failed!')
+                log.error('getSteuerSatz!')
+                return -1.0
+
+        except Exception as exc:
+            print('getSteuerSatz: {0}'.format(exc))
+            log.error('getSteuerSatz: {0}'.format(exc))
+            return -1.0
 
     def get_data_by_ean(self, ean):
         try:
@@ -197,7 +214,8 @@ class DataBaseManager:
             # Get: kArtikel, kMassEinheit, fMassMenge, kGrundPreisEinheit, fGrundpreisMenge
             cursor = self.conn.cursor()
             cursor.execute(
-                "SELECT kArtikel,fVKNetto, kMassEinheit, fMassMenge, kGrundPreisEinheit, fGrundpreisMenge FROM "
+                "SELECT kArtikel,fVKNetto, kMassEinheit, fMassMenge, kGrundPreisEinheit, kSteuerklasse,"
+                " fGrundpreisMenge FROM "
                 "dbo.tArtikel WHERE kArtikel = ?", k_article)
             article_data = cursor.fetchall()
             if len(article_data) != 1:
@@ -248,7 +266,8 @@ class DataBaseManager:
             if s_price is not None:
                 preis = float(s_price.fNettoPreis)
 
-            mengen_preis: float = float(preis * einheiten_multiplikator * mengen_multiplikator * (1.0 + s.STEUERSATZ))
+            mengen_preis: float = float(preis * einheiten_multiplikator * mengen_multiplikator *
+                                        (1.0 + self.getSteuerSatz( article_data[0].kSteuerklasse)))
 
             ret_val = self.roundToStr(float(article_data[0].fMassMenge)) + " " + article_einheit.cName + " (" + \
                 self.roundToStr(mengen_preis) + " € / " + self.roundToStr(float(article_data[0].fGrundpreisMenge)) + " " + \

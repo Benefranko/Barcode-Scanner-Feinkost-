@@ -25,8 +25,6 @@ wawi_advertise_aktive_meta_keyword: str = 'ANZEIGEN=TRUE'
 
 want_reload_advertise: bool = False
 
-STEUERSATZ = 0.19
-
 ####
 # SQL Lite Datenbank
 ####

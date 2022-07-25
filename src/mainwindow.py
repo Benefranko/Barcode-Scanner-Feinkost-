@@ -3,7 +3,7 @@ from PySide2.QtCore import QFile, QTimerEvent, Qt, QIODevice
 from PySide2.QtCore import Slot
 from PySide2.QtGui import QImage, QPixmap, QFontMetrics, QFont
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QLabel, QFrame, QVBoxLayout, QWidget, QLayout, QLayoutItem
+from PySide2.QtWidgets import QLabel, QFrame, QWidget, QLayout, QLayoutItem
 from PySide2.QtWidgets import QMainWindow
 
 from databasemanager import DataBaseManager
@@ -274,7 +274,7 @@ class MainWindow(QMainWindow):
             data = self.databasemanager.getDataBykArtikel(k_art)
             descr = self.databasemanager.get_article_description(k_art)
 
-            preis: float = float(data.fVKNetto) * (s.STEUERSATZ + 1)
+            preis: float = float(data.fVKNetto) * (self.databasemanager.getSteuerSatz(data.kSteuerklasse) + 1.0)
             s_preis = self.databasemanager.get_special_price(k_article=k_art)
             inhalt = self.databasemanager.get_mengen_preis(k_art)
 
@@ -285,7 +285,6 @@ class MainWindow(QMainWindow):
                 log.warning("Load Preview Advertise failed: get_mengen_preis-object is None or inhalt == ''"
                             ", kArtikel: {0}".format(k_art))
                 return None
-            print("aaa2")
 
             if descr is None or descr.cKurzBeschreibung == "":
                 print(
@@ -304,7 +303,7 @@ class MainWindow(QMainWindow):
 
                     self.window.preis_preview_1.setText(self.databasemanager.roundToStr(preis) + " €")
                     if s_preis is not None:
-                        p: float = float(s_preis.fNettoPreis) * (s.STEUERSATZ + 1)
+                        p: float = float(s_preis.fNettoPreis) * (self.databasemanager.getSteuerSatz(data.kSteuerklasse) + 1.0)
                         self.window.label_s_price_1.setText(self.databasemanager.roundToStr(p) + "€ statt")
                         self.window.preis_preview_1.font().setStrikeOut(True)
                         f = self.window.preis_preview_1.font()
@@ -325,7 +324,7 @@ class MainWindow(QMainWindow):
 
                     self.window.preis_preview_2.setText(self.databasemanager.roundToStr(preis) + " €")
                     if s_preis is not None:
-                        p:float = float(s_preis.fNettoPreis) * (s.STEUERSATZ + 1)
+                        p: float = float(s_preis.fNettoPreis) * (self.databasemanager.getSteuerSatz(data.kSteuerklasse) + 1.0)
                         self.window.label_s_price_2.setText(self.databasemanager.roundToStr(p) + "€ statt")
                         f = self.window.preis_preview_2.font()
                         f.setStrikeOut(True)
@@ -433,7 +432,11 @@ class MainWindow(QMainWindow):
             return
 
         # Artikel Preis
-        self.window.preis.setText(str(self.databasemanager.roundToStr(float(data[28]) * (s.STEUERSATZ + 1))) + " €")
+
+        # später ändern:
+        andersdata = self.databasemanager.getDataBykArtikel(data.kArtikel)
+        self.window.preis.setText(str(self.databasemanager.roundToStr(float(data[28]) *
+                                      (self.databasemanager.getSteuerSatz(andersdata.kSteuerklasse) + 1.0))) + " €")
 
         # Artikel Inhalt
         # self.window.inhalt.setText("value")
@@ -487,7 +490,8 @@ class MainWindow(QMainWindow):
             self.special_price_red_line.show()
 
             # Aktualisiere Sonderpreis-Label mit auf 2-Stellen gerundetem Sonderpreis in €
-            self.special_price_label.setText(self.databasemanager.roundToStr(float(special_price.fNettoPreis) * (s.STEUERSATZ + 1)) + " €")
+            self.special_price_label.setText(self.databasemanager.roundToStr(float(special_price.fNettoPreis)
+                                            * (self.databasemanager.getSteuerSatz(andersdata.kSteuerklasse) + 1)) + " €")
 
             # Berechne Position der "Streich Linie":
             # Breite des Normal-Preis-Textes (Abhängig von Schriftart und Größe)
@@ -536,7 +540,8 @@ class MainWindow(QMainWindow):
 
         brutto_preis = data[28] # == später netto_preis * steuersatz
         if special_price is not None:
-            brutto_preis = float(special_price.fNettoPreis) * (s.STEUERSATZ + 1)
+            brutto_preis = float(special_price.fNettoPreis) *\
+                           (self.databasemanager.getSteuerSatz(andersdata.kSteuerklasse) + 1.0)
 
         mengen_preis_line = self.databasemanager.get_mengen_preis(k_article=data.kArtikel)
         if mengen_preis_line:
