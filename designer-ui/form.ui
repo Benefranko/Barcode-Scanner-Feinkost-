@@ -42,7 +42,7 @@ QWidget#Widget { background-color: &quot;white&quot; }</string>
    <item>
     <widget class="QStackedWidget" name="stackedWidget">
      <property name="currentIndex">
-      <number>3</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="page_1">
       <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -294,6 +294,9 @@ QWidget#Widget { background-color: &quot;white&quot; }</string>
                       <font>
                        <pointsize>15</pointsize>
                       </font>
+                     </property>
+                     <property name="focusPolicy">
+                      <enum>Qt::WheelFocus</enum>
                      </property>
                      <property name="frameShape">
                       <enum>QFrame::NoFrame</enum>
@@ -548,6 +551,9 @@ p, li { white-space: pre-wrap; }
                    <font>
                     <pointsize>15</pointsize>
                    </font>
+                  </property>
+                  <property name="focusPolicy">
+                   <enum>Qt::WheelFocus</enum>
                   </property>
                   <property name="frameShape">
                    <enum>QFrame::NoFrame</enum>
@@ -851,6 +857,35 @@ p, li { white-space: pre-wrap; }
          </property>
         </spacer>
        </item>
+       <item>
+        <widget class="QLabel" name="label_waiting_for_scan">
+         <property name="font">
+          <font>
+           <pointsize>15</pointsize>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Warten auf Scan</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_27">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="page_2">
@@ -1089,6 +1124,57 @@ p, li { white-space: pre-wrap; }
             </widget>
            </item>
            <item>
+            <spacer name="verticalSpacer_26">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Fixed</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>10</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_13">
+             <item>
+              <widget class="QLabel" name="label_6">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>18</pointsize>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Verfügbar:/Auf Lager:/?:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_9">
+               <property name="font">
+                <font>
+                 <pointsize>18</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>0 Stück</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
             <spacer name="verticalSpacer_14">
              <property name="orientation">
               <enum>Qt::Vertical</enum>
@@ -1224,7 +1310,7 @@ border: 0px solid red; </string>
                    </font>
                   </property>
                   <property name="focusPolicy">
-                   <enum>Qt::NoFocus</enum>
+                   <enum>Qt::WheelFocus</enum>
                   </property>
                   <property name="frameShape">
                    <enum>QFrame::NoFrame</enum>
@@ -1591,6 +1677,9 @@ border: 0px solid red; </string>
             <font>
              <pointsize>12</pointsize>
             </font>
+           </property>
+           <property name="focusPolicy">
+            <enum>Qt::WheelFocus</enum>
            </property>
            <property name="frameShape">
             <enum>QFrame::NoFrame</enum>

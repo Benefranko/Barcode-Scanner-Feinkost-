@@ -28,6 +28,8 @@ class MainWindow(QMainWindow):
     timerID: int = -1
     # Auf Hauptseite: Unterseite für Werbungen: Index
     advertise_page_index: int = 0
+    # counter for waitingPoints
+    waiting_points_counter: int = 0
 
     # Objects
     # DataBaseManager für MS SQL Anbindung
@@ -588,15 +590,21 @@ class MainWindow(QMainWindow):
 
             # Zustands unabhängige Aktionen:
 
-            # Zustands spezifische Aktionen:
-            # Zustand: Warte für Barcode Scan:
-            if self.state == self.STATES.WAIT_FOR_SCAN:
+            if self.state != self.STATES.UNKNOWN:
                 # Es wurde ein Barcode gescannt-> Ermittle Informationen und zeige diese an
                 if action == "NEW_SCAN":
                     self.newScanHandling(value)
-                    return
+                    handled = True
+                elif action == "TIMER":
+                    self.waiting_points_counter = (self.waiting_points_counter + 1) % 4
+                    self.window.label_waiting_for_scan.setText("Warten auf Scan" + self.waiting_points_counter * ".")
+
+            # Zustands spezifische Aktionen:
+            # Zustand: Warte für Barcode Scan:
+            if self.state == self.STATES.WAIT_FOR_SCAN:
+
                 # Timer wurde erreicht-> Wechsle die Warte-Auf-Eingabe Seite, bzw zeige neue Werbung an
-                elif action == "CHANGE_ADVERTISE":
+                if action == "CHANGE_ADVERTISE":
                     self.switchArtikelPreViewPageAndStartPage()
                     return
                 # (jede Sekunde) Sekunden-Timer-Event
@@ -638,9 +646,6 @@ class MainWindow(QMainWindow):
                     return
                 # Wenn während Informationsanzeige ein neues Produkt gescannt wird,
                 # aktualisiere die Anzeige und resette den Timer
-                elif action == "NEW_SCAN":
-                    self.newScanHandling(value)
-                    return
 
             # Wenn gerade Information zu einem Hersteller angezeigt werden
             elif self.state == self.STATES.SHOW_PRODUCER_INFOS:
@@ -655,10 +660,6 @@ class MainWindow(QMainWindow):
                     self.showTimeTimer = s.SHOW_TIME
                     self.state = self.STATES.SHOW_PRODUCT_DESCRIPTION
                     self.window.stackedWidget.setCurrentIndex(1)
-                    return
-
-                elif action == "NEW_SCAN":
-                    self.newScanHandling(value)
                     return
 
                 # (jede Sekunde) Sekunden-Timer-Event
