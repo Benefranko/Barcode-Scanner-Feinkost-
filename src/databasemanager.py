@@ -113,8 +113,8 @@ class DataBaseManager:
             else:
                 return cursor.fetchall()
         except Exception as exc:
-            print('exec_sql failed ({0})[{1}]: {2}'.format(sql, value, exc))
-            log.error('exec_sql failed ({0})[{1}]: {2}'.format(sql, value, exc))
+            print('        exec_sql failed ({0})[{1}]: {2}'.format(sql, value, exc))
+            log.error('        exec_sql failed ({0})[{1}]: {2}'.format(sql, value, exc))
             return None
 
     # AUF FEHLER NOCH CHECKEN !!
@@ -162,15 +162,15 @@ class DataBaseManager:
     def getMengenPreisStr(self, k_article):
         data = self.getDataBykArtikel(k_article)
         if data is None:
-            print("Error keinen Eintrag zu dem k_artikel: {0} gefunden.".format(k_article))
-            log.warning("Error keinen Eintrag zu dem k_artikel: {0} gefunden.".format(k_article))
+            print("        Error keinen Eintrag zu dem k_artikel: {0} gefunden.".format(k_article))
+            log.warning("        Error keinen Eintrag zu dem k_artikel: {0} gefunden.".format(k_article))
             return None
 
             # Get Mengeneinheit
         if data.kMassEinheit == 0:
-            print("WARNUNG: kMassEinheit nicht festgelegt: k_artikel: {0}. -> Kann keinen Grundpreis erzeugen".
+            print("        WARNUNG: kMassEinheit nicht festgelegt: k_artikel: {0}. -> Kann keinen Grundpreis erzeugen".
                   format(k_article))
-            log.warning("WARNUNG: kMassEinheit nicht festgelegt: k_artikel: {0}. -> Kann keinen Grundpreis erzeugen".
+            log.warning("        WARNUNG: kMassEinheit nicht festgelegt: k_artikel: {0}. -> Kann keinen Grundpreis erzeugen".
                         format(k_article))
             return None
         mass_table_article = self.exec_sql("SELECT * FROM dbo.tMassEinheit WHERE kMassEinheit = ?", data.kMassEinheit)
@@ -204,11 +204,10 @@ class DataBaseManager:
 
         # Prevent div by 0
         if data.fMassMenge == 0:
-            print("Error: data.fMassMenge == 0")
+            print("        Error: data.fMassMenge == 0")
             return None
-
-        if mass_table_article.fBezugsMassEinheitFaktor == 0:
-            print("Error: mass_table_article.fBezugsMassEinheitFaktor == 0")
+        if data.fGrundpreisMenge == 0:
+            print("        Error: data.fGrundpreisMenge == 0")
             return None
 
         # Wenn der Artikel in der Nenner Einheit gegeben ist -> In Tabelle 0 -> Zum Rechnen 1 benötigt!
@@ -216,7 +215,11 @@ class DataBaseManager:
         if mass_bezugs_faktor == 0:
             mass_bezugs_faktor = 1
 
-        einheiten_multiplikator: float = float( mass_bezugs_faktor / mass_table_article.fBezugsMassEinheitFaktor )
+        article_bezugs_faktor = mass_table_article.fBezugsMassEinheitFaktor
+        if article_bezugs_faktor == 0:
+            article_bezugs_faktor = 1
+
+        einheiten_multiplikator: float = float( mass_bezugs_faktor / article_bezugs_faktor )
         mengen_multiplikator: float = float(data.fGrundpreisMenge / data.fMassMenge)
 
         preis = float(data.fVKNetto)

@@ -525,6 +525,9 @@ p, li { white-space: pre-wrap; }
                   <property name="text">
                    <string>vorschaubild2</string>
                   </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
                  </widget>
                 </item>
                 <item>
