@@ -300,7 +300,7 @@ class MainWindow(QMainWindow):
 
                     self.advertise_kArtikel_list[self.advertise_page_index] = None
                     print("  DEBUG: NEUE LISTE MIT WERBUNG:  {0}".format( self.advertise_kArtikel_list))
-                    log.debug("  DEBUG: NEUE LISTE MIT WERBUNG:  {0}".format( self.advertise_kArtikel_list))
+                    log.debug("  NEUE LISTE MIT WERBUNG:  {0}".format( self.advertise_kArtikel_list))
 
                 # Wähle neue aus...
                 self.advertise_page_index = (self.advertise_page_index + 1) % len(self.advertise_kArtikel_list)

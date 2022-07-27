@@ -234,7 +234,7 @@ class DataBaseManager:
             grundpreis_einheit.cName + ")"
 
     def getAdvertiseList(self, value):
-        return self.exec_sql("SELECT dbo.tArtikel.kArtikel, dbo.tMerkmalWertSprache.cMetaKeywords"
+        return self.exec_sql("SELECT dbo.tArtikel.kArtikel"
                              " FROM dbo.tArtikel, dbo.tMerkmalWertSprache, dbo.tArtikelMerkmal "
                              # get tArtikelMerkmal.kMerkmal from tArtikelMerkmal from kArtikel
                              "WHERE dbo.tArtikel.kArtikel = dbo.tArtikelMerkmal.kArtikel "
