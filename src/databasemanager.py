@@ -23,7 +23,6 @@ class DataBaseManager:
         splits = ret.split(".")
 
         if str == "":
-            print("WARNING: ROUND FAILED: {0} -> {1}".format(num, ret))
             log.warning("WARNING: ROUND FAILED: {0} -> {1}".format(num, ret))
             return "0.00"
         elif len(splits) == 0 or len(splits[1]) == 0:
@@ -57,7 +56,6 @@ class DataBaseManager:
                 # Verbinde mit MS SQl server unter verwendung des extern installierten ODBC Driver 18
                 driver_names = pyodbc.drivers()
                 if "ODBC Driver 18 for SQL Server" in driver_names:
-                    print("Verwende Driver: ODBC Driver 18 for SQL Server...")
                     log.debug("Verwende Driver: ODBC Driver 18 for SQL Server...")
 
                     self.conn = pyodbc.connect(driver=s.SQL_DRIVER_USED_VERSION_MS_DRIVER, server=ip + "," + str(port),
@@ -65,34 +63,26 @@ class DataBaseManager:
                                                user=usr,
                                                password=pw,
                                                encrypt="no")
-                    print("Erfolgreich mit MS SQL Server verbunden über ODBC Driver 18")
-                    log.info("Erfolgreich mit MS SQL Server verbunden über ODBC Driver 18")
+                    log.info("  -> Erfolgreich mit MS SQL Server verbunden über ODBC Driver 18")
 
                     break
 
                 elif "FreeTDS" in driver_names:
-                    print("Verwende Driver: FreeTDS ", s.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION, "...")
                     log.debug("Verwende Driver: FreeTDS {0} ...".format(s.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION))
 
                     self.conn = pyodbc.connect('DRIVER={0}; SERVER={1}; PORT={2}; DATABASE={3}; UID={4}; PWD={5}; '
                                                'TDS_Version={6};'.format(s.SQL_DRIVER_USED_VERSION_FreeTDS,
                                                                          ip, port, db, usr, pw,
                                                                          s.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION))
-                    print("Erfolgreich mit MS SQL Server verbunden über FreeTDS Driver "
-                          + s.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION)
                     log.info("Erfolgreich mit MS SQL Server verbunden über FreeTDS Driver {0} ".format(
                         s.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION))
                     break
                 else:
-                    print('Error: No suitable driver found. Cannot connect.')
                     log.critical('Error: No suitable driver found. Cannot connect.')
-                    print("All installed driver: ", pyodbc.drivers())
                     log.debug("All installed driver: {0}".format(pyodbc.drivers()))
                     self.conn = None
                     break
             except Exception as exc:
-                print('Connect to Database failed. ( Try: {0}/10 )'.format(i + 1), " Error: ", exc,
-                      " Warte 1 Sekunde...")
                 log.warning('Connect to Database failed. ( Try: {0}/10 ) Error: {1} - Warte 1 Sekunde...'
                             .format(i + 1, exc))
 
@@ -113,7 +103,6 @@ class DataBaseManager:
             else:
                 return cursor.fetchall()
         except Exception as exc:
-            print('        exec_sql failed ({0})[{1}]: {2}'.format(sql, value, exc))
             log.error('        exec_sql failed ({0})[{1}]: {2}'.format(sql, value, exc))
             return None
 
@@ -124,8 +113,7 @@ class DataBaseManager:
         if steuersatz:
             return float(steuersatz.fSteuersatz) / 100.0
         else:
-            print('getSteuerSatz failed!')
-            log.error('getSteuerSatz!')
+            log.error('        getSteuerSatz failed!')
             return -1.0
 
     def getDataByBarcode(self, c_barcode):
@@ -162,52 +150,63 @@ class DataBaseManager:
     def getMengenPreisStr(self, k_article):
         data = self.getDataBykArtikel(k_article)
         if data is None:
-            print("        Error keinen Eintrag zu dem k_artikel: {0} gefunden.".format(k_article))
-            log.warning("        Error keinen Eintrag zu dem k_artikel: {0} gefunden.".format(k_article))
+            log.warning("        Kein Eintrag zu dem k_artikel: {0} gefunden.".format(k_article))
             return None
 
             # Get Mengeneinheit
         if data.kMassEinheit == 0:
-            print("        WARNUNG: kMassEinheit nicht festgelegt: k_artikel: {0}. -> Kann keinen Grundpreis erzeugen".
-                  format(k_article))
-            log.warning("        WARNUNG: kMassEinheit nicht festgelegt: k_artikel: {0}. -> Kann keinen Grundpreis erzeugen".
+            log.warning("        (!) kMassEinheit nicht festgelegt: k_artikel: {0}. -> Kann keinen Grundpreis erzeugen".
                         format(k_article))
             return None
         mass_table_article = self.exec_sql("SELECT * FROM dbo.tMassEinheit WHERE kMassEinheit = ?", data.kMassEinheit)
         if mass_table_article is None:
+            log.warning("        (!) dbo.tMassEinheit für .kMassEinheit bei k_artikel: {0} nicht gefunden. "
+                        "-> Kann keinen Grundpreis erzeugen".
+                        format(k_article))
             return None
 
         mass_table_einheit = self.exec_sql("SELECT * FROM dbo.tMassEinheit WHERE kMassEinheit = ?",
                                            data.kGrundPreisEinheit)
         if mass_table_einheit is None:
-            # error
+            log.warning("        (!) dbo.tMassEinheit für .kGrundPreisEinheit bei k_artikel: {0} nicht gefunden. "
+                        "-> Kann keinen Grundpreis erzeugen".
+                        format(k_article))
             return None
 
             # Einheiten Namen
         article_einheit = self.exec_sql("SELECT * FROM dbo.tMassEinheitSprache WHERE kMassEinheit = ?",
                                         data.kMassEinheit)
         if article_einheit is None:
-            # error
+            log.warning("        (!) dbo.tMassEinheitSprache für .kMassEinheit bei k_artikel: {0} nicht gefunden. "
+                        "-> Kann keinen Grundpreis erzeugen".
+                        format(k_article))
+            return None
+
+        steuersatz = self.getSteuerSatz(data.kSteuerklasse)
+        if steuersatz == -1:
+            log.warning("        (!) getSteuerSatz() ist fehlgeschlagen für: k_artikel: {0}. "
+                        "-> Kann keinen Grundpreis erzeugen".
+                        format(k_article))
             return None
 
         grundpreis_einheit = self.exec_sql("SELECT * FROM dbo.tMassEinheitSprache WHERE kMassEinheit = ?",
                                            data.kGrundPreisEinheit)
-
-        steuersatz = self.getSteuerSatz(data.kSteuerklasse)
-        if steuersatz == -1:
-            # error
-            return None
-
         if grundpreis_einheit is None:
-            # error
+            log.warning("        (!) dbo.tMassEinheitSprache für data.kGrundPreisEinheit bei: k_artikel: {0}"
+                        " nicht gefunden. -> Kann keinen Grundpreis erzeugen".
+                        format(k_article))
             return None
 
         # Prevent div by 0
         if data.fMassMenge == 0:
-            print("        Error: data.fMassMenge == 0")
+            log.warning("        (!) Error: data.fMassMenge == 0 bei: k_artikel: {0}. "
+                        "-> Kann keinen Grundpreis erzeugen".
+                        format(k_article))
             return None
         if data.fGrundpreisMenge == 0:
-            print("        Error: data.fGrundpreisMenge == 0")
+            log.warning("        (!) Error: data.fGrundpreisMenge == 0 bei: k_artikel: {0}. "
+                        "-> Kann keinen Grundpreis erzeugen".
+                        format(k_article))
             return None
 
         # Wenn der Artikel in der Nenner Einheit gegeben ist -> In Tabelle 0 -> Zum Rechnen 1 benötigt!

@@ -23,7 +23,6 @@ class LocalDataBaseManager:
         with contextlib.closing(self.connection.cursor()) as c:
             c.execute(self.sql_create_table)
             log.info("Erfolgreich mit lokaler SQL Lite Datenbank verbunden und Tables erstellt!")
-            print("Erfolgreich mit lokaler SQL Lite Datenbank verbunden und Tables erstellt!")
 
     def disconnect(self):
         self.connection.close()
@@ -32,13 +31,11 @@ class LocalDataBaseManager:
     def connect(self, file_path):
         try:
             if self.connection is not None:
-                print("WARNING: Already Connected")
                 log.warning("WARNING: Try to connect, but already Connected!")
                 return self.connection
             else:
                 self.connection = sqlite3.connect(file_path)
         except Error as exc:
-            print('critical error occurred: {0}'.format(exc))
             log.critical("Konnte keine Verbindung zur lokalen SQL Lite Datenbank herstellen!")
             self.connection = None
             return None

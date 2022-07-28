@@ -69,15 +69,14 @@ if __name__ == "__main__":
         m_win.cleanUp()
 
     except Exception as exc:
-        print("\nError: Critical: ", exc)
-        log.critical(exc)
+        log.critical("\nError: Critical: {0}".format(exc))
+        if ret == 0:
+            ret = -1
 
     # Stoppe lokalen Server und beende das Programm
     w_server.stop_listen()
-    log.info("Programm Stop: {0}\n----------------------------------------------------------------"
-             .format(datetime.datetime.now()))
+    log.info("-> exit({0}) -> Programm Stop um: {1}\n----------------------------------------------------------------"
+             .format(ret, datetime.datetime.now()))
 
     logger.cleanup()
-
-    print("Programm wird mit Rückgabewert ({0}) beendet.".format(ret))
     sys.exit(ret)

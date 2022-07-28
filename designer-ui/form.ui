@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1210</width>
-    <height>720</height>
+    <height>796</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -148,7 +148,20 @@ QWidget#Widget { background-color: &quot;white&quot; }</string>
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>40</height>
+           <height>10</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_28">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>10</height>
           </size>
          </property>
         </spacer>
@@ -165,8 +178,8 @@ QWidget#Widget { background-color: &quot;white&quot; }</string>
           <number>0</number>
          </property>
          <widget class="QWidget" name="page_5">
-          <layout class="QGridLayout" name="gridLayout_8">
-           <item row="0" column="0">
+          <layout class="QHBoxLayout" name="horizontalLayout_16">
+           <item>
             <widget class="QGroupBox" name="groupBoxAdvertise">
              <property name="font">
               <font>
@@ -193,9 +206,22 @@ QWidget#Widget { background-color: &quot;white&quot; }</string>
                </spacer>
               </item>
               <item>
+               <spacer name="horizontalSpacer_23">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
                <widget class="QFrame" name="frame_2">
                 <property name="frameShape">
-                 <enum>QFrame::StyledPanel</enum>
+                 <enum>QFrame::NoFrame</enum>
                 </property>
                 <property name="frameShadow">
                  <enum>QFrame::Sunken</enum>
@@ -452,6 +478,29 @@ p, li { white-space: pre-wrap; }
                </widget>
               </item>
               <item>
+               <spacer name="horizontalSpacer_25">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="Line" name="line_3">
+                <property name="midLineWidth">
+                 <number>1</number>
+                </property>
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+               </widget>
+              </item>
+              <item>
                <spacer name="horizontalSpacer_14">
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
@@ -699,6 +748,19 @@ p, li { white-space: pre-wrap; }
                </layout>
               </item>
               <item>
+               <spacer name="horizontalSpacer_24">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
                <spacer name="horizontalSpacer_20">
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
@@ -717,8 +779,8 @@ p, li { white-space: pre-wrap; }
           </layout>
          </widget>
          <widget class="QWidget" name="page_6">
-          <layout class="QGridLayout" name="gridLayout_4">
-           <item row="0" column="0">
+          <layout class="QHBoxLayout" name="horizontalLayout_15">
+           <item>
             <widget class="QLabel" name="img1">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
@@ -734,7 +796,7 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
-           <item row="0" column="1">
+           <item>
             <widget class="Line" name="line">
              <property name="midLineWidth">
               <number>1</number>
@@ -744,7 +806,7 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
-           <item row="0" column="2">
+           <item>
             <layout class="QVBoxLayout" name="verticalLayout_4">
              <item>
               <spacer name="verticalSpacer_8">
@@ -855,7 +917,7 @@ p, li { white-space: pre-wrap; }
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>40</height>
+           <height>10</height>
           </size>
          </property>
         </spacer>
@@ -867,6 +929,9 @@ p, li { white-space: pre-wrap; }
            <pointsize>15</pointsize>
            <bold>true</bold>
           </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(111, 111, 111);</string>
          </property>
          <property name="text">
           <string>Warten auf Scan</string>
@@ -884,7 +949,7 @@ p, li { white-space: pre-wrap; }
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>40</height>
+           <height>10</height>
           </size>
          </property>
         </spacer>
@@ -923,6 +988,22 @@ p, li { white-space: pre-wrap; }
           <string>Innkaufhauslogo</string>
          </property>
         </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_29">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Preferred</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_10">
@@ -967,7 +1048,7 @@ p, li { white-space: pre-wrap; }
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>30</height>
+           <height>10</height>
           </size>
          </property>
         </spacer>
@@ -1284,7 +1365,7 @@ border: 0px solid red; </string>
                <property name="checked">
                 <bool>false</bool>
                </property>
-               <layout class="QGridLayout" name="gridLayout_6">
+               <layout class="QHBoxLayout" name="horizontalLayout_14">
                 <property name="leftMargin">
                  <number>2</number>
                 </property>
@@ -1297,7 +1378,7 @@ border: 0px solid red; </string>
                 <property name="bottomMargin">
                  <number>2</number>
                 </property>
-                <item row="1" column="0">
+                <item>
                  <widget class="QTextEdit" name="description">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -1369,6 +1450,22 @@ border: 0px solid red; </string>
           </layout>
          </item>
         </layout>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_30">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Preferred</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
        </item>
        <item>
         <spacer name="verticalSpacer_9">

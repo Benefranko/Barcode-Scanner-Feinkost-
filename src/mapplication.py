@@ -44,8 +44,7 @@ class MApplication(QApplication):
 
             # Wenn das Fenster geschlossen werden soll, z.B. mit ALT F4, ignoriere das signal
             if not self.want_exiting and event.type() == QEvent.Close and self.inputBuffer != "quit":
-                print("Prevent Window from closing (Type '[\\r] + \"quit\" + [ALT F4]' to close the Window)...")
-                log.info("Prevent Window from closing! Received QEvent.Close ")
+                log.info("Prevent Window from closing (Type '[\\r] + \"quit\" + [ALT F4]' to close the Window)...")
                 event.accept()
                 return True
 
@@ -53,7 +52,6 @@ class MApplication(QApplication):
             else:
                 return QApplication.notify(self, receiver, event)
         except KeyboardInterrupt as exc:
-            print('KeyboardInterrupt: {0}'.format(exc))
             log.info("KeyboardInterruption in m_application::notify : {0}".format(exc))
             self.want_exiting = True
             QApplication.quit()

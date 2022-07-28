@@ -32,8 +32,7 @@ class Server:
         try:
             self.thread = Thread(target=self.run_web_server, args=())
         except Exception as exc:
-            print(exc)
-            log.critical("Webserver erstellen ist fehlgeschlagen: {0}".format(exc))
+            log.critical("> Webserver erstellen ist fehlgeschlagen: {0}".format(exc))
             sys.exit(12)
 
     # Starte Server in extra Thread
@@ -216,6 +215,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                             text += ">" + line.rstrip() + "</p>\n"
                     html_string = html_string.replace("%DATA%", text)
                 else:
+                    log.debug("> WARNUNG: Seite nicht gefunden: ", self.path)
                     html_string = open("../html/404.html", "r").read()
                     html_status = 404
 
@@ -230,8 +230,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 return
 
         except Exception as exc:
-            print('Es ist ein Fehler im RequestHandler aufgetreten: {0}.'.format(exc))
-            log.warning("Es ist ein Fehler im RequestHandler aufgetreten: {0}".format(exc))
+            log.warning("> Es ist ein Fehler im RequestHandler aufgetreten: {0}".format(exc))
             self.send_response(500)
             self.send_header('content-type', 'text/html')
             self.end_headers()
@@ -247,8 +246,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.wfile.write(w_bytes)
             return True
         except Exception as exc:
-            print('Es ist ein Fehler im RequestHandler aufgetreten: write() failed: {0}.'.format(exc))
-            log.warning("Es ist ein Fehler im RequestHandler aufgetreten: write() failed: {0}".format(exc))
+            log.warning("> Es ist ein Fehler im RequestHandler aufgetreten: write() failed: {0}".format(exc))
             return False
 
     def do_POST(self):
@@ -259,8 +257,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         try:
             if self.path == "/log.html":
-                print("Try to clear log...")
-                log.debug("Try to clear log...")
+                log.debug("> Try to clear log...")
 
                 if "password=" + settings.clear_log_file_pw + "&" in str(post_data):
                     if settings.log_file_delete_mode == "RENAME":
@@ -271,8 +268,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         fo.truncate()
                         fo.close()
 
-                        print("Log renamed")
-                        log.info("Log renamed")
+                        log.info("    -> Log renamed")
 
                         self.do_GET()
                         return
@@ -281,34 +277,31 @@ class RequestHandler(BaseHTTPRequestHandler):
                         fo.truncate()
                         fo.close()
 
-                        print("Log deleted")
-                        log.info("Log deleted")
+                        log.info("    -> Log deleted")
 
                         self.do_GET()
                         return
                     else:
-                        log.error("Unbekannter log_file_delete_mode: {0}".format(settings.log_file_delete_mode))
+                        log.error("   -> Fehler: Unbekannter log_file_delete_mode: {0}".format(settings.log_file_delete_mode))
                         self.do_GET()
                         return
                 else:
-                    print("Clear/Delete failed: Wrong password: ".format(str(post_data)))
-                    log.warning("Clear/Delete failed: Wrong password: ".format(str(post_data)))
+                    log.warning("   -> Clear/Delete failed: Wrong password: ".format(str(post_data)))
 
             if self.path == "/settings.html":
                 if "ReloadAdvertiseListButton=TRUE" in str(post_data) \
                         or ("ReloadAdvertiseListButton.x" in
                             str(post_data) and "ReloadAdvertiseListButton.y" in str(post_data)):
                     settings.want_reload_advertise = True
-                    print("Reload Advertise List")
-                    log.info("Reload Advertise List")
+                    log.info("> Reload Advertise List")
                     self.do_GET()
                     return
                 else:
-                    print("Unbekannter POST: {0}".format(str(post_data)))
-                    log.warning("Unbekannter POST: {0}".format(str(post_data)))
+                    log.warning("> Unbekannter POST: {0}".format(str(post_data)))
 
             else:
-                print("Post Seite nicht gefunden: ", self.path)
+                log.debug("> WARNUNG: Post Seite nicht gefunden: ", self.path)
+
                 html_string = open("../html/404.html", "r").read()
                 html_status = 404
 
@@ -321,8 +314,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 return
 
         except Exception as exc:
-            print('Es ist ein Fehler im RequestHandler aufgetreten: {0}.'.format(exc))
-            log.warning("Es ist ein Fehler im RequestHandler aufgetreten: {0}".format(exc))
+            log.warning("> Es ist ein Fehler im RequestHandler aufgetreten: {0}".format(exc))
             self.send_response(500)
             self.send_header('content-type', 'text/html')
             self.end_headers()

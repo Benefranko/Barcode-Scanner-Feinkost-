@@ -1,10 +1,10 @@
 from enum import Enum
-from PySide2.QtCore import QFile, QTimerEvent, Qt, QIODevice
+from PySide2.QtCore import QFile, QTimerEvent, Qt, QIODevice, QPoint, QRect
 from PySide2.QtCore import Slot
 from PySide2.QtGui import QImage, QPixmap, QFontMetrics, QFont
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QLabel, QFrame, QWidget, QLayout, QLayoutItem
-from PySide2.QtWidgets import QMainWindow
+from PySide2.QtWidgets import QMainWindow, QApplication
 
 from databasemanager import DataBaseManager
 from localdatabasemanager import LocalDataBaseManager
@@ -43,6 +43,8 @@ class MainWindow(QMainWindow):
     # LocalDataBaseManager für SQL Lite Anbindung zum Speichern von Statistiken
     loc_db_mngr: LocalDataBaseManager = None
 
+    screenSize: QRect = None
+
     # Liste mit Werbung → muss aktualisiert werden! Entweder mit später über Web implementierter Funktion oder über
     # täglichen Reboot!
     advertise_kArtikel_list = None
@@ -55,9 +57,6 @@ class MainWindow(QMainWindow):
         SHOW_PRODUCER_INFOS = 3
 
     state = STATES.SHOW_PRODUCT_DESCRIPTION
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        print("__exit__")
 
     # Stoppe Sekunden Timer im Destruktor
     def cleanUp(self):
@@ -107,8 +106,13 @@ class MainWindow(QMainWindow):
         self.window.stackedWidget.setCurrentIndex(0)
         self.window.stackedWidget_advertise.setCurrentIndex(1)
 
+        screen = 1
+        self.screenSize = QApplication.desktop().screenGeometry(screen)
+        self.setGeometry(self.screenSize)
+
         # Vollbild:
         self.showFullScreen()
+
         # self.setFixedSize(800, 400)
         # self.setWindowFlags(Qt.CustomizeWindowHint | Qt.FramelessWindowHint)
 
@@ -144,7 +148,6 @@ class MainWindow(QMainWindow):
         img_path: str = "../images/no_picture_found.jpg"
         pix = QPixmap(img_path)
         if pix.isNull():
-            print("Konnte Bild nicht laden: ", img_path)
             log.error("Konnte Bild nicht laden: {0}".format(img_path))
         else:
             self.window.frame.setPixmap(pix.scaled(pix.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
@@ -153,16 +156,18 @@ class MainWindow(QMainWindow):
         img_path = "../images/sunmi_scan.png"
         pix = QPixmap(img_path)
         if pix.isNull():
-            print("Konnte Bild nicht laden: ", img_path)
             log.error("Konnte Bild nicht laden: {0}".format(img_path))
         else:
-            self.window.img1.setPixmap(pix.scaled(pix.size() / 2, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            # self.window.img1.setPixmap(pix.scaled(pix.size() / 2, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            max_width = (0.9 * (self.screenSize.width() / 2))
+            max_height = (0.8 * (self.screenSize.height()))
+            pix = pix.scaled(max_width, max_height, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            self.window.img1.setPixmap(pix)
 
         # InnKaufHaus-Logo-Grafik
         img_path = "../images/logo.jpg"
         pix = QPixmap(img_path)
         if pix.isNull():
-            print("Konnte Bild nicht laden: ", img_path)
             log.error("Konnte Bild nicht laden: {0}".format(img_path))
         else:
             self.window.logo.setPixmap(
@@ -196,13 +201,10 @@ class MainWindow(QMainWindow):
         # Lade Liste mit Artikeln, zu denen die Vorschau angezeigt werden soll...
         self.advertise_kArtikel_list = self.databasemanager.getAdvertiseList(s.wawi_advertise_aktive_meta_keyword)
         if self.advertise_kArtikel_list is None or len(self.advertise_kArtikel_list) < 2:
-            print("Not more than 1 Advertise found !")
             log.warning("Not more than 1 Advertise found !")
             self.advertise_kArtikel_list = None
 
-        print("DEBUG: LISTE MIT WERBUNG: ", self.advertise_kArtikel_list)
-        log.debug("DEBUG: LISTE MIT WERBUNG: {0}".format(self.advertise_kArtikel_list))
-
+        log.debug("* DEBUG: LISTE MIT WERBUNG: {0}".format(self.advertise_kArtikel_list))
 
         ####
         # EVENTS SIGNALS SLOTS TIMER
@@ -216,7 +218,6 @@ class MainWindow(QMainWindow):
             # Lade UI aus einer Datei...
             ui_file = QFile(ui_path)
             if not ui_file.open(QIODevice.ReadOnly):
-                print(f"Cannot open {ui_path}: {ui_file.errorString()}")
                 log.critical(str(f"Cannot open {ui_path}: {ui_file.errorString()}"))
 
                 return None
@@ -230,7 +231,6 @@ class MainWindow(QMainWindow):
             else:
                 return self.window
         except Exception as exc:
-            print('Konnte Gui aus Ui.Datei nicht laden!'.format(exc))
             log.critical("Konnte Gui aus Ui.Datei nicht laden!")
             return None
 
@@ -256,7 +256,6 @@ class MainWindow(QMainWindow):
                 s.want_reload_advertise = False
                 self.advertise_kArtikel_list = self.databasemanager.getAdvertiseList(
                     s.wawi_advertise_aktive_meta_keyword)
-                print("DEBUG: LISTE MIT WERBUNG: ", self.advertise_kArtikel_list)
                 log.debug("DEBUG: LISTE MIT WERBUNG: {0}".format( self.advertise_kArtikel_list))
 
                 if self.advertise_kArtikel_list is None or len(self.advertise_kArtikel_list) < 2:
@@ -273,7 +272,6 @@ class MainWindow(QMainWindow):
                 self.window.stackedWidget_advertise.setCurrentIndex(1)
 
         except Exception as e:
-            print("Failed to load new Advertise: {0}".format(e))
             log.error("Failed to load new Advertise: {0}".format(e))
             self.window.stackedWidget_advertise.setCurrentIndex(1)
 
@@ -288,18 +286,15 @@ class MainWindow(QMainWindow):
             # -> reduce 'i' == 1... use + 1 to check if error
             for trs in range(0, len(self.advertise_kArtikel_list) + 1 - i):
                 if trs == len(self.advertise_kArtikel_list) - i:
-                    print("Error: couldn't find a ( second ) advertise, that is not invalid -> clear list")
                     log.error("Error: couldn't find a ( second ) advertise, that is not invalid -> clear list")
                     self.advertise_kArtikel_list = None
 
                     return None
                 elif trs >= 1 and self.advertise_kArtikel_list[self.advertise_page_index] is not None:
-                    print("    -> Entferne ungültige Werbung: ", self.advertise_kArtikel_list[self.advertise_page_index])
                     log.warning("    -> Entferne ungültige Werbung: {0}".
                                 format( self.advertise_kArtikel_list[self.advertise_page_index]))
 
                     self.advertise_kArtikel_list[self.advertise_page_index] = None
-                    print("  DEBUG: NEUE LISTE MIT WERBUNG:  {0}".format( self.advertise_kArtikel_list))
                     log.debug("  NEUE LISTE MIT WERBUNG:  {0}".format( self.advertise_kArtikel_list))
 
                 # Wähle neue aus...
@@ -310,25 +305,21 @@ class MainWindow(QMainWindow):
 
                 data = self.databasemanager.getDataBykArtikel(k_art)
                 if data is None:
-                    print("    Failed to load data from advertise article k_artikel={0}".format(k_art))
                     log.error("    Failed to load data from advertise article k_artikel={0}".format(k_art))
                     continue
 
                 descr = self.databasemanager.getArticleDescription(k_art)
                 if descr is None:
-                    print("    Failed to load article description from advertise article k_artikel={0}".format(k_art))
                     log.error("    Failed to load article description from advertise article k_artikel={0}".format(k_art))
                     continue
 
                 steuersatz: float = self.databasemanager.getSteuerSatz(data.kSteuerklasse)
                 if steuersatz == -1:
-                    print("    Failed to load steuersatz kSteuerklasse={0}".format(data.kSteuerklasse))
                     log.error("    Failed to load steuersatz kSteuerklasse={0}".format(data.kSteuerklasse))
                     continue
 
                 inhalt = self.databasemanager.getMengenPreisStr(k_art)
                 if inhalt is None:
-                    print("    Failed to load MengenPreis from advertise article k_artikel={0}".format(k_art))
                     log.error("    Failed to load MengenPreis from advertise article k_artikel={0}".format(k_art))
                     continue
 
@@ -339,10 +330,8 @@ class MainWindow(QMainWindow):
                 img: QImage = QImage()
                 if content is None or img.loadFromData(content) is False:
                     if content:
-                        print("    Failed to load Image from DB: Invalid Image! (k_artikel={0})".format(k_art))
                         log.error("    Failed to load Image from DB! Invalid Image! (k_artikel={0})".format(k_art))
                     else:
-                        print("    Advertise has no Image!! -> Skipp (k_artikel={0})".format(k_art))
                         log.error("    Advertise has no Image!! -> Skipp  (k_artikel={0})".format(k_art))
                     continue
                 else:
@@ -403,13 +392,11 @@ class MainWindow(QMainWindow):
     def loadHerstellerPage(self, k_artikel: str):
         h_infos = self.databasemanager.getHerstellerInfos(k_artikel)
         if h_infos is None:
-            print("        Keine Hersteller Informationen für Artikel (kArtikel={0}) vorhanden".format(k_artikel))
             log.warning("        Keine Hersteller Informationen für Artikel (kArtikel={0}) vorhanden".format(k_artikel))
             return None
 
         h_descr = self.databasemanager.getHerstellerDescription(h_infos.kHersteller)
         if h_descr is None:
-            print("        Failed to load HerstellerBeschreibung (kArtikel={0})".format(k_artikel))
             log.warning("        Failed to load HerstellerBeschreibung (kArtikel={0})".format(k_artikel))
             return None
 
@@ -437,7 +424,6 @@ class MainWindow(QMainWindow):
         try:
             data = self.databasemanager.getDataByBarcode(int(scan_article_ean))
         except Exception as exc:
-            print("    INVALID SCAN: Can't cast to int: '", scan_article_ean, "': ", exc)
             log.warning("    Ungültiger Scan: Can't cast to int: {0}: {1}".format(scan_article_ean, exc))
             self.event_handler("LOAD_ARTICLE_FAILED", scan_article_ean)
             return
@@ -450,14 +436,12 @@ class MainWindow(QMainWindow):
 
         descript = self.databasemanager.getArticleDescription(data.kArtikel)
         if descript is None:
-            print("    Keine Artikelbeschreibung vorhanden! k_artikel={0}".format(data.kArtikel))
             log.warning("    Keine Artikelbeschreibung vorhanden! k_artikel={0}".format(data.kArtikel))
             self.event_handler("LOAD_ARTICLE_FAILED", scan_article_ean)
             return
 
         steuersatz: float = self.databasemanager.getSteuerSatz(data.kSteuerklasse)
         if steuersatz == -1:
-            print("    Failed to get steuersatz kSteuerklasse={0}".format(data.kSteuerklasse))
             log.error("    Failed to get steuersatz kSteuerklasse={0}".format(data.kSteuerklasse))
             self.event_handler("LOAD_ARTICLE_FAILED", scan_article_ean)
             return
@@ -497,7 +481,6 @@ class MainWindow(QMainWindow):
         # Artikel Hersteller
         hersteller = None
         if data.kHersteller == 0:
-            print("    Kein Hersteller für den Artikel k_artikel={0} vorhanden!".format(data.kArtikel))
             log.warning("    Kein Hersteller für den Artikel k_artikel={0} vorhanden!".format(data.kArtikel))
         else:
             hersteller = self.databasemanager.getHerstellerInfos(k_article=data.kArtikel)
@@ -537,7 +520,6 @@ class MainWindow(QMainWindow):
 
         if content is None or img.loadFromData(content) is False:
             if content:
-                print("    Failed to load img from db: Invalid Img: k=artikel={0}".format(data.kArtikel))
                 log.warning("    Failed to load img from db: Invalid Img: k=artikel={0}".format(data.kArtikel))
             self.window.img.setPixmap(
                 QPixmap("../images/kein-bild-vorhanden.webp").scaled(self.window.img.size() / 1.5, Qt.KeepAspectRatio,
@@ -599,14 +581,15 @@ class MainWindow(QMainWindow):
             self.window.inhalt.show()
             self.window.label_inhalt.show()
         else:
-            self.window.inhalt.hide()
-            self.window.label_inhalt.hide()
+            # self.window.inhalt.hide()
+            # self.window.label_inhalt.hide()
+            self.event_handler("LOAD_ARTICLE_FAILED", scan_article_ean)
+            return None
 
         # Füge den Scan der lokalen Statistiken-Datenbank hinzu:
         try:
             self.loc_db_mngr.add_new_scan(data.kArtikel, scan_article_ean)
         except Exception as e:
-            print("    Error: Das speichern des Scans für Statistiken ist fehlgeschlagen! ", e)
             log.error("    Error: Das speichern des Scans für Statistiken ist fehlgeschlagen: {0}".format(e))
         return
 
@@ -708,11 +691,9 @@ class MainWindow(QMainWindow):
                 raise Exception("Unbekannter Objektzustand: ")
 
             if not handled:
-                print("WARNUNG: Die Aktion" + action + " wurde nicht bearbeitet!")
                 log.warning("Die Aktion {0} wurde nicht bearbeitet!".format(action))
 
         except Exception as e:
-            print("Handle Event ({0})[{1}] failed: [{2}]".format(action, value, e))
             log.error("Handle Event ({0})[{1}] failed: [{2}]".format(action, value, e))
 
     # Funktion (Slot), die mit dem Signal aus MApplication verbunden ist, und bei einem Scan aufgerufen wird
