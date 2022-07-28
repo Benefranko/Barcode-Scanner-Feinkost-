@@ -1,9 +1,11 @@
 from enum import Enum
-from PySide2.QtCore import QFile, QTimerEvent, Qt, QIODevice, QPoint, QRect
+from logging import Logger
+
+from PySide2.QtCore import QFile, QTimerEvent, Qt, QIODevice, QRect
 from PySide2.QtCore import Slot
 from PySide2.QtGui import QImage, QPixmap, QFontMetrics, QFont
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QLabel, QFrame, QWidget, QLayout, QLayoutItem
+from PySide2.QtWidgets import QLabel, QFrame, QWidget  # , QLayout, QLayoutItem
 from PySide2.QtWidgets import QMainWindow, QApplication
 
 from databasemanager import DataBaseManager
@@ -13,7 +15,7 @@ import settings as s
 import logging
 from pathlib import Path
 
-log = logging.getLogger(Path(__file__).name)
+log: Logger = logging.getLogger(Path(__file__).name)
 
 
 # Klasse steuert die Grafik und managed die Datenbanken
@@ -79,15 +81,15 @@ class MainWindow(QMainWindow):
         self.databasemanager.disconnect()
         self.loc_db_mngr.disconnect()
 
-    def rec_clear_layout(self, layout: QLayout):
-        for i in reversed(range(layout.count())):
-            item: QLayoutItem = layout.itemAt(i)
-            if item.layout():
-                self.rec_clear_layout(item.layout())
-                layout.takeAt(i)
-
-            elif item.widget():
-                layout.takeAt(i).widget().setParent(None)
+    # def rec_clear_layout(self, layout: QLayout):
+    #     for i in reversed(range(layout.count())):
+    #         item: QLayoutItem = layout.itemAt(i)
+    #         if item.layout():
+    #             self.rec_clear_layout(item.layout())
+    #             layout.takeAt(i)
+    #
+    #         elif item.widget():
+    #             layout.takeAt(i).widget().setParent(None)
 
     def __init__(self, sql_lite_path, msql_ip, msql_port, ui_file_path, parent=None):
         # Falls Fenster ein übergeordnetes Objekt erhält, übergib dieses der Basisklasse QMainWindow
@@ -231,7 +233,7 @@ class MainWindow(QMainWindow):
             else:
                 return self.window
         except Exception as exc:
-            log.critical("Konnte Gui aus Ui.Datei nicht laden!")
+            log.critical("Konnte Gui aus Ui.Datei nicht laden: {0}!".format(exc))
             return None
 
     def timerEvent(self, event: QTimerEvent) -> None:
@@ -250,13 +252,13 @@ class MainWindow(QMainWindow):
         return
 
     def switchArtikelPreViewPageAndStartPage(self):
-        # Wenn artikel mit Merkmal für Vorschau existieren, lade Neue Anzeige und wechsle zu dieser
+        # Wenn artikel mit Merkmal für Vorschau existieren, lade neue Anzeige und wechsle zu dieser
         try:
             if s.want_reload_advertise:
                 s.want_reload_advertise = False
                 self.advertise_kArtikel_list = self.databasemanager.getAdvertiseList(
                     s.wawi_advertise_aktive_meta_keyword)
-                log.debug("DEBUG: LISTE MIT WERBUNG: {0}".format( self.advertise_kArtikel_list))
+                log.debug("DEBUG: LISTE MIT WERBUNG: {0}".format(self.advertise_kArtikel_list))
 
                 if self.advertise_kArtikel_list is None or len(self.advertise_kArtikel_list) < 2:
                     print("  Not more than 1 Advertise found !")
@@ -279,7 +281,6 @@ class MainWindow(QMainWindow):
         if self.advertise_kArtikel_list is None or len(self.advertise_kArtikel_list) < 2:
             # Advertise List is Empty
             return
-        k_art: int = 0
 
         for i in range(0, 2):
             # -try all indexes but if it is the second one don't try this one => reduce range by one at the second
@@ -292,16 +293,16 @@ class MainWindow(QMainWindow):
                     return None
                 elif trs >= 1 and self.advertise_kArtikel_list[self.advertise_page_index] is not None:
                     log.warning("    -> Entferne ungültige Werbung: {0}".
-                                format( self.advertise_kArtikel_list[self.advertise_page_index]))
+                                format(self.advertise_kArtikel_list[self.advertise_page_index]))
 
                     self.advertise_kArtikel_list[self.advertise_page_index] = None
-                    log.debug("  NEUE LISTE MIT WERBUNG:  {0}".format( self.advertise_kArtikel_list))
+                    log.debug("  NEUE LISTE MIT WERBUNG:  {0}".format(self.advertise_kArtikel_list))
 
                 # Wähle neue aus...
                 self.advertise_page_index = (self.advertise_page_index + 1) % len(self.advertise_kArtikel_list)
                 if self.advertise_kArtikel_list[self.advertise_page_index] is None:
                     continue
-                k_art = self.advertise_kArtikel_list[self.advertise_page_index].kArtikel
+                k_art: int = self.advertise_kArtikel_list[self.advertise_page_index].kArtikel
 
                 data = self.databasemanager.getDataBykArtikel(k_art)
                 if data is None:
@@ -310,7 +311,8 @@ class MainWindow(QMainWindow):
 
                 descr = self.databasemanager.getArticleDescription(k_art)
                 if descr is None:
-                    log.error("    Failed to load article description from advertise article k_artikel={0}".format(k_art))
+                    log.error("    Failed to load article description from advertise article k_artikel={0}"
+                              .format(k_art))
                     continue
 
                 steuersatz: float = self.databasemanager.getSteuerSatz(data.kSteuerklasse)
@@ -473,7 +475,8 @@ class MainWindow(QMainWindow):
             return
 
         # Artikel Preis
-        self.window.preis.setText(str(self.databasemanager.roundToStr( float(data.fVKNetto) * (steuersatz + 1.0))) + " €")
+        self.window.preis.setText(
+            str(self.databasemanager.roundToStr(float(data.fVKNetto) * (steuersatz + 1.0))) + " €")
 
         # Artikel Inhalt
         # self.window.inhalt.setText("value")

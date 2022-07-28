@@ -75,7 +75,8 @@ if __name__ == "__main__":
 
     # Stoppe lokalen Server und beende das Programm
     w_server.stop_listen()
-    log.info("-> exit({0}) -> Programm Stop um: {1}\n----------------------------------------------------------------"
+    log.info("-> exit({0}) -> Programm Stop um: {1}"
+             "\n--------------------------------------------------------------------------------"
              .format(ret, datetime.datetime.now()))
 
     logger.cleanup()

@@ -4,7 +4,7 @@
 ####
 
 # Programm Version
-PROGRAMM_VERSION: str = "1.2.1"
+PROGRAMM_VERSION: str = "1.2.2"
 
 
 ####
@@ -81,5 +81,3 @@ SPACE_BETWEEN_PRICE_AND_SPECIAL_PRICE: int = 10
 SPECIAL_PRICE_FONT_SIZE: int = 50
 # PRODUKT Max Font Size in Pixel
 PRODUCT_MAX_FONT_SIZE: int = 40
-
-

@@ -209,7 +209,7 @@ class DataBaseManager:
                         format(k_article))
             return None
 
-        # Wenn der Artikel in der Nenner Einheit gegeben ist -> In Tabelle 0 -> Zum Rechnen 1 benötigt!
+        # Wenn der Artikel in der Nenner Einheit gegeben ist → In Tabelle 0 → Zum Rechnen 1 benötigt!
         mass_bezugs_faktor = mass_table_einheit.fBezugsMassEinheitFaktor
         if mass_bezugs_faktor == 0:
             mass_bezugs_faktor = 1
@@ -218,7 +218,7 @@ class DataBaseManager:
         if article_bezugs_faktor == 0:
             article_bezugs_faktor = 1
 
-        einheiten_multiplikator: float = float( mass_bezugs_faktor / article_bezugs_faktor )
+        einheiten_multiplikator: float = float(mass_bezugs_faktor / article_bezugs_faktor)
         mengen_multiplikator: float = float(data.fGrundpreisMenge / data.fMassMenge)
 
         preis = float(data.fVKNetto)
@@ -251,4 +251,3 @@ class DataBaseManager:
     def getArticleDescription(self, k_article):
         return self.exec_sql("SELECT cBeschreibung ,cKurzBeschreibung, cName FROM [dbo].[tArtikelBeschreibung] WHERE"
                              " dbo.tArtikelBeschreibung.kArtikel = ?", k_article)
-

@@ -2,7 +2,7 @@ import sys
 import calendar
 import shutil
 
-from http.server import ThreadingHTTPServer, HTTPServer, BaseHTTPRequestHandler, SimpleHTTPRequestHandler
+from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler  # , HTTPServer, SimpleHTTPRequestHandler
 from datetime import datetime, timedelta
 from threading import Thread
 
@@ -51,7 +51,6 @@ class Server:
         with ThreadingHTTPServer((self.listenIP, self.listenPort), RequestHandler) as server:
             self.webserver = server
             server.serve_forever()
-        self.webserver = None
         return None
 
 
@@ -282,7 +281,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                         self.do_GET()
                         return
                     else:
-                        log.error("   -> Fehler: Unbekannter log_file_delete_mode: {0}".format(settings.log_file_delete_mode))
+                        log.error("   -> Fehler: Unbekannter log_file_delete_mode: {0}"
+                                  .format(settings.log_file_delete_mode))
                         self.do_GET()
                         return
                 else:
@@ -319,5 +319,3 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.send_header('content-type', 'text/html')
             self.end_headers()
             self.tryWriteOK("<h1>Ein unerwartetes Problem ist aufgetreten!</h1>".encode("utf-8"))
-
-
