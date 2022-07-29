@@ -122,20 +122,19 @@ class DataBaseManager:
     def getDataBykArtikel(self, k_artikel):
         return self.exec_sql("SELECT * FROM dbo.tArtikel WHERE kArtikel = ?", k_artikel, True)
 
-    def getImageList(self):
-        return self.exec_sql(" SELECT  dbo.tBild.kBild, dbo.tArtikel.kArtikel, dbo.tBild.bBild"
-                             " FROM dbo.tBild, dbo.tArtikel, dbo.tArtikelbildPlattform"
-                             " WHERE dbo.tArtikel.kArtikel = dbo.tArtikelbildPlattform.kArtikel "
+    def getFirstImageBykArtikel(self, k_article):
+        return self.exec_sql(" SELECT dbo.tBild.bBild"
+                             " FROM dbo.tBild, dbo.tArtikelbildPlattform"
+                             " WHERE dbo.tArtikelbildPlattform.kBild = dbo.tBild.kBild"
                              " AND dbo.tArtikelbildPlattform.kPlattform = 1"
-                             " AND dbo.tArtikelbildPlattform.kBild = dbo.tBild.kBild", None, False)
+                             " AND dbo.tArtikelbildPlattform.kArtikel = ?", k_article, True)
 
-    def getFirstImage(self, k_article):
-        img_list = self.getImageList()
-        if img_list is not None:
-            for img in img_list:
-                if img.kArtikel == k_article:
-                    return img.bBild
-        return None
+    def getFirstImageBykHersteller(self, k_hersteller):
+        return self.exec_sql(" SELECT dbo.tBild.bBild"
+                             " FROM dbo.tBild, dbo.[tHerstellerBildPlattform]"
+                             " WHERE dbo.tHerstellerBildPlattform.kBild = dbo.tBild.kBild"
+                             " AND dbo.tHerstellerBildPlattform.kPlattform = 1"
+                             " AND dbo.tHerstellerBildPlattform.kHersteller = ?", k_hersteller, True)
 
     def getHerstellerInfos(self, k_article):
         return self.exec_sql("SELECT [dbo].[tHersteller].cName, [dbo].[tHersteller].cHomepage, "
@@ -229,8 +228,8 @@ class DataBaseManager:
         mengen_preis: float = float(preis * einheiten_multiplikator * mengen_multiplikator * (1.0 + steuersatz))
 
         return self.roundToStr(float(data.fMassMenge)) + " " + article_einheit.cName + " (" + \
-            self.roundToStr(mengen_preis) + " € / " + self.roundToStr(float(data.fGrundpreisMenge)) + " " + \
-            grundpreis_einheit.cName + ")"
+               self.roundToStr(mengen_preis) + " € / " + self.roundToStr(float(data.fGrundpreisMenge)) + " " + \
+               grundpreis_einheit.cName + ")"
 
     def getAdvertiseList(self, value):
         return self.exec_sql("SELECT dbo.tArtikel.kArtikel"
@@ -251,3 +250,10 @@ class DataBaseManager:
     def getArticleDescription(self, k_article):
         return self.exec_sql("SELECT cBeschreibung ,cKurzBeschreibung, cName FROM [dbo].[tArtikelBeschreibung] WHERE"
                              " dbo.tArtikelBeschreibung.kArtikel = ?", k_article)
+
+    def getLagerBestand(self, k_article) -> int:
+        bestand = self.exec_sql("SELECT fLagerbestand FROM [dbo].[tlagerbestand] WHERE kArtikel = ?", k_article)
+        if bestand is None:
+            return -1
+        else:
+            return int(bestand.fLagerbestand)

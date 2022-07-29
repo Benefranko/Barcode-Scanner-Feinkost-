@@ -172,8 +172,6 @@ class MainWindow(QMainWindow):
         if pix.isNull():
             log.error("Konnte Bild nicht laden: {0}".format(img_path))
         else:
-            self.window.logo.setPixmap(
-                pix.scaled(pix.toImage().size() / 2, Qt.KeepAspectRatio, Qt.SmoothTransformation))
             self.window.Innkaufhauslogo.setPixmap(
                 pix.scaled(pix.toImage().size() / 2, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         ####
@@ -328,9 +326,9 @@ class MainWindow(QMainWindow):
                 preis: float = float(data.fVKNetto) * (steuersatz + 1.0)
                 s_preis = self.databasemanager.getSpecialPrice(k_article=k_art)
 
-                content = self.databasemanager.getFirstImage(data.kArtikel)
+                content = self.databasemanager.getFirstImageBykArtikel(data.kArtikel)
                 img: QImage = QImage()
-                if content is None or img.loadFromData(content) is False:
+                if content is None or content.bBild is None or img.loadFromData(content.bBild) is False:
                     if content:
                         log.error("    Failed to load Image from DB! Invalid Image! (k_artikel={0})".format(k_art))
                     else:
@@ -413,6 +411,27 @@ class MainWindow(QMainWindow):
         else:
             self.window.label_link.hide()
             self.window.label_link_text.hide()
+
+        content = self.databasemanager.getFirstImageBykHersteller(h_infos.kHersteller)
+        img = QImage()
+        if content is None or content.bBild is None or img.loadFromData(content.bBild) is False:
+            if content:
+                log.warning("    Failed to load img from db: Invalid Img: .kHersteller={0}".format(h_infos.kHersteller))
+            else:
+                log.debug("    No Img for Hersteller: .kHersteller={0}".format(h_infos.kHersteller))
+            self.window.hersteller_img.hide()
+        else:
+            # update sizes:
+            self.window.stackedWidget.setCurrentIndex(0)
+            self.window.stackedWidget.setCurrentIndex(1)
+            self.window.stackedWidget.setCurrentIndex(0)
+            self.window.stackedWidget.setCurrentIndex(3)
+
+            p = QPixmap.fromImage(img).scaled(self.window.hersteller_img.size() / 1.3,
+                                              Qt.KeepAspectRatio,
+                                              Qt.SmoothTransformation)
+            self.window.hersteller_img.setPixmap(p)
+            self.window.hersteller_img.show()
 
         return h_infos.cName
 
@@ -518,10 +537,10 @@ class MainWindow(QMainWindow):
 
         # Lade Grafik aus MS SQL Datenbank zu dem Artikel
         # Verwende dazu das erste vorhandene Bild, das es gibt
-        content = self.databasemanager.getFirstImage(data.kArtikel)
+        content = self.databasemanager.getFirstImageBykArtikel(data.kArtikel)
         img = QImage()
 
-        if content is None or img.loadFromData(content) is False:
+        if content is None or content.bBild is None or img.loadFromData(content.bBild) is False:
             if content:
                 log.warning("    Failed to load img from db: Invalid Img: k=artikel={0}".format(data.kArtikel))
             self.window.img.setPixmap(
@@ -588,6 +607,18 @@ class MainWindow(QMainWindow):
             # self.window.label_inhalt.hide()
             self.event_handler("LOAD_ARTICLE_FAILED", scan_article_ean)
             return None
+
+        lagerbestand = self.databasemanager.getLagerBestand(data.kArtikel)
+        if lagerbestand == -1:
+            self.window.label_lagerbstand_value.hide()
+            self.window.label_lagerbstand_text.hide()
+        else:
+            if lagerbestand == 0:
+                self.window.label_lagerbstand_value.setText("Ausverkauft. Bald wieder verfügbar!")
+            else:
+                self.window.label_lagerbstand_value.setText(str(lagerbestand) + " Stück")
+            self.window.label_lagerbstand_text.show()
+            self.window.label_lagerbstand_value.show()
 
         # Füge den Scan der lokalen Statistiken-Datenbank hinzu:
         try:

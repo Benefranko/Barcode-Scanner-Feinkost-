@@ -4,7 +4,7 @@
 ####
 
 # Programm Version
-PROGRAMM_VERSION: str = "1.2.2"
+PROGRAMM_VERSION: str = "1.3.0"
 
 
 ####
