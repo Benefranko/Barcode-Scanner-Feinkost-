@@ -736,3 +736,5 @@ class MainWindow(QMainWindow):
         # Gib den Scan dem Event-Handler weiter...
         log.debug("Neuen Barcode Scan erhalten: {0}".format(value))
         self.event_handler("NEW_SCAN", value)
+
+

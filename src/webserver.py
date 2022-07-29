@@ -214,7 +214,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                             text += ">" + line.rstrip() + "</p>\n"
                     html_string = html_string.replace("%DATA%", text)
                 else:
-                    log.debug("> WARNUNG: Seite nicht gefunden: ", self.path)
+                    log.debug("> WARNUNG: Seite nicht gefunden: {0}".format(self.path))
                     html_string = open("../html/404.html", "r").read()
                     html_status = 404
 
@@ -300,7 +300,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                     log.warning("> Unbekannter POST: {0}".format(str(post_data)))
 
             else:
-                log.debug("> WARNUNG: Post Seite nicht gefunden: ", self.path)
+                log.debug("> WARNUNG: Post Seite nicht gefunden: {0}".format(self.path))
 
                 html_string = open("../html/404.html", "r").read()
                 html_status = 404

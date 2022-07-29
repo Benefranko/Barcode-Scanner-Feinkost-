@@ -61,7 +61,7 @@ QWidget#Widget { background-color: &quot;white&quot; }</string>
    <item>
     <widget class="QStackedWidget" name="stackedWidget">
      <property name="currentIndex">
-      <number>2</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="page_1">
       <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -1461,10 +1461,10 @@ border: 0px solid red; </string>
                    <enum>QFrame::NoFrame</enum>
                   </property>
                   <property name="verticalScrollBarPolicy">
-                   <enum>Qt::ScrollBarAlwaysOff</enum>
+                   <enum>Qt::ScrollBarAsNeeded</enum>
                   </property>
                   <property name="horizontalScrollBarPolicy">
-                   <enum>Qt::ScrollBarAlwaysOff</enum>
+                   <enum>Qt::ScrollBarAsNeeded</enum>
                   </property>
                   <property name="readOnly">
                    <bool>true</bool>
@@ -1995,6 +1995,12 @@ background-color: rgba(170, 255, 255, 200);
          </item>
          <item row="4" column="1">
           <widget class="QPushButton" name="pushButton_back_from_hersteller_page">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>50</height>
+            </size>
+           </property>
            <property name="font">
             <font>
              <pointsize>15</pointsize>
