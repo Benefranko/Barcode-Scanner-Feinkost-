@@ -158,6 +158,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                     html_string = open("../html/main.html", "r").read()
                 elif sub_paths[1] == "settings.html":
                     html_string = open("../html/settings.html", "r").read()
+                    html_string = self.replaceVarsInSettingsHtml(html_string)
                 elif sub_paths[1] == "images":
                     if len(sub_paths) == 3:
                         if sub_paths[2] == "reload.png":
@@ -229,7 +230,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 return
 
         except Exception as exc:
-            log.warning("> Es ist ein Fehler im RequestHandler aufgetreten: {0}".format(exc))
+            log.error("> Es ist ein Fehler im RequestHandler aufgetreten: {0}".format(exc))
             self.send_response(500)
             self.send_header('content-type', 'text/html')
             self.end_headers()
@@ -237,6 +238,16 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         self.loc_db_mngr = None
         return
+
+    @staticmethod
+    def replaceVarsInSettingsHtml(html: str) -> str:
+        html = html.replace("%anzeigezeit_Hersteller_value%", str(settings.SHOW_PRODUCER_INFOS_TIME))
+        html = html.replace("%anzeigezeit_value%", str(settings.SHOW_TIME))
+        html = html.replace("%changeAdvertiseTime_value%", str(settings.CHANGE_ADVERTISE_TIME))
+
+        for i in range(1, 5):
+            html = html.replace("%STATUS" + str(i) + "%", "")
+        return html
 
     # Write Funktion in eigenem try-catch statement, um Html-Fehler senden zu können, wenn im SQL Teil
     # etwas fehlschlägt!
@@ -253,6 +264,9 @@ class RequestHandler(BaseHTTPRequestHandler):
         post_data = self.rfile.read(content_length)  # <--- Gets the data itself
         html_string: str = ""
         html_status: int = 200
+
+        self.loc_db_mngr = localdatabasemanager.LocalDataBaseManager()
+        self.loc_db_mngr.connect(settings.local_db_path)
 
         try:
             if self.path == "/log.html":
@@ -296,8 +310,57 @@ class RequestHandler(BaseHTTPRequestHandler):
                     log.info("> Reload Advertise List")
                     self.do_GET()
                     return
+                elif post_data.startswith("anzeigezeit_value=".encode()):
+                    html_string = open("../html/settings.html", "r").read()
+
+                    if post_data.split('='.encode())[1].isdigit():
+                        time = int(post_data.split('='.encode())[1])
+                        self.loc_db_mngr.setDelayTime("ARTIKEL", time)
+                        settings.SHOW_TIME = time
+                        html_string = html_string.replace("%anzeigezeit_value%", str(settings.SHOW_TIME))
+                        html_string = html_string.replace("%STATUS1%", "Erfolgreich aktualisiert!")
+                    else:
+                        html_string = html_string.replace("%anzeigezeit_value%", str(settings.SHOW_TIME))
+                        html_string = html_string.replace("%STATUS1%", "Aktualisierung fehlgeschlagen! Keine Zahl?")
+                    html_string = self.replaceVarsInSettingsHtml(html_string)
+
+                elif post_data.startswith("anzeigezeit_Hersteller_value=".encode()):
+                    html_string = open("../html/settings.html", "r").read()
+
+                    if post_data.split('='.encode())[1].isdigit():
+                        time = int(post_data.split('='.encode())[1])
+                        self.loc_db_mngr.setDelayTime("HERSTELLER", time)
+                        settings.SHOW_PRODUCER_INFOS_TIME = time
+                        html_string = html_string.replace("%anzeigezeit_Hersteller_value%",
+                                                          str(settings.SHOW_PRODUCER_INFOS_TIME))
+                        html_string = html_string.replace("%STATUS2%", "Erfolgreich aktualisiert!")
+                    else:
+                        html_string = html_string.replace("%anzeigezeit_Hersteller_value%",
+                                                          str(settings.SHOW_PRODUCER_INFOS_TIME))
+                        html_string = html_string.replace("%STATUS2%", "Aktualisierung fehlgeschlagen! Keine Zahl?")
+                    html_string = self.replaceVarsInSettingsHtml(html_string)
+
+                elif post_data.startswith("changeAdvertiseTime_value=".encode()):
+                    html_string = open("../html/settings.html", "r").read()
+
+                    if post_data.split('='.encode())[1].isdigit():
+                        time = int(post_data.split('='.encode())[1])
+                        self.loc_db_mngr.setDelayTime("CHANGE_ADVERTISE", time)
+                        settings.CHANGE_ADVERTISE_TIME = time
+                        print(time)
+                        html_string = html_string.replace("%anzeigezeit_Hersteller_value%",
+                                                          str(settings.CHANGE_ADVERTISE_TIME))
+                        html_string = html_string.replace("%STATUS3%", "Erfolgreich aktualisiert!")
+                    else:
+                        html_string = html_string.replace("%anzeigezeit_Hersteller_value%",
+                                                          str(settings.CHANGE_ADVERTISE_TIME))
+                        html_string = html_string.replace("%STATUS3%", "Aktualisierung fehlgeschlagen! Keine Zahl?")
+                    html_string = self.replaceVarsInSettingsHtml(html_string)
+
                 else:
                     log.warning("> Unbekannter POST: {0}".format(str(post_data)))
+                    html_string = open("../html/404.html", "r").read()
+                    html_status = 404
 
             else:
                 log.debug("> WARNUNG: Post Seite nicht gefunden: {0}".format(self.path))
@@ -314,7 +377,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 return
 
         except Exception as exc:
-            log.warning("> Es ist ein Fehler im RequestHandler aufgetreten: {0}".format(exc))
+            log.error("> Es ist ein Fehler im RequestHandler aufgetreten: {0}".format(exc))
             self.send_response(500)
             self.send_header('content-type', 'text/html')
             self.end_headers()

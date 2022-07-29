@@ -3,6 +3,8 @@ import sqlite3
 from sqlite3 import Error
 import contextlib
 
+import settings
+
 import logging
 from pathlib import Path
 log = logging.getLogger(Path(__file__).name)
@@ -18,11 +20,27 @@ class LocalDataBaseManager:
                                     ean integer NOT NULL
                                     
                                 );"""
+    sql_create_table2 = """CREATE TABLE IF NOT EXISTS times (
+                                        name TEXT PRIMARY KEY,
+                                        value integer NOT NULL
+                                    );"""
 
     def create_table(self):
         with contextlib.closing(self.connection.cursor()) as c:
             c.execute(self.sql_create_table)
+            c.execute(self.sql_create_table2)
             log.info("Erfolgreich mit lokaler SQL Lite Datenbank verbunden und Tables erstellt!")
+
+    def updateConstants(self):
+        d_time = self.getDelayTime("ARTIKEL")
+        if d_time and d_time[0] > 1:
+            settings.SHOW_TIME = d_time[0]
+        d_time = self.getDelayTime("HERSTELLER")
+        if d_time and d_time[0] > 1:
+            settings.SHOW_PRODUCER_INFOS_TIME = d_time[0]
+        d_time = self.getDelayTime("CHANGE_ADVERTISE")
+        if d_time and d_time[0] > 1:
+            settings.CHANGE_ADVERTISE_TIME = d_time[0]
 
     def disconnect(self):
         self.connection.close()
@@ -40,6 +58,28 @@ class LocalDataBaseManager:
             self.connection = None
             return None
         return self.connection
+
+    def getDelayTime(self, name: str):
+        with contextlib.closing(self.connection.cursor()) as cur:
+            cur.execute("SELECT value FROM times WHERE name = ?", (name,))
+            return cur.fetchone()
+
+    def setDelayTime(self, name, value):
+
+        with contextlib.closing(self.connection.cursor()) as cur:
+            cur.execute("INSERT INTO times(name,value) VALUES(?,?) ON CONFLICT(name) DO UPDATE SET value = ?;",
+                        (name, value, value))
+            self.connection.commit()
+            id_ = cur.lastrowid
+        return id_
+
+    def getTime(self, k_article, ean):
+        with contextlib.closing(self.connection.cursor()) as cur:
+            cur.execute(''' INSERT INTO scans(date,time,kArticle,ean)
+                      VALUES(date('now','localtime'), time('now','localtime'),?,?) ''', (k_article, ean))
+            self.connection.commit()
+            id_ = cur.lastrowid
+        return id_
 
     def get_all_scans(self):
         with contextlib.closing(self.connection.cursor()) as cur:

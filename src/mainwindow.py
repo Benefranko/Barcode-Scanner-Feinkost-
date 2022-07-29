@@ -190,6 +190,7 @@ class MainWindow(QMainWindow):
         else:
             try:
                 self.loc_db_mngr.create_table()
+                self.loc_db_mngr.updateConstants()
             except Exception as e:
                 raise Exception("Das erstellen der Tabellen in der lokalen SQL Lite Datenbank ist fehlgeschlagen: {0}"
                                 .format(e))

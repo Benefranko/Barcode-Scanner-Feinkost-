@@ -7,27 +7,40 @@
 	</head>
 
 	<body style="background-color: white">
-	<h1>Einstellungen: </h1>
+	<h1 style="font-size: 45px">Einstellungen: </h1>
 		 <ul style="font-size: 22px">
-		  <li >
-			  <form action="" method="post">
-				Lade Liste mit Werbung neu:
-				<input type="image" src="/images/reload.png" name="ReloadAdvertiseListButton" style="border: 1px solid #000; width:30px; vertical-align:middle;"></input>
-			  </form>
-		  </li>
-		  <li>
-			  <form action="" method="post">
-			  	Coming Soon
-				  <button name="ReloadAdvertiseListButton" style="background-image: url('/images/reload.png');" value="TRUE">Reload</button>
-			  </form>
-		  </li>
-		  <li>...</li>
+			  <li style="margin-top:40px">
+				  <form action="" method="post">
+					Lade Liste mit Werbung neu:
+					<input type="image" src="/images/reload.png" name="ReloadAdvertiseListButton" style="border: 1px solid #000; width:30px; vertical-align:middle;"></input>
+				  </form>
+			  </li>
+			  <li style="margin-top:40px">
+				  <form action="" method="post">
+					  <label for="showArticleTime">Anzeigezeit der Artikelinformationen:</label><br>
+					  <input type="text" id="showArticleTime" name="anzeigezeit_value" value="%anzeigezeit_value%">
+					  <input type="submit" value="Anwenden"> %STATUS1%
+				  </form>
+			  </li>
+			  <li style="margin-top:40px">
+				  <form action="" method="post">
+					  <label for="showHerstellerTime">Anzeigezeit der Herstellerinformationen:</label><br>
+					  <input type="text" id="showHerstellerTime" name="anzeigezeit_Hersteller_value" value="%anzeigezeit_Hersteller_value%">
+					  <input type="submit" value="Anwenden"> %STATUS2%
+				  </form>
+			  </li>
+			  <li style="margin-top:40px">
+				  <form action="" method="post">
+					  <label for="changeAdvertiseTime">Zeit zwischen Wechsel der Werbungsseite und Startseite:</label><br>
+					  <input type="text" id="changeAdvertiseTime" name="changeAdvertiseTime_value" value="%changeAdvertiseTime_value%">
+					  <input type="submit" value="Anwenden"> %STATUS3%
+				  </form>
+			  </li>
 		</ul>
-
 
 		<div style="margin-top: 50px; font-size: 22px; " >
 
-			<a style="text-decoration: none; color: blue" href="/">Zum Start</a>
+			<a style="text-decoration: none; color: blue; font-size: 35px" href="/">Zum Start</a>
 
 
 		</div>
