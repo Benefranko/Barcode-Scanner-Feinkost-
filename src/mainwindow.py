@@ -530,8 +530,11 @@ class MainWindow(QMainWindow):
             self.window.description.setHtml("")
         else:
             self.window.description.setHtml(descript.cBeschreibung)
-            self.window.groupBox_beschreibung.setTitle("Produktinformationen: \"{0}\""
-                                                       .format(descript.cKurzBeschreibung))
+            if len(descript.cKurzBeschreibung) > s.MAX_SHORT_DESCRIPTION_LENGTH:
+                self.window.groupBox_beschreibung.setTitle("Produktinformationen:")
+            else:
+                self.window.groupBox_beschreibung.setTitle("Produktinformationen: \"{0}\""
+                                                           .format(descript.cKurzBeschreibung))
 
         self.window.stackedWidget.setCurrentIndex(1)
         self.window.stackedWidget.setCurrentIndex(0)
@@ -544,12 +547,14 @@ class MainWindow(QMainWindow):
         if content is None or content.bBild is None or img.loadFromData(content.bBild) is False:
             if content:
                 log.warning("    Failed to load img from db: Invalid Img: k=artikel={0}".format(data.kArtikel))
-            self.window.img.setPixmap(
-                QPixmap("../images/kein-bild-vorhanden.webp").scaled(self.window.img.size() / 1.5, Qt.KeepAspectRatio,
-                                                                     Qt.SmoothTransformation))
+            # self.window.img.setPixmap(
+            #     QPixmap("../images/kein-bild-vorhanden.webp").scaled(self.window.img.size() / 1.5, Qt.KeepAspectRatio,
+            #                                                          Qt.SmoothTransformation))
+            self.window.img.hide()
         else:
             p = QPixmap.fromImage(img).scaled(self.window.img.size() / 1.3, Qt.KeepAspectRatio, Qt.SmoothTransformation)
             self.window.img.setPixmap(p)
+            self.window.img.show()
 
         # Erneuter Seitenwechsel, um Layout-update zu erzwingen
         self.window.stackedWidget.setCurrentIndex(1)

@@ -81,3 +81,8 @@ SPACE_BETWEEN_PRICE_AND_SPECIAL_PRICE: int = 10
 SPECIAL_PRICE_FONT_SIZE: int = 50
 # PRODUKT Max Font Size in Pixel
 PRODUCT_MAX_FONT_SIZE: int = 40
+
+# Maximale Kurzbeschreibungszeichenlänge, wenn größer, dann zeig nur noch "Produkt Informationen:"
+# -> Layout sonst nicht mehr schön (Bild wird zu klein, bzw Textfeld zu breit)
+MAX_SHORT_DESCRIPTION_LENGTH: int = 50
+
