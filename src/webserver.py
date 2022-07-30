@@ -319,6 +319,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                         settings.SHOW_TIME = time
                         html_string = html_string.replace("%anzeigezeit_value%", str(settings.SHOW_TIME))
                         html_string = html_string.replace("%STATUS1%", "Erfolgreich aktualisiert!")
+                        log.info("> Aktualisiere Artikel Information Anzeigezeit zu: {0} Sekunden.".
+                                 format(settings.SHOW_TIME))
+
                     else:
                         html_string = html_string.replace("%anzeigezeit_value%", str(settings.SHOW_TIME))
                         html_string = html_string.replace("%STATUS1%", "Aktualisierung fehlgeschlagen! Keine Zahl?")
@@ -334,6 +337,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                         html_string = html_string.replace("%anzeigezeit_Hersteller_value%",
                                                           str(settings.SHOW_PRODUCER_INFOS_TIME))
                         html_string = html_string.replace("%STATUS2%", "Erfolgreich aktualisiert!")
+                        log.info("> Aktualisiere Hersteller Informationen Anzeigezeit zu: {0} Sekunden.".
+                                 format(settings.SHOW_PRODUCER_INFOS_TIME))
                     else:
                         html_string = html_string.replace("%anzeigezeit_Hersteller_value%",
                                                           str(settings.SHOW_PRODUCER_INFOS_TIME))
@@ -351,6 +356,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                         html_string = html_string.replace("%anzeigezeit_Hersteller_value%",
                                                           str(settings.CHANGE_ADVERTISE_TIME))
                         html_string = html_string.replace("%STATUS3%", "Erfolgreich aktualisiert!")
+                        log.info("> Aktualisiere Wechselzeit zwischen Startseite und Werbung Seite zu: {0} Sekunden.".
+                                 format(settings.CHANGE_ADVERTISE_TIME))
                     else:
                         html_string = html_string.replace("%anzeigezeit_Hersteller_value%",
                                                           str(settings.CHANGE_ADVERTISE_TIME))
