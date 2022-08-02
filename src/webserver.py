@@ -1,6 +1,7 @@
 import sys
 import calendar
 import shutil
+import re
 
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler  # , HTTPServer, SimpleHTTPRequestHandler
 from datetime import datetime, timedelta
@@ -220,7 +221,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                     html_status = 404
 
             self.send_response(html_status)
-            self.send_header('content-type', 'text/html')
+            self.send_header('content-type', 'text/html; charset=utf-8')
             self.end_headers()
 
             # Write Funktion in eigenem try-catch statement, um Html-Fehler senden zu können, wenn im SQL Teil
@@ -310,64 +311,132 @@ class RequestHandler(BaseHTTPRequestHandler):
                     log.info("> Reload Advertise List")
                     self.do_GET()
                     return
-                elif post_data.startswith("anzeigezeit_value=".encode()):
-                    html_string = open("../html/settings.html", "r").read()
-
-                    if post_data.split('='.encode())[1].isdigit():
-                        time = int(post_data.split('='.encode())[1])
-                        self.loc_db_mngr.setDelayTime("ARTIKEL", time)
-                        settings.SHOW_TIME = time
-                        html_string = html_string.replace("%anzeigezeit_value%", str(settings.SHOW_TIME))
-                        html_string = html_string.replace("%STATUS1%", "Erfolgreich aktualisiert!")
-                        log.info("> Aktualisiere Artikel Information Anzeigezeit zu: {0} Sekunden.".
-                                 format(settings.SHOW_TIME))
-
-                    else:
-                        html_string = html_string.replace("%anzeigezeit_value%", str(settings.SHOW_TIME))
-                        html_string = html_string.replace("%STATUS1%", "Aktualisierung fehlgeschlagen! Keine Zahl?")
-                    html_string = self.replaceVarsInSettingsHtml(html_string)
-
-                elif post_data.startswith("anzeigezeit_Hersteller_value=".encode()):
-                    html_string = open("../html/settings.html", "r").read()
-
-                    if post_data.split('='.encode())[1].isdigit():
-                        time = int(post_data.split('='.encode())[1])
-                        self.loc_db_mngr.setDelayTime("HERSTELLER", time)
-                        settings.SHOW_PRODUCER_INFOS_TIME = time
-                        html_string = html_string.replace("%anzeigezeit_Hersteller_value%",
-                                                          str(settings.SHOW_PRODUCER_INFOS_TIME))
-                        html_string = html_string.replace("%STATUS2%", "Erfolgreich aktualisiert!")
-                        log.info("> Aktualisiere Hersteller Informationen Anzeigezeit zu: {0} Sekunden.".
-                                 format(settings.SHOW_PRODUCER_INFOS_TIME))
-                    else:
-                        html_string = html_string.replace("%anzeigezeit_Hersteller_value%",
-                                                          str(settings.SHOW_PRODUCER_INFOS_TIME))
-                        html_string = html_string.replace("%STATUS2%", "Aktualisierung fehlgeschlagen! Keine Zahl?")
-                    html_string = self.replaceVarsInSettingsHtml(html_string)
-
-                elif post_data.startswith("changeAdvertiseTime_value=".encode()):
-                    html_string = open("../html/settings.html", "r").read()
-
-                    if post_data.split('='.encode())[1].isdigit():
-                        time = int(post_data.split('='.encode())[1])
-                        self.loc_db_mngr.setDelayTime("CHANGE_ADVERTISE", time)
-                        settings.CHANGE_ADVERTISE_TIME = time
-                        print(time)
-                        html_string = html_string.replace("%anzeigezeit_Hersteller_value%",
-                                                          str(settings.CHANGE_ADVERTISE_TIME))
-                        html_string = html_string.replace("%STATUS3%", "Erfolgreich aktualisiert!")
-                        log.info("> Aktualisiere Wechselzeit zwischen Startseite und Werbung Seite zu: {0} Sekunden.".
-                                 format(settings.CHANGE_ADVERTISE_TIME))
-                    else:
-                        html_string = html_string.replace("%anzeigezeit_Hersteller_value%",
-                                                          str(settings.CHANGE_ADVERTISE_TIME))
-                        html_string = html_string.replace("%STATUS3%", "Aktualisierung fehlgeschlagen! Keine Zahl?")
-                    html_string = self.replaceVarsInSettingsHtml(html_string)
-
                 else:
-                    log.warning("> Unbekannter POST: {0}".format(str(post_data)))
-                    html_string = open("../html/404.html", "r").read()
-                    html_status = 404
+                    data = re.split('&|='.encode(), post_data)
+                    admin: bool = False
+
+                    if "adminPW".encode() in data and data.index("adminPW".encode()) < (len(data) - 1):
+                        if data[data.index("adminPW".encode()) + 1].decode() == settings.clear_log_file_pw:
+                            admin = True
+                        else:
+                            log.warning(" > Falsches Passwort in Webeinstellungen: {0}".
+                                        format(data[data.index("adminPW".encode()) + 1].decode()))
+                    else:
+                        log.error(" > Kein Passwort in Webeinstellungen Postanfrage!.")
+
+                    for i in range(0, len(data), 2):
+
+                        if i == len(data) - 1 or data[i].decode() == "adminPW":
+                            continue
+
+                        elif data[i].decode() == "anzeigezeit_value":
+                            # post_data.startswith("anzeigezeit_value=".encode("utf-8"))
+                            html_string = open("../html/settings.html", "r").read()
+
+                            if not admin:
+                                html_string = html_string.replace("%anzeigezeit_value%", str(settings.SHOW_TIME))
+                                html_string = html_string.replace("%STATUS1%",
+                                                                  "<font color='red'>Aktualisierung fehlgeschlagen! "
+                                                                  "Falsches Admin Passwort</font>")
+                            elif data[i + 1].isdigit():
+                                time = int(data[i + 1])
+                                self.loc_db_mngr.setDelayTime("ARTIKEL", time)
+                                settings.SHOW_TIME = time
+                                html_string = html_string.replace("%anzeigezeit_value%", str(settings.SHOW_TIME))
+                                html_string = html_string.replace("%STATUS1%",
+                                                                  "<font color='green'>Erfolgreich aktualisiert!</font>"
+                                                                  "")
+                                log.info("> Aktualisiere Artikel Information Anzeigezeit zu: {0} Sekunden.".
+                                         format(settings.SHOW_TIME))
+
+                            else:
+                                html_string = html_string.replace("%anzeigezeit_value%", str(settings.SHOW_TIME))
+                                html_string = html_string.replace("%STATUS1%",
+                                                                  "<font color='red'>Aktualisierung fehlgeschlagen! "
+                                                                  "Keine Zahl?</font>")
+                            html_string = self.replaceVarsInSettingsHtml(html_string)
+
+                        elif data[i].decode() == "anzeigezeit_Hersteller_value":
+                            # post_data.startswith("anzeigezeit_Hersteller_value=".encode("utf-8")):
+                            html_string = open("../html/settings.html", "r").read()
+
+                            if not admin:
+                                html_string = html_string.replace("%anzeigezeit_Hersteller_value%",
+                                                                  str(settings.SHOW_TIME))
+                                html_string = html_string.replace("%STATUS2%",
+                                                                  "<font color='red'>Aktualisierung fehlgeschlagen! "
+                                                                  "Falsches Admin Passwort</font>")
+                            elif data[i + 1].isdigit():
+                                time = int(data[i + 1])
+                                self.loc_db_mngr.setDelayTime("HERSTELLER", time)
+                                settings.SHOW_PRODUCER_INFOS_TIME = time
+                                html_string = html_string.replace("%anzeigezeit_Hersteller_value%",
+                                                                  str(settings.SHOW_PRODUCER_INFOS_TIME))
+                                html_string = html_string.replace("%STATUS2%",
+                                                                  "<font color='green'>Erfolgreich aktualisiert!</font>"
+                                                                  "")
+                                log.info("> Aktualisiere Hersteller Informationen Anzeigezeit zu: {0} Sekunden.".
+                                         format(settings.SHOW_PRODUCER_INFOS_TIME))
+                            else:
+                                html_string = html_string.replace("%anzeigezeit_Hersteller_value%",
+                                                                  str(settings.SHOW_PRODUCER_INFOS_TIME))
+                                html_string = html_string.replace("%STATUS2%",
+                                                                  "<font color='red'>Aktualisierung fehlgeschlagen! "
+                                                                  "Keine Zahl?</font>")
+                            html_string = self.replaceVarsInSettingsHtml(html_string)
+
+                        elif data[i].decode() == "changeAdvertiseTime_value":
+                            # post_data.startswith("changeAdvertiseTime_value=".encode("utf-8")):
+                            html_string = open("../html/settings.html", "r").read()
+
+                            if not admin:
+                                html_string = html_string.replace("%anzeigezeit_Hersteller_value%",
+                                                                  str(settings.SHOW_TIME))
+                                html_string = html_string.replace("%STATUS3%",
+                                                                  "<font color='red'>Aktualisierung fehlgeschlagen! "
+                                                                  "Falsches Admin Passwort</font>")
+                            elif data[i + 1].isdigit():
+                                time = int(data[i + 1])
+                                self.loc_db_mngr.setDelayTime("CHANGE_ADVERTISE", time)
+                                settings.CHANGE_ADVERTISE_TIME = time
+                                print(time)
+                                html_string = html_string.replace("%anzeigezeit_Hersteller_value%",
+                                                                  str(settings.CHANGE_ADVERTISE_TIME))
+                                html_string = html_string.replace("%STATUS3%",
+                                                                  "<font color='green'>Erfolgreich aktualisiert!</font>"
+                                                                  "")
+                                log.info(
+                                    "> Aktualisiere Wechselzeit zwischen Startseite und Werbung Seite zu: {0} Sekunden.".
+                                    format(settings.CHANGE_ADVERTISE_TIME))
+                            else:
+                                html_string = html_string.replace("%anzeigezeit_Hersteller_value%",
+                                                                  str(settings.CHANGE_ADVERTISE_TIME))
+                                html_string = html_string.replace("%STATUS3%",
+                                                                  "<font color='red'>Aktualisierung fehlgeschlagen! "
+                                                                  "Keine Zahl?</font>")
+                            html_string = self.replaceVarsInSettingsHtml(html_string)
+
+                        elif data[i].decode() == "changePasswordNewPW_value":
+                            # post_data.startswith("changeAdvertiseTime_value=".encode("utf-8")):
+                            html_string = open("../html/settings.html", "r").read()
+
+                            if not admin:
+                                html_string = html_string.replace("%STATUS4%",
+                                                                  "<font color='red'>Aktualisierung fehlgeschlagen! "
+                                                                  "Falsches Admin Passwort</font>")
+                            else:
+                                self.loc_db_mngr.setPassword("ADMIN", data[i + 1].decode())
+                                settings.clear_log_file_pw = data[i + 1].decode()
+
+                                html_string = html_string.replace("%STATUS4%",
+                                                                  "<font color='green'>Erfolgreich aktualisiert!</font>"
+                                                                  "")
+                                log.info("> Ändere das Admin Passwort")
+                            html_string = self.replaceVarsInSettingsHtml(html_string)
+                        else:
+                            log.warning("> Unbekannter POST: {0}".format(str(post_data)))
+                            html_string = open("../html/404.html", "r").read()
+                            html_status = 404
 
             else:
                 log.debug("> WARNUNG: Post Seite nicht gefunden: {0}".format(self.path))
@@ -375,8 +444,13 @@ class RequestHandler(BaseHTTPRequestHandler):
                 html_string = open("../html/404.html", "r").read()
                 html_status = 404
 
+            if html_string == "":
+                log.warning("> Unbearbeiteter POST: {0}".format(str(post_data)))
+                html_string = open("../html/404.html", "r").read()
+                html_status = 404
+
             self.send_response(html_status)
-            self.send_header('Content-type', 'text/html')
+            self.send_header('Content-type', 'text/html; charset=utf-8')
             self.end_headers()
 
             if not self.tryWriteOK(html_string.encode("utf-8")):

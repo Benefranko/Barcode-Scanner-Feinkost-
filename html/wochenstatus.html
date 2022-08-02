@@ -27,7 +27,14 @@
 	<p></p>
 
 	<a style="color: blue; text-decoration: none; font-size: 35px" href="/">Zur Startseite</a>
-	
+	<div style="height: 30px"></div>
+
+	<div style="display: flex">
+		<a style="color: dark-blue; text-decoration: none; font-size: 35px; margin: auto;" href="/wochenstatus.html">Alle Artikel</a>
+		<a style="color: blue; text-decoration: none; font-size: 35px; margin: auto;" href="/wochenstatus-kategorie.html">Nach Kategorie</a>
+		<a style="color: blue; text-decoration: none; font-size: 35px; margin: auto;" href="/wochenstatus-hersteller.html">Nach Hersteller</a>
+	</div>
+
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 	<script >
 		const ctx = document.getElementById('myChart').getContext('2d');
@@ -36,7 +43,7 @@
 			data: {
 				labels: ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'],
 				datasets: [{
-					label: ' Verwendungen',
+					label: ' Alle Artikel',
 					data: %DATA_DATA_SET_1%,
 					backgroundColor: [
 						'rgba(255, 99, 132, 0.2)',

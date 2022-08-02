@@ -24,11 +24,16 @@ class LocalDataBaseManager:
                                         name TEXT PRIMARY KEY,
                                         value integer NOT NULL
                                     );"""
+    sql_create_table3 = """CREATE TABLE IF NOT EXISTS passwords (
+                                            name TEXT PRIMARY KEY,
+                                            value TEXT NOT NULL
+                                        );"""
 
     def create_table(self):
         with contextlib.closing(self.connection.cursor()) as c:
             c.execute(self.sql_create_table)
             c.execute(self.sql_create_table2)
+            c.execute(self.sql_create_table3)
             log.info("Erfolgreich mit lokaler SQL Lite Datenbank verbunden und Tables erstellt!")
 
     def updateConstants(self):
@@ -41,6 +46,9 @@ class LocalDataBaseManager:
         d_time = self.getDelayTime("CHANGE_ADVERTISE")
         if d_time and d_time[0] > 1:
             settings.CHANGE_ADVERTISE_TIME = d_time[0]
+        pw = self.getPassword("ADMIN")
+        if pw:
+            settings.clear_log_file_pw = pw[0]
 
     def disconnect(self):
         self.connection.close()
@@ -65,9 +73,21 @@ class LocalDataBaseManager:
             return cur.fetchone()
 
     def setDelayTime(self, name, value):
-
         with contextlib.closing(self.connection.cursor()) as cur:
             cur.execute("INSERT INTO times(name,value) VALUES(?,?) ON CONFLICT(name) DO UPDATE SET value = ?;",
+                        (name, value, value))
+            self.connection.commit()
+            id_ = cur.lastrowid
+        return id_
+
+    def getPassword(self, name: str):
+        with contextlib.closing(self.connection.cursor()) as cur:
+            cur.execute("SELECT value FROM passwords WHERE name = ?", (name,))
+            return cur.fetchone()
+
+    def setPassword(self, name, value):
+        with contextlib.closing(self.connection.cursor()) as cur:
+            cur.execute("INSERT INTO passwords(name,value) VALUES(?,?) ON CONFLICT(name) DO UPDATE SET value = ?;",
                         (name, value, value))
             self.connection.commit()
             id_ = cur.lastrowid

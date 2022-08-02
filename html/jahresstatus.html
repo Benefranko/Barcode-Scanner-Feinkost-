@@ -24,8 +24,9 @@
 	
 	<p></p>
 
+	<a style="color: blue; text-decoration: none; font-size: 30px; height: 50px" href="javascript:history.back()">Zur&uuml;ck</a><br>
 	<a style="color: blue; text-decoration: none; font-size: 35px;" href="/">Zur Startseite</a>
-	
+
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
 	<script >
 		const ctx = document.getElementById('myChart').getContext('2d');
@@ -34,7 +35,7 @@
 			data: {
 				labels: ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"],
 				datasets: [{
-					label: ' Verwendungen',
+					label: ' Alle Artikel',
 					data: %DATA_DATA_SET_1%,
 					backgroundColor: [
 						'rgba(255, 99, 132, 0.2)',
