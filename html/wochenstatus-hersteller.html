@@ -24,9 +24,9 @@
 	<p></p>
 
 	<div style="display: flex">
-		<a class="m-btn auswahlLink m-btn-green auswahlLinkSelected" href="/wochenstatus.html">Alle Artikel</a>
+		<a class="m-btn auswahlLink m-btn-green" href="/wochenstatus.html">Alle Artikel</a>
 		<a class="m-btn auswahlLink m-btn-green" href="/wochenstatus-kategorie.html">Nach Kategorie</a>
-		<a class="m-btn auswahlLink m-btn-green" href="/wochenstatus-hersteller.html">Nach Hersteller</a>
+		<a class="m-btn auswahlLink m-btn-green auswahlLinkSelected" href="/wochenstatus-hersteller.html">Nach Hersteller</a>
 	</div>
 
 	<div class="spacer"></div>
@@ -40,30 +40,7 @@
 			type: 'bar',
 			data: {
 				labels: ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'],
-				datasets: [{
-					label: ' Alle Artikel',
-					data: %DATA_DATA_SET_1%,
-					backgroundColor: [
-						'rgba(255, 99, 132, 0.2)',
-						'rgba(54, 162, 235, 0.2)',
-						'rgba(255, 206, 86, 0.2)',
-						'rgba(75, 192, 192, 0.2)',
-						'rgba(153, 102, 255, 0.2)',
-						'rgba(255, 159, 64, 0.2)',
-						'rgba(255, 99, 132, 0.2)'
-
-					],
-					borderColor: [
-						'rgba(255, 99, 132, 1)',
-						'rgba(54, 162, 235, 1)',
-						'rgba(255, 206, 86, 1)',
-						'rgba(75, 192, 192, 1)',
-						'rgba(153, 102, 255, 1)',
-						'rgba(255, 159, 64, 1)',
-						'rgba(255, 99, 132, 1)'
-					],
-					borderWidth: 2
-				}]
+				datasets: [ %DATA_DATA_SETS% ]
 			},
 			options: {
 				scales: {

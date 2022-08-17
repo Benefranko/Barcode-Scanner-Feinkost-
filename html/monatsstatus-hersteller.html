@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Canvas Diagramm</title>
+		<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+		<link rel="stylesheet" href="style.css">
+
+		<style>
+
+		</style>
+	</head>
+<body style="background-color: white">
+
+	<div class="titel">
+		<h1 >Wochenstatistik:</h1>
+	</div>
+	<p></p>
+
+	<div style="background-color: white">
+		<canvas id="myChart"></canvas>
+	</div>
+	
+	<p></p>
+
+	<div style="display: flex">
+		<a class="m-btn auswahlLink m-btn-green" href="/jahresstatus.html">Alle Artikel</a>
+		<a class="m-btn auswahlLink m-btn-green" href="/jahresstatus-kategorie.html">Nach Kategorie</a>
+		<a class="m-btn auswahlLink m-btn-green auswahlLinkSelected" href="/jahresstatus-hersteller.html">Nach Hersteller</a>
+	</div>
+
+	<div class="spacer"></div>
+	<a class="m-btn m-btn-blue" href="/"> < Zur Startseite</a>
+	<div class="spacer"></div>
+
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<script >
+		const ctx = document.getElementById('myChart').getContext('2d');
+		const myChart = new Chart(ctx, {
+			type: 'bar',
+			data: {
+				labels: %DATA_LABEL_SET%,
+				datasets: [ %DATA_DATA_SETS% ]
+			},
+			options: {
+				scales: {
+					y: {
+						beginAtZero: true
+					}
+				}
+			}
+			
+		});
+	</script>
+	
+	</body>
+</html>

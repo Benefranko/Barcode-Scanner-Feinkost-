@@ -4,62 +4,66 @@
 		<meta charset="utf-8">
 		<title>Barcodescanner Statistiken</title>
 		<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+		<link rel="stylesheet" href="style.css">
 		<style>
 			body{
-				margin-left: 20px;
+				width: 95%;
 			}
 			.switch_button {
 				width: 80px;
 				height: 30px;
 				font-size:18px
 			}
+
+			.option-div{
+				font-size:18px;
+				margin-top:20px;
+			}
 		</style>
 	</head>
 	<body>
-		<div  style="background-color: white" >
-			<div style="display: flex; background-color: cyan; height: 100px; align-items: center;justify-content: center;">
-				<h1 style="font-size:28px">Protokollierung:</h1>
-			</div>
-				<div style="font-size:18px; margin-top:50px;">
-					DEBUG - Nachrichten:
-					<button class="switch_button" onclick="debugSwitch()" id="debug-button" style="color: red" >AUS</button>
-				</div>
-				<div style="font-size:18px; margin-top: 20px">
-					INFO - Nachrichten:
-					<button class="switch_button" onclick="infoSwitch()" id="info-button" style="color: green" >EIN</button>
-				</div>
-				<div style="font-size:18px; margin-top: 20px">
-					WARNING - Nachrichten:
-					<button class="switch_button" onclick="warningSwitch()" id="warning-button" style="color: green" >EIN</button>
-				</div>
-				<div style="font-size:18px; margin-top: 20px">
-					ERROR - Nachrichten:
-					<button class="switch_button" onclick="errorSwitch()" id="error-button" style="color: green" >EIN</button>
-				</div>
-				<div style="font-size:18px; margin-top: 20px">
-					CRITICAL - Nachrichten:
-					<button class="switch_button" onclick="criticalSwitch()" id="critical-button" style="color: green" >EIN</button>
-				</div>
-
-				<div style="height: 20px">
-				</div>
-				<p>Gesamten Verlauf unwiderruflich entfernen?</p>
-				<form action="" method="post">
-					Passwort:
-					<input type="password" name="password" value="">
-					<input type="submit" name="deleteLog" value="Leeren">
-
-				</form>
-
-
-				<div style="height: 20px">
-				</div>
-				<a style="color: blue; text-decoration: none; font-size: 28px;" href="/">Zur Startseite</a>
-				<div style="height: 20px">
-				</div>
+		<div class="titel">
+			<h1>Protokollierung:</h1>
 		</div>
 
+		<div class="option-div" style="margin-top:50px">
+			DEBUG - Nachrichten:
+			<button class="switch_button" onclick="debugSwitch()" id="debug-button" style="color: red" >AUS</button>
+		</div>
+		<div class="option-div">
+			INFO - Nachrichten:
+			<button class="switch_button" onclick="infoSwitch()" id="info-button" style="color: green" >EIN</button>
+		</div>
+		<div class="option-div">
+			WARNING - Nachrichten:
+			<button class="switch_button" onclick="warningSwitch()" id="warning-button" style="color: green" >EIN</button>
+		</div>
+		<div class="option-div">
+			ERROR - Nachrichten:
+			<button class="switch_button" onclick="errorSwitch()" id="error-button" style="color: green" >EIN</button>
+		</div>
+		<div class="option-div">
+			CRITICAL - Nachrichten:
+			<button class="switch_button" onclick="criticalSwitch()" id="critical-button" style="color: green" >EIN</button>
+		</div>
+
+		<div class="spacer"></div>
+
+		<p>Gesamten Verlauf unwiderruflich entfernen?</p>
+
+		<form action="" method="post">
+			Passwort:
+			<input type="password" name="password" value="">
+			<input type="submit" name="deleteLog" value="Leeren">
+
+		</form>
+
+		<div class="spacer"></div>
+		<a class="m-btn m-btn-blue" href="/"> < Zur Startseite</a>
+		<div class="spacer"></div>
+
 		<h2>Protokoll:</h2>
+
 
 		%DATA%
 

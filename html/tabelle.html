@@ -4,6 +4,8 @@
 		<meta charset="utf-8">
 		<title>Alle Scanns</title>
 		<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+		<link rel="stylesheet" href="/style.css">
+
 		<style>
 			table, th, td {
 				border: 1px solid;
@@ -11,11 +13,6 @@
 			th {
 				height: 50px;
 				width: 150px;
-			}
-			body {
-				width: 80%;
-				margin-left: auto;
-				margin-right: auto;
 			}
 
 			.pageSwitchButtonDiv{
@@ -26,6 +23,7 @@
 				text-align: center;
 				line-height: 60px;
 				font-size: 50px;
+				border-radius: 5px;
 			}
 			.switchPageLink{
 				color: white;
@@ -33,11 +31,22 @@
 				display: block;
 			}
 
+			.switch-Page-Link{
+				font-size: 35px;
+				float: left;
+				margin-left: 30px;
+				width: 40px;
+				height: 40px;
+				text-align: center;
+      			padding: 12px 12px;
+
+			}
+
 		</style>
 	</head>
 	<body style="background-color: white">
-		<div style="display: flex; background-color: cyan; height: 100px; align-items: center;justify-content: center;">
-			<h1 style="text-align: center">Tabelle mit allen Scan-Eintraegen:</h1>
+		<div class="titel">
+			<h1>Tabelle mit allen Scan-Eintr&auml;gen:</h1>
 		</div>
 
 		<table style="border-collapse: collapse; border-spacing: 20px; text-align: center; margin-left: auto; margin-top:40px; margin-right: auto ">
@@ -53,30 +62,20 @@
 			%LINES%
 		</table>
 
-		<div style="height: 50px">
 
+		<div class="spacer"> </div>
+
+		<div class="row" style="margin: auto; width: 50%; border: 3px solid green; height: 66px; padding: 10px">
+				<a class="m-btn-green m-btn switch-Page-Link" href="/tabelle/0"> 0 </a>
+				<a class="m-btn-green m-btn switch-Page-Link" href="/tabelle/%BACK%"> < </a>
+				<a class="m-btn-green m-btn switch-Page-Link" href="/tabelle/%CURRENT%">%CURRENT%</a>
+				<a class="m-btn-green m-btn switch-Page-Link" href="/tabelle/%NEXT%"> > </a>
+				<a class="m-btn-green m-btn switch-Page-Link" href="/tabelle/%LAST%">%LAST%</a>
 		</div>
 
-		<div class="row" style=" margin-left: auto; margin-right: auto;" >
-			<div class="pageSwitchButtonDiv">
-				<a class="switchPageLink" href="/tabelle/0"> 0 </a>
-			</div>
-			<div class="pageSwitchButtonDiv" style="margin-left: 40px">
-				<a class="switchPageLink" href="/tabelle/%BACK%"> < </a>
-			</div>
-			<div class="pageSwitchButtonDiv" style="margin-left: 30px">
-				<a class="switchPageLink" href="/tabelle/%CURRENT%">%CURRENT%</a>
-			</div>
-			<div class="pageSwitchButtonDiv" style="margin-left: 30px">
-				<a class="switchPageLink" href="/tabelle/%NEXT%"> > </a>
-			</div>
-			<div class="pageSwitchButtonDiv" style="margin-left: 40px">
-				<a class="switchPageLink" href="/tabelle/%LAST%">%LAST%</a>
-			</div>
-		</div>
+		<div class="spacer"></div>
+		<a class="m-btn-blue m-btn" href="/"> < Zur Startseite</a>
+		<div class="spacer"></div>
 
-		<div style="margin-top: 150px; font-size: 35px; " >
-			<a style="text-decoration: none; color: blue" href="/">Zur Startseite</a>
-		</div>
 	</body>
 </html>

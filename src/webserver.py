@@ -71,6 +71,19 @@ class RequestHandler(BaseHTTPRequestHandler):
         html_status = 200
         html_string: str = ""
         try:
+            if self.path == "/style.css":
+                self.send_response(200)
+                self.send_header('content-type', 'text/css')
+                self.end_headers()
+
+                # Open the file, read bytes, serve
+                with open("../html/css/style.css", 'rb') as file:
+                    bts = file.read()
+                if not self.tryWriteOK(bts):
+                    self.loc_db_mngr = None
+                    return
+                return
+
             # Je nach URL Pfad / je nach aufgerufener Internetseite:
             sub_paths = self.path.split("/")
             if sub_paths is not None and len(sub_paths) > 1:
@@ -92,6 +105,57 @@ class RequestHandler(BaseHTTPRequestHandler):
                         label_list[i] = str(i + 1) + "."
                     html_string = html_string.replace("%DATA_LABEL_SET_1%", str(label_list))
 
+                elif sub_paths[1] == "monatsstatus-hersteller.html":
+                    # Lade HTML TEMPLATE für Wochenstatus mit Javascript Chart
+                    html_string = open("../html/monatsstatus-hersteller.html", "r").read()
+
+                    now = datetime.now()
+                    days_of_month = calendar.monthrange(now.year, now.month)[1]
+                    day_of_month = int(now.strftime("%d")) - 1
+
+                    replace_str: str = ""
+                    herstellerlist = self.loc_db_mngr.getHerstellerList()
+
+                    for i in range(0, len(herstellerlist)):
+                        if herstellerlist[i] is None:
+                            continue
+                        elif herstellerlist[i][0] is None:
+                            hersteller = "Unbekannt"
+                        else:
+                            hersteller = herstellerlist[i][0]
+
+                        scan_list = [0] * days_of_month
+                        for day in range(0, day_of_month + 1):
+                            current_day = datetime.today().date() - timedelta(days=day)
+                            buf = self.loc_db_mngr.count_scans_at_date_where_hersteller_is(current_day, hersteller)
+                            if buf is not None:
+                                scan_list[day_of_month - day] = buf[0][0]
+
+                        if replace_str != "":
+                            replace_str += ","
+                        replace_str += "{\r\n" \
+                                       + "     label: '" + hersteller + "',\r\n" \
+                                       + "     data: " + str(scan_list) + ",\r\n" \
+                                       + "     backgroundColor: [\r\n" \
+                                       + "         'rgba(" + str((i * 50) % 255) + ", " + \
+                                       str((i * 100) % 255) + ", " + \
+                                       str((i * 150) % 255) + ", 0.2)'\r\n" \
+                                       + "     ],\r\n" \
+                                       + "    borderColor: [\r\n" \
+                                       + "         'rgba(" + str((i * 50) % 255) + ", " + \
+                                       str((i * 100) % 255) + ", " + \
+                                       str((i * 150) % 255) + ", 1)'\r\n" \
+                                       + "     ],\r\n" \
+                                       + "     borderWidth: 2\r\n" \
+                                       + "}"
+
+                    html_string = html_string.replace("%DATA_DATA_SETS%", replace_str)
+
+                    label_list = [""] * days_of_month
+                    for i in range(0, days_of_month):
+                        label_list[i] = str(i + 1) + "."
+                    html_string = html_string.replace("%DATA_LABEL_SET%", str(label_list))
+
                 elif sub_paths[1] == "wochenstatus.html":
                     # Lade HTML TEMPLATE für Wochenstatus mit Javascript Chart
                     html_string = open("../html/wochenstatus.html", "r").read()
@@ -103,6 +167,49 @@ class RequestHandler(BaseHTTPRequestHandler):
                         if buf is not None:
                             scan_list[weekday - day] = buf[0][0]
                     html_string = html_string.replace("%DATA_DATA_SET_1%", str(scan_list))
+
+                elif sub_paths[1] == "wochenstatus-hersteller.html":
+                    # Lade HTML TEMPLATE für Wochenstatus mit Javascript Chart
+                    html_string = open("../html/wochenstatus-hersteller.html", "r").read()
+                    replace_str: str = ""
+                    weekday = datetime.today().weekday()
+
+                    herstellerlist = self.loc_db_mngr.getHerstellerList()
+
+                    for i in range(0, len(herstellerlist)):
+                        if herstellerlist[i] is None:
+                            continue
+                        elif herstellerlist[i][0] is None:
+                            hersteller = "Unbekannt"
+                        else:
+                            hersteller = herstellerlist[i][0]
+
+                        scan_list = [0] * 7
+                        for day in range(0, weekday + 1):
+                            current_day = datetime.today().date() - timedelta(days=day)
+                            buf = self.loc_db_mngr.count_scans_at_date_where_hersteller_is(current_day,
+                                                                                           hersteller)
+                            if buf is not None:
+                                scan_list[weekday - day] = buf[0][0]
+                        if replace_str != "":
+                            replace_str += ","
+                        replace_str += "{\r\n" \
+                                       + "     label: '" + hersteller + "',\r\n" \
+                                       + "     data: " + str(scan_list) + ",\r\n" \
+                                       + "     backgroundColor: [\r\n" \
+                                       + "         'rgba(" + str((i * 50) % 255) + ", " + \
+                                       str((i * 100) % 255) + ", " + \
+                                       str((i * 150) % 255) + ", 0.2)'\r\n" \
+                                       + "     ],\r\n" \
+                                       + "    borderColor: [\r\n" \
+                                       + "         'rgba(" + str((i * 50) % 255) + ", " + \
+                                       str((i * 100) % 255) + ", " + \
+                                       str((i * 150) % 255) + ", 1)'\r\n" \
+                                       + "     ],\r\n" \
+                                       + "     borderWidth: 2\r\n" \
+                                       + "}"
+
+                    html_string = html_string.replace("%DATA_DATA_SETS%", replace_str)
 
                 elif sub_paths[1] == "jahresstatus.html":
                     # Lade HTML TEMPLATE für Jahresstatus mit Javascript Chart
@@ -117,6 +224,56 @@ class RequestHandler(BaseHTTPRequestHandler):
                             if scan_d.year == current_year and scan_d.month == m:
                                 scan_list[m - 1] += 1
                     html_string = html_string.replace("%DATA_DATA_SET_1%", str(scan_list))
+
+                elif sub_paths[1] == "jahresstatus-hersteller.html":
+
+                    # Lade HTML TEMPLATE für Jahresstatus mit Javascript Chart
+                    html_string = open("../html/jahresstatus-hersteller.html", "r").read()
+                    replace_str: str = ""
+                    current_year = datetime.now().year
+
+                    s_list = self.loc_db_mngr.get_all_scans()
+                    herstellerlist = self.loc_db_mngr.getHerstellerList()
+                    for i in range(0, len(herstellerlist)):
+                        if herstellerlist[i] is None:
+                            continue
+                        elif herstellerlist[i][0] is None:
+                            hersteller = "Unbekannt"
+                        else:
+                            hersteller = herstellerlist[i][0]
+
+                        ####
+                        # DRINGEND MIT SQL STATEMENT SCHNELLER MACHEN!!!!!!
+                        ####
+                        scan_list = [0] * 12
+                        for m in range(1, 13):
+                            for scan in s_list:
+                                scan_d = datetime.fromisoformat(scan[1])
+                                if scan_d.year == current_year and scan_d.month == m:
+                                    if scan[5] is None and hersteller == "Unbekannt":
+                                        scan_list[m - 1] += 1
+                                    elif scan[5] == hersteller:
+                                        scan_list[m - 1] += 1
+
+                        if replace_str != "":
+                            replace_str += ","
+                        replace_str += "{\r\n" \
+                                       + "     label: '" + hersteller + "',\r\n" \
+                                       + "     data: " + str(scan_list) + ",\r\n" \
+                                       + "     backgroundColor: [\r\n" \
+                                       + "         'rgba(" + str((i * 50) % 255) + ", " + \
+                                       str((i * 100) % 255) + ", " + \
+                                       str((i * 150) % 255) + ", 0.2)'\r\n" \
+                                       + "     ],\r\n" \
+                                       + "    borderColor: [\r\n" \
+                                       + "         'rgba(" + str((i * 50) % 255) + ", " + \
+                                       str((i * 100) % 255) + ", " + \
+                                       str((i * 150) % 255) + ", 1)'\r\n" \
+                                       + "     ],\r\n" \
+                                       + "     borderWidth: 2\r\n" \
+                                       + "}"
+
+                    html_string = html_string.replace("%DATA_DATA_SETS%", replace_str)
 
                 # Erweiterbar mit tabelle/INDEX, mit immer nur 100 Items auf einer seite mit nächster
                 #  seite und 1 seite zurück gg. mit POST die anzahl umstellbar machen!

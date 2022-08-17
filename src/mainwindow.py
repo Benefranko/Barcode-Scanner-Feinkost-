@@ -641,7 +641,7 @@ class MainWindow(QMainWindow):
 
         # Füge den Scan der lokalen Statistiken-Datenbank hinzu:
         try:
-            self.loc_db_mngr.add_new_scan(data.kArtikel, scan_article_ean)
+            self.loc_db_mngr.add_new_scan(data.kArtikel, scan_article_ean, hersteller)
         except Exception as e:
             log.error("    Error: Das speichern des Scans für Statistiken ist fehlgeschlagen: {0}".format(e))
         return

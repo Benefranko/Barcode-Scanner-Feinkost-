@@ -7,19 +7,22 @@ import settings
 
 import logging
 from pathlib import Path
+
 log = logging.getLogger(Path(__file__).name)
 
 
 class LocalDataBaseManager:
     connection = None
-    sql_create_table = """CREATE TABLE IF NOT EXISTS scans (
-                                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                    date date NOT NULL,
-                                    time time NOT NULL,
-                                    kArticle integer NOT NULL,
-                                    ean integer NOT NULL
-                                    
-                                );"""
+    sql_create_table = """CREATE TABLE IF NOT EXISTS "scans" ( 
+                                            "id" INTEGER, 
+                                            "date" date NOT NULL, 
+                                            "time" time NOT NULL, 
+                                            "kArticle" integer NOT NULL, 
+                                            "ean" integer NOT NULL, 
+                                            "hersteller" TEXT, 
+                                            PRIMARY KEY("id") 
+                                        );"""
+
     sql_create_table2 = """CREATE TABLE IF NOT EXISTS times (
                                         name TEXT PRIMARY KEY,
                                         value integer NOT NULL
@@ -125,10 +128,32 @@ class LocalDataBaseManager:
             cur.execute("SELECT COUNT(1) FROM scans WHERE date = ?", [date.isoformat()])
             return cur.fetchall()
 
-    def add_new_scan(self, k_article, ean):
+    def count_scans_at_date_where_hersteller_is(self, date: datetime.date, hersteller: str):
+        if hersteller == "Unbekannt":
+            with contextlib.closing(self.connection.cursor()) as cur:
+                cur.execute("SELECT COUNT(1) FROM scans WHERE date = ? AND hersteller is NULL",
+                            (date.isoformat(),))
+                return cur.fetchall()
+        else:
+            with contextlib.closing(self.connection.cursor()) as cur:
+                cur.execute("SELECT COUNT(1) FROM scans WHERE date = ? AND hersteller = ?",
+                            (date.isoformat(), hersteller))
+                return cur.fetchall()
+
+    def getHerstellerList(self):
         with contextlib.closing(self.connection.cursor()) as cur:
-            cur.execute(''' INSERT INTO scans(date,time,kArticle,ean)
-                      VALUES(date('now','localtime'), time('now','localtime'),?,?) ''', (k_article, ean))
+            cur.execute("SELECT DISTINCT hersteller FROM scans")
+            return cur.fetchall()
+
+    def add_new_scan(self, k_article, ean, hersteller):
+        with contextlib.closing(self.connection.cursor()) as cur:
+            if hersteller is not None and hersteller.cName != "":
+                cur.execute(''' INSERT INTO scans(date,time,kArticle,ean,hersteller)
+                            VALUES(date('now','localtime'), time('now','localtime'),?,?,?) ''',
+                            (k_article, ean, hersteller.cName))
+            else:
+                cur.execute(''' INSERT INTO scans(date,time,kArticle,ean)
+                        VALUES(date('now','localtime'), time('now','localtime'),?,?) ''', (k_article, ean))
             self.connection.commit()
             id_ = cur.lastrowid
         return id_

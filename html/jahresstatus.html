@@ -3,18 +3,18 @@
 	<head>
 		<meta charset="utf-8">
 		<title>Canvas Diagramm</title>
+		<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+		<link rel="stylesheet" href="style.css">
 		<style>
-			body {
-				width: 70%;
-				margin-left: auto;
-				margin-right: auto;
-			}
+
+
+
 		</style>
 	</head>
 <body style="background-color: white">
 
-	<div style="display: flex; background-color: cyan; height: 100px; align-items: center;justify-content: center;">
-		<h1 style="text-align: center" >Jahresstatistik:</h1>
+	<div class="titel">
+		<h1 >Jahresstatistik:</h1>
 	</div>
 	<p></p>
 
@@ -24,8 +24,18 @@
 	
 	<p></p>
 
-	<a style="color: blue; text-decoration: none; font-size: 30px; height: 50px" href="javascript:history.back()">Zur&uuml;ck</a><br>
-	<a style="color: blue; text-decoration: none; font-size: 35px;" href="/">Zur Startseite</a>
+	<!-- <a style="color: blue; text-decoration: none; font-size: 30px; height: 50px" href="javascript:history.back()">Zur&uuml;ck</a><br> -->
+
+
+	<div style="display: flex">
+		<a class="m-btn auswahlLink m-btn-green auswahlLinkSelected" href="/jahresstatus.html">Alle Artikel</a>
+		<a class="m-btn auswahlLink m-btn-green" href="/jahresstatus-kategorie.html">Nach Kategorie</a>
+		<a class="m-btn auswahlLink m-btn-green" href="/jahresstatus-hersteller.html">Nach Hersteller</a>
+	</div>
+
+	<div class="spacer"></div>
+	<a class="m-btn m-btn-blue" href="/"> < Zur Startseite</a>
+	<div class="spacer"></div>
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
 	<script >
@@ -33,7 +43,7 @@
 		const myChart = new Chart(ctx, {
 			type: 'bar',
 			data: {
-				labels: ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"],
+				labels: ["Januar", "Februar", "M&auml;rz", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"],
 				datasets: [{
 					label: ' Alle Artikel',
 					data: %DATA_DATA_SET_1%,
