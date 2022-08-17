@@ -459,8 +459,10 @@ class RequestHandler(BaseHTTPRequestHandler):
                         return
                 else:
                     log.warning("   -> Clear/Delete failed: Wrong password: ".format(str(post_data)))
+                    html_string = open("../html/tabelle-falsches-pw.html", "r").read()
 
-            if self.path == "/settings.html":
+
+            elif self.path == "/settings.html":
                 if "ReloadAdvertiseListButton=TRUE" in str(post_data) \
                         or ("ReloadAdvertiseListButton.x" in
                             str(post_data) and "ReloadAdvertiseListButton.y" in str(post_data)):
