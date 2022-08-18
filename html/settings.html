@@ -6,8 +6,15 @@
 		<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 		<link rel="stylesheet" href="style.css">
 		<style>
-			body{
+			body {
 				width: 95%;
+			}
+			ul {
+				font-size: 22px;
+				font-family: 'Source Sans Pro', sans-serif;
+			}
+			li {
+				margin-top:40px;
 			}
 		</style>
 
@@ -17,14 +24,14 @@
 		<div class="titel">
 			<h1 class="titel-font">Einstellungen: </h1>
 		</div>
-		 <ul style="font-size: 22px">
-			  <li style="margin-top:40px">
+		 <ul>
+			  <li>
 				  <form action="" method="post">
 					Lade Liste mit Werbung neu:
 					<input type="image" src="/images/reload.png" name="ReloadAdvertiseListButton" style="border: 1px solid #000; width:30px; vertical-align:middle;"></input>
 				  </form>
 			  </li>
-			  <li style="margin-top:40px">
+			  <li>
 				  <form action="" method="post">
 					  <label for="showArticleTime">Anzeigezeit der Artikelinformationen:</label><br>
 					  Admin Passwort: <input type="password" name="adminPW" value=""><br>
@@ -32,7 +39,7 @@
 					  <input type="submit" value="Anwenden"> %STATUS1%
 				  </form>
 			  </li>
-			  <li style="margin-top:40px">
+			  <li>
 				  <form action="" method="post">
 					  <label for="showHerstellerTime">Anzeigezeit der Herstellerinformationen:</label><br>
 					  Admin Passwort: <input type="password" name="adminPW" value=""><br>
@@ -40,7 +47,7 @@
 					  <input type="submit" value="Anwenden"> %STATUS2%
 				  </form>
 			  </li>
-			  <li style="margin-top:40px">
+			  <li>
 				  <form action="" method="post">
 					  <label for="changeAdvertiseTime">Zeit zwischen Wechsel der Werbungsseite und Startseite:</label><br>
 					  Admin Passwort: <input type="password" name="adminPW" value=""><br>
@@ -48,7 +55,7 @@
 					  <input type="submit" value="Anwenden"> %STATUS3%
 				  </form>
 			  </li>
-			 <li style="margin-top:40px">
+			 <li>
 				  <form action="" method="post">
 					  <label for="changePasswordNewPW">Admin Passwort &auml;ndern:</label><br>
 					  Admin Passwort: <input type="password" name="adminPW" value=""><br>
@@ -59,7 +66,10 @@
 		</ul>
 
 		<div class="spacer"></div>
-		<a class="m-btn m-btn-blue" href="/"> &#8962; Zur Startseite</a>
+		<div class="row jc-left">
+			<a class="m-btn m-btn-blue" href="/"> &#8962; Zur Startseite</a>
+			<a class="m-btn m-btn-green row-block-distance-40" href="/log.html"> &#128712; Ereignis Log</a>
+		</div>
 		<div class="pageEnd"></div>
 
 	</body>
