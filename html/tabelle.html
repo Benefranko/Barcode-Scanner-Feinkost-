@@ -14,39 +14,20 @@
 				height: 50px;
 				width: 150px;
 			}
-
-			.pageSwitchButtonDiv{
-				width: 60px;
-				height: 60px;
-				float: left;
-				background: cyan;
-				text-align: center;
-				line-height: 60px;
-				font-size: 50px;
-				border-radius: 5px;
-			}
-			.switchPageLink{
-				color: white;
-				text-decoration: none;
-				display: block;
-			}
-
 			.switch-Page-Link{
 				font-size: 35px;
-				float: left;
 				margin-left: 30px;
 				width: 40px;
 				height: 40px;
 				text-align: center;
       			padding: 12px 12px;
-
 			}
 
 		</style>
 	</head>
 	<body style="background-color: white">
 		<div class="titel">
-			<h1>Tabelle mit allen Scan-Eintr&auml;gen:</h1>
+			<h1 class="titel-font">Tabelle mit allen Scan-Eintr&auml;gen:</h1>
 		</div>
 
 
@@ -58,7 +39,7 @@
 		<div class="spacer"> </div>
 
 		<div class="row jc-center" style="margin: auto; width: 50%; border: 3px solid green; height: 66px; padding: 10px">
-				<a class="m-btn-green m-btn switch-Page-Link" href="/tabelle/0"> 0 </a>
+				<a class="m-btn-green m-btn switch-Page-Link" style="margin-left: 0px" href="/tabelle/0"> 0 </a>
 				<a class="m-btn-green m-btn switch-Page-Link" href="/tabelle/%BACK%"> < </a>
 				<a class="m-btn-blue m-btn switch-Page-Link" href="/tabelle/%CURRENT%">%CURRENT%</a>
 				<a class="m-btn-green m-btn switch-Page-Link" href="/tabelle/%NEXT%"> > </a>
@@ -89,7 +70,7 @@
 		<div class="spacer"> </div>
 
 		<div class="row jc-center" style="margin: auto; width: 50%; border: 3px solid green; height: 66px; padding: 10px">
-				<a class="m-btn-green m-btn switch-Page-Link" href="/tabelle/0"> 0 </a>
+				<a class="m-btn-green m-btn switch-Page-Link" style="margin-left: 0px" href="/tabelle/0"> 0 </a>
 				<a class="m-btn-green m-btn switch-Page-Link" href="/tabelle/%BACK%"> < </a>
 				<a class="m-btn-blue m-btn switch-Page-Link" href="/tabelle/%CURRENT%">%CURRENT%</a>
 				<a class="m-btn-green m-btn switch-Page-Link" href="/tabelle/%NEXT%"> > </a>
@@ -101,8 +82,7 @@
 			<a class="m-btn m-btn-green row-block-distance" href="javascript:window.scrollTo(0, 0);"> &#129045; Zum Anfang</a>
 			<a class="m-btn m-btn-blue row-block-distance-40" href="/"> &#8962; Zur Startseite</a>
 		</div>
-		<div class="spacer"></div>
-		<div class="spacer"></div>
+		<div class="pageEnd"></div>
 
 	</body>
 </html>

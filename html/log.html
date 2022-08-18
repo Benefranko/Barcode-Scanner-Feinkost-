@@ -4,7 +4,7 @@
 		<meta charset="utf-8">
 		<title>Barcodescanner Statistiken</title>
 		<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
-		<link rel="stylesheet" href="style.css">
+		<link rel="stylesheet" href="/style.css">
 		<style>
 			body{
 				width: 95%;
@@ -15,7 +15,12 @@
 				font-size:18px;
 				margin: auto 0;
 			}
-
+			.swBtnOn {
+				color: green;
+			}
+			.swBtnOff {
+				color: red;
+			}
 			.msg{
 				font-size:18px;
 				width: 250px;
@@ -24,31 +29,29 @@
 	</head>
 	<body>
 		<div class="titel">
-			<h1>Ereignis Log:</h1>
+			<h1 class="titel-font" >Ereignis Log:</h1>
 		</div>
-
-
 		<div class="spacer"></div>
 
 		<div class="row jc-left">
 			<p class="msg" >DEBUG - Nachrichten:</p>
-			<button class="switch_button" onclick="debugSwitch()" id="debug-button" style="color: red" >AUS</button>
+			<button class="switch_button swBtnOff" onclick="debugSwitch()" id="debug-button" >AUS</button>
 		</div>
 		<div class="row jc-left">
 			<p class="msg" >INFO - Nachrichten:</p>
-			<button class="switch_button" onclick="infoSwitch()" id="info-button" style="color: green" >EIN</button>
+			<button class="switch_button swBtnOn" onclick="infoSwitch()" id="info-button" >EIN</button>
 		</div>
 		<div class="row jc-left">
 			<p class="msg" >WARNING - Nachrichten:</p>
-			<button class="switch_button" onclick="warningSwitch()" id="warning-button" style="color: green" >EIN</button>
+			<button class="switch_button swBtnOn" onclick="warningSwitch()" id="warning-button" >EIN</button>
 		</div>
 		<div class="row jc-left">
 			<p class="msg" >ERROR - Nachrichten:</p>
-			<button class="switch_button" onclick="errorSwitch()" id="error-button" style="color: green" >EIN</button>
+			<button class="switch_button swBtnOn" onclick="errorSwitch()" id="error-button" >EIN</button>
 		</div>
 		<div class="row jc-left">
 			<p class="msg" >CRITICAL - Nachrichten:</p>
-			<button class="switch_button" onclick="criticalSwitch()" id="critical-button" style="color: green" >EIN</button>
+			<button class="switch_button swBtnOn" onclick="criticalSwitch()" id="critical-button" >EIN</button>
 		</div>
 
 		<div class="spacer"></div>
@@ -57,7 +60,6 @@
 			Passwort:
 			<input type="password" style="font-size: 16px" name="password" value="">
 			<input class="m-btn" style="font-size: 16px;" type="submit" name="deleteLog" value="Verlauf l&ouml;schen">
-
 		</form>
 
 		<div class="spacer"></div>
@@ -65,7 +67,6 @@
 			<a class="m-btn m-btn-green" href="javascript:window.scrollTo(0, document.body.scrollHeight);"> &#129047; Zum Ende</a>
 			<a class="m-btn m-btn-green row-block-distance-40" href="javascript:window.location.reload()"> &#x21bb; Aktualisieren</a>
 			<a class="m-btn m-btn-blue row-block-distance-40" href="/"> &#8962; Zur Startseite</a>
-
 		</div>
 		<div class="spacer"></div>
 
@@ -80,8 +81,7 @@
 			<a class="m-btn m-btn-blue row-block-distance-40" href="/"> &#8962; Zur Startseite</a>
 
 		</div>
-		<div class="spacer"></div>
-		<div class="spacer"></div>
+		<div class="pageEnd"></div>
 
 		<script>
 			var switchBtn = function(buttonName, messageName) {

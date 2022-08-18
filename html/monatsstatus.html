@@ -9,21 +9,15 @@
 
 		</style>
 	</head>
-<body style="background-color: white">
-
+<body>
 	<div class="titel">
-		<h1>Monatsstatistik:</h1>
+		<h1 class="titel-font">Monatsstatistik:</h1>
 	</div>
-	<p></p>
+	<div class="spacer"></div>
+	<canvas style="background-color: white" id="myChart"></canvas>
+	<div class="spacer"></div>
 
-	<div style="background-color: white">
-		<canvas id="myChart"></canvas>
-	</div>
-	
-	<p></p>
-
-	 <!-- <a style="color: blue; text-decoration: none; font-size: 30px; height: 50px" href="javascript:history.back()">Zur&uuml;ck</a><br> -->
-	<div style="display: flex">
+	<div class="row">
 		<a class="m-btn auswahlLink m-btn-green auswahlLinkSelected" href="/monatsstatus.html"> &#128309; Alle Artikel</a>
 		<a class="m-btn auswahlLink m-btn-green" href="/monatsstatus-kategorie.html">Nach Kategorie</a>
 		<a class="m-btn auswahlLink m-btn-green" href="/monatsstatus-hersteller.html">Nach Hersteller</a>
@@ -31,99 +25,143 @@
 
 	<div class="spacer"></div>
 	<a class="m-btn m-btn-blue" href="/"> &#8962; Zur Startseite</a>
-	<div class="spacer"></div>
+	<div class="pageEnd"></div>
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
 	<script >
 	
-const ctx = document.getElementById('myChart').getContext('2d');
-const myChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-        labels: %DATA_LABEL_SET_1%,
-        datasets: [{
-            label: ' Alle Artikel',
-            data: %DATA_DATA_SET_1%,
-            backgroundColor: [
-                'rgba(255, 99, 132, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(255, 206, 86, 0.2)',
-                'rgba(75, 192, 192, 0.2)',
-                'rgba(153, 102, 255, 0.2)',
-                'rgba(255, 159, 64, 0.2)',
-                'rgba(255, 99, 132, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(255, 206, 86, 0.2)',
-                'rgba(75, 192, 192, 0.2)',
-                'rgba(153, 102, 255, 0.2)',
-                'rgba(255, 159, 64, 0.2)',
-                'rgba(255, 99, 132, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(255, 206, 86, 0.2)',
-                'rgba(75, 192, 192, 0.2)',
-                'rgba(153, 102, 255, 0.2)',
-                'rgba(255, 159, 64, 0.2)',
-                'rgba(255, 99, 132, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(255, 206, 86, 0.2)',
-                'rgba(75, 192, 192, 0.2)',
-                'rgba(153, 102, 255, 0.2)',
-                'rgba(255, 159, 64, 0.2)',
-                'rgba(255, 99, 132, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(255, 206, 86, 0.2)',
-                'rgba(75, 192, 192, 0.2)',
-                'rgba(153, 102, 255, 0.2)',
-                'rgba(255, 159, 64, 0.2)',
+		const ctx = document.getElementById('myChart').getContext('2d');
+		let delayed;
+		const myChart = new Chart(ctx, {
+			type: 'bar',
+			data: {
+				labels: %DATA_LABEL_SET_1%,
+				datasets: [{
+					label: ' Alle Artikel',
+					data: %DATA_DATA_SET_1%,
+					backgroundColor: [
+						'rgba(255, 99, 132, 0.2)',
+						'rgba(54, 162, 235, 0.2)',
+						'rgba(255, 206, 86, 0.2)',
+						'rgba(75, 192, 192, 0.2)',
+						'rgba(153, 102, 255, 0.2)',
+						'rgba(255, 159, 64, 0.2)',
+						'rgba(255, 99, 132, 0.2)',
+						'rgba(54, 162, 235, 0.2)',
+						'rgba(255, 206, 86, 0.2)',
+						'rgba(75, 192, 192, 0.2)',
+						'rgba(153, 102, 255, 0.2)',
+						'rgba(255, 159, 64, 0.2)',
+						'rgba(255, 99, 132, 0.2)',
+						'rgba(54, 162, 235, 0.2)',
+						'rgba(255, 206, 86, 0.2)',
+						'rgba(75, 192, 192, 0.2)',
+						'rgba(153, 102, 255, 0.2)',
+						'rgba(255, 159, 64, 0.2)',
+						'rgba(255, 99, 132, 0.2)',
+						'rgba(54, 162, 235, 0.2)',
+						'rgba(255, 206, 86, 0.2)',
+						'rgba(75, 192, 192, 0.2)',
+						'rgba(153, 102, 255, 0.2)',
+						'rgba(255, 159, 64, 0.2)',
+						'rgba(255, 99, 132, 0.2)',
+						'rgba(54, 162, 235, 0.2)',
+						'rgba(255, 206, 86, 0.2)',
+						'rgba(75, 192, 192, 0.2)',
+						'rgba(153, 102, 255, 0.2)',
+						'rgba(255, 159, 64, 0.2)',
 
-                'rgba(255, 99, 132, 0.2)'
-            ],
-            borderColor: [
-                'rgba(255, 99, 132, 1)',
-                'rgba(54, 162, 235, 1)',
-                'rgba(255, 206, 86, 1)',
-                'rgba(75, 192, 192, 1)',
-                'rgba(153, 102, 255, 1)',
-                'rgba(255, 159, 64, 1)',
-                'rgba(255, 99, 132, 1)',
-                'rgba(54, 162, 235, 1)',
-                'rgba(255, 206, 86, 1)',
-                'rgba(75, 192, 192, 1)',
-                'rgba(153, 102, 255, 1)',
-                'rgba(255, 159, 64, 1)',
-                'rgba(255, 99, 132, 1)',
-                'rgba(54, 162, 235, 1)',
-                'rgba(255, 206, 86, 1)',
-                'rgba(75, 192, 192, 1)',
-                'rgba(153, 102, 255, 1)',
-                'rgba(255, 159, 64, 1)',
-                'rgba(255, 99, 132, 1)',
-                'rgba(54, 162, 235, 1)',
-                'rgba(255, 206, 86, 1)',
-                'rgba(75, 192, 192, 1)',
-                'rgba(153, 102, 255, 1)',
-                'rgba(255, 159, 64, 1)',
-                'rgba(255, 99, 132, 1)',
-                'rgba(54, 162, 235, 1)',
-                'rgba(255, 206, 86, 1)',
-                'rgba(75, 192, 192, 1)',
-                'rgba(153, 102, 255, 1)',
-                'rgba(255, 159, 64, 1)',
+						'rgba(255, 99, 132, 0.2)'
+					],
+					borderColor: [
+						'rgba(255, 99, 132, 1)',
+						'rgba(54, 162, 235, 1)',
+						'rgba(255, 206, 86, 1)',
+						'rgba(75, 192, 192, 1)',
+						'rgba(153, 102, 255, 1)',
+						'rgba(255, 159, 64, 1)',
+						'rgba(255, 99, 132, 1)',
+						'rgba(54, 162, 235, 1)',
+						'rgba(255, 206, 86, 1)',
+						'rgba(75, 192, 192, 1)',
+						'rgba(153, 102, 255, 1)',
+						'rgba(255, 159, 64, 1)',
+						'rgba(255, 99, 132, 1)',
+						'rgba(54, 162, 235, 1)',
+						'rgba(255, 206, 86, 1)',
+						'rgba(75, 192, 192, 1)',
+						'rgba(153, 102, 255, 1)',
+						'rgba(255, 159, 64, 1)',
+						'rgba(255, 99, 132, 1)',
+						'rgba(54, 162, 235, 1)',
+						'rgba(255, 206, 86, 1)',
+						'rgba(75, 192, 192, 1)',
+						'rgba(153, 102, 255, 1)',
+						'rgba(255, 159, 64, 1)',
+						'rgba(255, 99, 132, 1)',
+						'rgba(54, 162, 235, 1)',
+						'rgba(255, 206, 86, 1)',
+						'rgba(75, 192, 192, 1)',
+						'rgba(153, 102, 255, 1)',
+						'rgba(255, 159, 64, 1)',
 
-                'rgba(255, 99, 132, 1)'
-            ],
-            borderWidth: 2
-        }]
-    },
-    options: {
-        scales: {
-            y: {
-                beginAtZero: true
-            }
-        }
-    }
-});
-</script>
+						'rgba(255, 99, 132, 1)'
+					],
+					borderWidth: 2
+				}]
+			},
+			options: {
+				animation: {
+				    onComplete: () => {
+					    delayed = true;
+				    },
+				    delay: (context) => {
+						let delay = 0;
+						if (context.type === 'data' && context.mode === 'default' && !delayed) {
+					  		delay = context.dataIndex * 50 + context.datasetIndex * 25;
+						}
+						return delay;
+				    },
+				},
+				scales: {
+				  	x: {
+				  		stacked: true,
+				  	},
+				  	y: {
+						stacked: true,
+						beginAtZero: true
+				  	}
+				}
+			}
+		});
+
+		var toggleStackedBtn = function(buttonName, chart) {
+						button = document.getElementById(buttonName);
+						if( button.value == "true" ) {
+							button.value = "false";
+							button.textContent = "Nebeneinander";
+							button.classList.remove("m-btn-green")
+							button.classList.add("m-btn-blue")
+
+							chart.options.scales.x.stacked = false;
+							chart.options.scales.y.stacked = false;
+
+						} else {
+							button.value = "true"
+							button.textContent = "Gestapelt";
+							button.classList.remove("m-btn-blue")
+							button.classList.add("m-btn-green")
+
+							chart.options.scales.x.stacked = true;
+							chart.options.scales.y.stacked = true;
+						}
+						chart.update();
+					};
+
+				function switchStacked() {
+					toggleStackedBtn("stack-button", myChart);
+				}
+		</script>
 	
 	</body>
 </html>
