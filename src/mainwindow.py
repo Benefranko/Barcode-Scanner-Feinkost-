@@ -454,11 +454,18 @@ class MainWindow(QMainWindow):
 
         # Versuche Informationen vom MS SQL Server zu dem Artikel abzufragen
         try:
-            data = self.databasemanager.getDataByBarcode(int(scan_article_ean))
+            ean: int = int(scan_article_ean)
         except Exception as exc:
             log.warning("    Ungültiger Scan: Can't cast to int: {0}: {1}".format(scan_article_ean, exc))
             self.event_handler("LOAD_ARTICLE_FAILED", scan_article_ean)
             return
+
+        # Ungültiger Schlüssel in der MS Sql Datenbank
+        if ean <= 0:
+            self.window.stackedWidget.setCurrentIndex(2)
+            self.showTimeTimer = s.SHOW_TIME_NOTHING_FOUND
+            return
+        data = self.databasemanager.getDataByBarcode(ean)
 
         if data is None:
             # Wenn keine Informationen zu dem Artikel gefunden werden kann, welche zu "nichts-gefunden"-Seite
@@ -639,9 +646,16 @@ class MainWindow(QMainWindow):
             self.window.label_lagerbstand_text.show()
             self.window.label_lagerbstand_value.show()
 
+        # getKategorie for statistics
+        ret = self.databasemanager.getKategorieByKArtikel(k_article=data.kArtikel)
+        if ret:
+            kategorie = ret.cName
+        else:
+            kategorie = "Unbekannt"
+
         # Füge den Scan der lokalen Statistiken-Datenbank hinzu:
         try:
-            self.loc_db_mngr.add_new_scan(data.kArtikel, scan_article_ean, hersteller)
+            self.loc_db_mngr.add_new_scan(data.kArtikel, scan_article_ean, hersteller, kategorie)
         except Exception as e:
             log.error("    Error: Das speichern des Scans für Statistiken ist fehlgeschlagen: {0}".format(e))
         return

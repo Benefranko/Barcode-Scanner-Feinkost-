@@ -257,3 +257,9 @@ class DataBaseManager:
             return -1
         else:
             return int(bestand.fLagerbestand)
+
+    def getKategorieByKArtikel(self, k_article):
+        return self.exec_sql("SELECT [tKategorieSprache].cName"
+                             " FROM [Mandant_1].[dbo].[tkategorieartikel], [Mandant_1].[dbo].[tKategorieSprache]"
+                             " WHERE [tkategorieartikel].kArtikel = ?"
+                             " AND [tkategorieartikel].kKategorie = [tKategorieSprache].kKategorie", k_article)

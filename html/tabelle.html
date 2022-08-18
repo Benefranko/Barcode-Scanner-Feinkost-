@@ -49,7 +49,26 @@
 			<h1>Tabelle mit allen Scan-Eintr&auml;gen:</h1>
 		</div>
 
-		<table style="border-collapse: collapse; border-spacing: 20px; text-align: center; margin-left: auto; margin-top:40px; margin-right: auto ">
+
+		<div class="spacer"> </div>
+		<div class="row jc-left">
+			<a class="m-btn m-btn-green row-block-distance" href="javascript:window.scrollTo(0, document.body.scrollHeight);"> &#129047; Zum Ende</a>
+			<a class="m-btn m-btn-blue row-block-distance-40" href="/"> &#8962; Zur Startseite</a>
+		</div>
+		<div class="spacer"> </div>
+
+		<div class="row jc-center" style="margin: auto; width: 50%; border: 3px solid green; height: 66px; padding: 10px">
+				<a class="m-btn-green m-btn switch-Page-Link" href="/tabelle/0"> 0 </a>
+				<a class="m-btn-green m-btn switch-Page-Link" href="/tabelle/%BACK%"> < </a>
+				<a class="m-btn-blue m-btn switch-Page-Link" href="/tabelle/%CURRENT%">%CURRENT%</a>
+				<a class="m-btn-green m-btn switch-Page-Link" href="/tabelle/%NEXT%"> > </a>
+				<a class="m-btn-green m-btn switch-Page-Link" href="/tabelle/%LAST%">%LAST%</a>
+		</div>
+
+
+		<div class="spacer"> </div>
+
+		<table style="border-collapse: collapse; border-spacing: 20px; text-align: center; margin-left: auto; margin-right: auto ">
 			<thead>
 				<tr>
 					<th>ID</th>
@@ -57,24 +76,32 @@
 					<th>Zeit</th>
 					<th>kArtikel</th>
 					<th>EAN</th>
+					<th>Hersteller</th>
+					<th>Kategorie</th>
 				</tr>
 			</thead>
 			%LINES%
 		</table>
 
 
+
+
 		<div class="spacer"> </div>
 
-		<div class="row" style="margin: auto; width: 50%; border: 3px solid green; height: 66px; padding: 10px">
+		<div class="row jc-center" style="margin: auto; width: 50%; border: 3px solid green; height: 66px; padding: 10px">
 				<a class="m-btn-green m-btn switch-Page-Link" href="/tabelle/0"> 0 </a>
 				<a class="m-btn-green m-btn switch-Page-Link" href="/tabelle/%BACK%"> < </a>
-				<a class="m-btn-green m-btn switch-Page-Link" href="/tabelle/%CURRENT%">%CURRENT%</a>
+				<a class="m-btn-blue m-btn switch-Page-Link" href="/tabelle/%CURRENT%">%CURRENT%</a>
 				<a class="m-btn-green m-btn switch-Page-Link" href="/tabelle/%NEXT%"> > </a>
 				<a class="m-btn-green m-btn switch-Page-Link" href="/tabelle/%LAST%">%LAST%</a>
 		</div>
 
+		<div class="spacer"> </div>
+		<div class="row jc-left">
+			<a class="m-btn m-btn-green row-block-distance" href="javascript:window.scrollTo(0, 0);"> &#129045; Zum Anfang</a>
+			<a class="m-btn m-btn-blue row-block-distance-40" href="/"> &#8962; Zur Startseite</a>
+		</div>
 		<div class="spacer"></div>
-		<a class="m-btn-blue m-btn" href="/"> < Zur Startseite</a>
 		<div class="spacer"></div>
 
 	</body>

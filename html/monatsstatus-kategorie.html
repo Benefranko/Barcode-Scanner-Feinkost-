@@ -24,13 +24,13 @@
 	<p></p>
 
 	<div style="display: flex">
-		<a class="m-btn auswahlLink m-btn-green" href="/wochenstatus.html">Alle Artikel</a>
-		<a class="m-btn auswahlLink m-btn-green" href="/wochenstatus-kategorie.html">Nach Kategorie</a>
-		<a class="m-btn auswahlLink m-btn-green auswahlLinkSelected" href="/wochenstatus-hersteller.html"> &#128309; Nach Hersteller</a>
+		<a class="m-btn auswahlLink m-btn-green" href="/monatsstatus.html">Alle Artikel</a>
+		<a class="m-btn auswahlLink m-btn-green auswahlLinkSelected" href="/monatsstatus-kategorie.html"> &#128309; Nach Kategorie</a>
+		<a class="m-btn auswahlLink m-btn-green" href="/monatsstatus-hersteller.html">Nach Hersteller</a>
 	</div>
 
 	<div class="spacer"></div>
-		<a class="m-btn m-btn-blue" href="/"> &#8962; Zur Startseite</a>
+	<a class="m-btn m-btn-blue" href="/"> &#8962; Zur Startseite</a>
 	<div class="spacer"></div>
 
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -39,7 +39,7 @@
 		const myChart = new Chart(ctx, {
 			type: 'bar',
 			data: {
-				labels: ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'],
+				labels: %DATA_LABEL_SET%,
 				datasets: [ %DATA_DATA_SETS% ]
 			},
 			options: {

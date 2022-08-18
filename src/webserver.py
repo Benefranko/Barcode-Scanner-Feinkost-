@@ -137,14 +137,65 @@ class RequestHandler(BaseHTTPRequestHandler):
                                        + "     label: '" + hersteller + "',\r\n" \
                                        + "     data: " + str(scan_list) + ",\r\n" \
                                        + "     backgroundColor: [\r\n" \
-                                       + "         'rgba(" + str((i * 50) % 255) + ", " + \
-                                       str((i * 100) % 255) + ", " + \
-                                       str((i * 150) % 255) + ", 0.2)'\r\n" \
+                                       + "         'rgba(" + str((i * 50) % 200) + ", " + \
+                                       str((i * 100) % 200) + ", " + \
+                                       str((i * 150) % 200) + ", 0.2)'\r\n" \
                                        + "     ],\r\n" \
                                        + "    borderColor: [\r\n" \
-                                       + "         'rgba(" + str((i * 50) % 255) + ", " + \
-                                       str((i * 100) % 255) + ", " + \
-                                       str((i * 150) % 255) + ", 1)'\r\n" \
+                                       + "         'rgba(" + str((i * 50) % 200) + ", " + \
+                                       str((i * 100) % 200) + ", " + \
+                                       str((i * 150) % 200) + ", 1)'\r\n" \
+                                       + "     ],\r\n" \
+                                       + "     borderWidth: 2\r\n" \
+                                       + "}"
+
+                    html_string = html_string.replace("%DATA_DATA_SETS%", replace_str)
+
+                    label_list = [""] * days_of_month
+                    for i in range(0, days_of_month):
+                        label_list[i] = str(i + 1) + "."
+                    html_string = html_string.replace("%DATA_LABEL_SET%", str(label_list))
+
+                elif sub_paths[1] == "monatsstatus-kategorie.html":
+                    # Lade HTML TEMPLATE für Wochenstatus mit Javascript Chart
+                    html_string = open("../html/monatsstatus-kategorie.html", "r").read()
+
+                    now = datetime.now()
+                    days_of_month = calendar.monthrange(now.year, now.month)[1]
+                    day_of_month = int(now.strftime("%d")) - 1
+
+                    replace_str: str = ""
+                    kategorieList = self.loc_db_mngr.getKategorieList()
+
+                    for i in range(0, len(kategorieList)):
+                        if kategorieList[i] is None:
+                            continue
+                        elif kategorieList[i][0] is None:
+                            kategorie = "Unbekannt"
+                        else:
+                            kategorie = kategorieList[i][0]
+
+                        scan_list = [0] * days_of_month
+                        for day in range(0, day_of_month + 1):
+                            current_day = datetime.today().date() - timedelta(days=day)
+                            buf = self.loc_db_mngr.count_scans_at_date_where_kategorie_is(current_day, kategorie)
+                            if buf is not None:
+                                scan_list[day_of_month - day] = buf[0][0]
+
+                        if replace_str != "":
+                            replace_str += ","
+                        replace_str += "{\r\n" \
+                                       + "     label: '" + kategorie + "',\r\n" \
+                                       + "     data: " + str(scan_list) + ",\r\n" \
+                                       + "     backgroundColor: [\r\n" \
+                                       + "         'rgba(" + str((i * 50) % 200) + ", " + \
+                                       str((i * 100) % 200) + ", " + \
+                                       str((i * 150) % 200) + ", 0.2)'\r\n" \
+                                       + "     ],\r\n" \
+                                       + "    borderColor: [\r\n" \
+                                       + "         'rgba(" + str((i * 50) % 200) + ", " + \
+                                       str((i * 100) % 200) + ", " + \
+                                       str((i * 150) % 200) + ", 1)'\r\n" \
                                        + "     ],\r\n" \
                                        + "     borderWidth: 2\r\n" \
                                        + "}"
@@ -197,14 +248,14 @@ class RequestHandler(BaseHTTPRequestHandler):
                                        + "     label: '" + hersteller + "',\r\n" \
                                        + "     data: " + str(scan_list) + ",\r\n" \
                                        + "     backgroundColor: [\r\n" \
-                                       + "         'rgba(" + str((i * 50) % 255) + ", " + \
-                                       str((i * 100) % 255) + ", " + \
-                                       str((i * 150) % 255) + ", 0.2)'\r\n" \
+                                       + "         'rgba(" + str((i * 50) % 200) + ", " + \
+                                       str((i * 100) % 200) + ", " + \
+                                       str((i * 150) % 200) + ", 0.2)'\r\n" \
                                        + "     ],\r\n" \
                                        + "    borderColor: [\r\n" \
-                                       + "         'rgba(" + str((i * 50) % 255) + ", " + \
-                                       str((i * 100) % 255) + ", " + \
-                                       str((i * 150) % 255) + ", 1)'\r\n" \
+                                       + "         'rgba(" + str((i * 50) % 200) + ", " + \
+                                       str((i * 100) % 200) + ", " + \
+                                       str((i * 150) % 200) + ", 1)'\r\n" \
                                        + "     ],\r\n" \
                                        + "     borderWidth: 2\r\n" \
                                        + "}"
@@ -261,14 +312,14 @@ class RequestHandler(BaseHTTPRequestHandler):
                                        + "     label: '" + hersteller + "',\r\n" \
                                        + "     data: " + str(scan_list) + ",\r\n" \
                                        + "     backgroundColor: [\r\n" \
-                                       + "         'rgba(" + str((i * 50) % 255) + ", " + \
-                                       str((i * 100) % 255) + ", " + \
-                                       str((i * 150) % 255) + ", 0.2)'\r\n" \
+                                       + "         'rgba(" + str((i * 50) % 200) + ", " + \
+                                       str((i * 100) % 200) + ", " + \
+                                       str((i * 150) % 200) + ", 0.2)'\r\n" \
                                        + "     ],\r\n" \
                                        + "    borderColor: [\r\n" \
-                                       + "         'rgba(" + str((i * 50) % 255) + ", " + \
-                                       str((i * 100) % 255) + ", " + \
-                                       str((i * 150) % 255) + ", 1)'\r\n" \
+                                       + "         'rgba(" + str((i * 50) % 200) + ", " + \
+                                       str((i * 100) % 200) + ", " + \
+                                       str((i * 150) % 200) + ", 1)'\r\n" \
                                        + "     ],\r\n" \
                                        + "     borderWidth: 2\r\n" \
                                        + "}"
@@ -296,7 +347,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                             html_string = html_string.replace("%NEXT%", str(page + 1))
                         if page == 0:
                             html_string = html_string.replace("%BACK%\"><</a>", "%BACK%\"></a>")
-                            html_string = html_string.replace("%BACK%", str())
+                            html_string = html_string.replace("%BACK%", str("0"))
                         else:
                             html_string = html_string.replace("%BACK%", str(page - 1))
 
@@ -310,7 +361,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                                                 <td>{2}</td>\n
                                                 <td>{3}</td>\n
                                                 <td>{4}</td>\n
-                                        </tr>\n""".format(scan[0], scan[1], scan[2], scan[3], scan[4])
+                                                <td>{5}</td>\n
+                                                <td>{6}</td>\n
+                                        </tr>\n""".format(scan[0], scan[1], scan[2], scan[3], scan[4], scan[5], scan[6])
                         html_string = html_string.replace("%LINES%", send_data)
                 elif sub_paths[1] == "":
                     html_string = open("../html/main.html", "r").read()
@@ -327,7 +380,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                                 bts: bytes = file_handle.read()
                             self.tryWriteOK(bts)
                             return
-                        if sub_paths[2] == "favicon.ico":
+                        elif sub_paths[2] == "favicon.ico":
                             self.send_response(200)
                             self.send_header('content-type', 'image/x-icon')
                             self.end_headers()
@@ -335,6 +388,18 @@ class RequestHandler(BaseHTTPRequestHandler):
                                 bts: bytes = file_handle.read()
                             self.tryWriteOK(bts)
                             return
+                        elif sub_paths[2] == "background.png":
+                            self.send_response(200)
+                            self.send_header('content-type', 'image/png')
+                            self.end_headers()
+                            with open("../images/background.jpg", 'rb') as file_handle:
+                                bts: bytes = file_handle.read()
+                            self.tryWriteOK(bts)
+                            return
+                        else:
+                            log.debug("> WARNUNG: Seite nicht gefunden: {0}".format(self.path))
+                            html_string = open("../html/404.html", "r").read()
+                            html_status = 404
                 elif sub_paths[1] == "favicon.ico":
                     self.send_response(200)
                     self.send_header('content-type', 'image/x-icon')
@@ -460,7 +525,6 @@ class RequestHandler(BaseHTTPRequestHandler):
                 else:
                     log.warning("   -> Clear/Delete failed: Wrong password: ".format(str(post_data)))
                     html_string = open("../html/tabelle-falsches-pw.html", "r").read()
-
 
             elif self.path == "/settings.html":
                 if "ReloadAdvertiseListButton=TRUE" in str(post_data) \

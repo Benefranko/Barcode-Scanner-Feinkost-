@@ -9,6 +9,13 @@
 			body{
 				width: 90%;
 			}
+			.btn1{
+				width: 260px;
+				display: block;
+				margin: auto;
+				text-align: center;
+				font-size: 25px;
+			}
 		</style>
 	</head>
 <body>
@@ -17,29 +24,30 @@
 			<h1 style="font-size:35px;">Feinkost Barcodescanner</h1>
 	</div>
 
-	<p style="font-size:35px">Statistiken:</p>
+	<p style="font-size:35px; text-align: center">Statistiken:</p>
 
-	<a class="m-btn m-btn-green" href="/wochenstatus.html">Wochenstatistik</a>
+	<div class="row jc-center">
+		<a class="m-btn m-btn-green "  href="/wochenstatus.html"> &#128197; Wochenstatistik</a>
+
+		<a class="m-btn m-btn-green row-block-distance-40 " href="/monatsstatus.html"> &#128197; Monatsstatistik</a>
+
+		<a class="m-btn m-btn-green row-block-distance-40 " href="/jahresstatus.html"> &#128197; Jahresstatistik</a>
+	</div>
+
+
+	<p style="font-size:35px; text-align: center">Sonstiges:</p>
+
+
+	<a class="m-btn m-btn-green btn1" href="/tabelle/0"> &#128441; Verlauf Tabelle</a>
 	<div class="spacer"></div>
-
-	<a class="m-btn m-btn-green" href="/monatsstatus.html">Monatsstatistik</a>
+	<a class="m-btn m-btn-green btn1" href="/log.html"> &#128712; Ereignis Log</a>
 	<div class="spacer"></div>
+	<a class="m-btn m-btn-green btn1" href="/settings.html"> &#9881; Einstellungen</a>
 
-
-	<a class="m-btn m-btn-green" href="/jahresstatus.html">Jahresstatistik</a>
 	<div class="spacer"></div>
-
-
-	<p style="font-size:35px;">Sonstiges:</p>
-	<a class="m-btn m-btn-green" href="/tabelle/0">Tabelle mit allen Aufzeichnungen</a>
 	<div class="spacer"></div>
-
-	<a class="m-btn m-btn-green" href="/log.html">Ereignis Log</a>
 	<div class="spacer"></div>
-
-	<a class="m-btn m-btn-green" href="/settings.html">Einstellungen</a>
 	<div class="spacer"></div>
-
 
 	</body>
 </html>

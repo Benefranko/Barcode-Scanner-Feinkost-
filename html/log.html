@@ -12,155 +12,115 @@
 			.switch_button {
 				width: 80px;
 				height: 30px;
-				font-size:18px
+				font-size:18px;
+				margin: auto 0;
 			}
 
-			.option-div{
+			.msg{
 				font-size:18px;
-				margin-top:20px;
+				width: 250px;
 			}
 		</style>
 	</head>
 	<body>
 		<div class="titel">
-			<h1>Protokollierung:</h1>
+			<h1>Ereignis Log:</h1>
 		</div>
 
-		<div class="option-div" style="margin-top:50px">
-			DEBUG - Nachrichten:
+
+		<div class="spacer"></div>
+
+		<div class="row jc-left">
+			<p class="msg" >DEBUG - Nachrichten:</p>
 			<button class="switch_button" onclick="debugSwitch()" id="debug-button" style="color: red" >AUS</button>
 		</div>
-		<div class="option-div">
-			INFO - Nachrichten:
+		<div class="row jc-left">
+			<p class="msg" >INFO - Nachrichten:</p>
 			<button class="switch_button" onclick="infoSwitch()" id="info-button" style="color: green" >EIN</button>
 		</div>
-		<div class="option-div">
-			WARNING - Nachrichten:
+		<div class="row jc-left">
+			<p class="msg" >WARNING - Nachrichten:</p>
 			<button class="switch_button" onclick="warningSwitch()" id="warning-button" style="color: green" >EIN</button>
 		</div>
-		<div class="option-div">
-			ERROR - Nachrichten:
+		<div class="row jc-left">
+			<p class="msg" >ERROR - Nachrichten:</p>
 			<button class="switch_button" onclick="errorSwitch()" id="error-button" style="color: green" >EIN</button>
 		</div>
-		<div class="option-div">
-			CRITICAL - Nachrichten:
+		<div class="row jc-left">
+			<p class="msg" >CRITICAL - Nachrichten:</p>
 			<button class="switch_button" onclick="criticalSwitch()" id="critical-button" style="color: green" >EIN</button>
 		</div>
 
 		<div class="spacer"></div>
 
-		<p>Gesamten Verlauf unwiderruflich entfernen?</p>
-
-		<form action="" method="post">
+		<form action="" style="font-size: 26px" method="post">
 			Passwort:
-			<input type="password" name="password" value="">
-			<input type="submit" name="deleteLog" value="Leeren">
+			<input type="password" style="font-size: 16px" name="password" value="">
+			<input class="m-btn" style="font-size: 16px;" type="submit" name="deleteLog" value="Verlauf l&ouml;schen">
 
 		</form>
 
 		<div class="spacer"></div>
-		<a class="m-btn m-btn-blue" href="/"> < Zur Startseite</a>
+		<div class="row jc-left">
+			<a class="m-btn m-btn-green" href="javascript:window.scrollTo(0, document.body.scrollHeight);"> &#129047; Zum Ende</a>
+			<a class="m-btn m-btn-green row-block-distance-40" href="javascript:window.location.reload()"> &#x21bb; Aktualisieren</a>
+			<a class="m-btn m-btn-blue row-block-distance-40" href="/"> &#8962; Zur Startseite</a>
+
+		</div>
 		<div class="spacer"></div>
 
 		<h2>Protokoll:</h2>
 
-
 		%DATA%
 
+		<div class="spacer"></div>
+		<div class="row jc-left">
+			<a class="m-btn m-btn-green" href="javascript:window.scrollTo(0, 0);"> &#129045; Zum Anfang</a>
+			<a class="m-btn m-btn-green row-block-distance-40" href="javascript:window.location.reload()"> &#x21bb; Aktualisieren</a>
+			<a class="m-btn m-btn-blue row-block-distance-40" href="/"> &#8962; Zur Startseite</a>
+
+		</div>
+		<div class="spacer"></div>
+		<div class="spacer"></div>
+
 		<script>
-			function debugSwitch() {
-				button = document.getElementById("debug-button");
+			var switchBtn = function(buttonName, messageName) {
+				button = document.getElementById(buttonName);
 				if( button.textContent == "EIN" ) {
 					button.textContent = "AUS";
 					button.style.color = "red";
-				 	list = document.getElementsByName("debug");
+				 	list = document.getElementsByName(messageName);
     				for(i = 0; i < list.length; i++) {
       					list[i].style.display = "none";
     				}
 				} else {
 					button.textContent = "EIN";
 					button.style.color = "green";
-					list = document.getElementsByName("debug");
+					list = document.getElementsByName(messageName);
     				for(i = 0; i < list.length; i++) {
       					list[i].style.display = "block";
     				}
 				}
+			};
+
+			function debugSwitch() {
+				switchBtn("debug-button", "debug");
 			}
 
     		function infoSwitch() {
-				button = document.getElementById("info-button");
-				if( button.textContent == "EIN" ) {
-					button.textContent = "AUS";
-					button.style.color = "red";
-				 	list = document.getElementsByName("info");
-    				for(i = 0; i < list.length; i++) {
-      					list[i].style.display = "none";
-    				}
-				} else {
-					button.textContent = "EIN";
-					button.style.color = "green";
-					list = document.getElementsByName("info");
-    				for(i = 0; i < list.length; i++) {
-      					list[i].style.display = "block";
-    				}
-				}
+    			switchBtn("info-button", "info");
 			}
 
     		function warningSwitch() {
-				button = document.getElementById("warning-button");
-				if( button.textContent == "EIN" ) {
-					button.textContent = "AUS";
-					button.style.color = "red";
-				 	list = document.getElementsByName("warning");
-    				for(i = 0; i < list.length; i++) {
-      					list[i].style.display = "none";
-    				}
-				} else {
-					button.textContent = "EIN";
-					button.style.color = "green";
-					list = document.getElementsByName("warning");
-    				for(i = 0; i < list.length; i++) {
-      					list[i].style.display = "block";
-    				}
-				}
+    		    switchBtn("warning-button", "warning");
 			}
 
     		function errorSwitch() {
-				button = document.getElementById("error-button");
-				if( button.textContent == "EIN" ) {
-					button.textContent = "AUS";
-					button.style.color = "red";
-				 	list = document.getElementsByName("error");
-    				for(i = 0; i < list.length; i++) {
-      					list[i].style.display = "none";
-    				}
-				} else {
-					button.textContent = "EIN";
-					button.style.color = "green";
-					list = document.getElementsByName("error");
-    				for(i = 0; i < list.length; i++) {
-      					list[i].style.display = "block";
-    				}
-				}
+    		    switchBtn("error-button", "error");
 			}
 
     		function criticalSwitch() {
-				button = document.getElementById("critical-button");
-				if( button.textContent == "EIN" ) {
-					button.textContent = "AUS";
-					button.style.color = "red";
-				 	list = document.getElementsByName("critical");
-    				for(i = 0; i < list.length; i++) {
-      					list[i].style.display = "none";
-    				}
-				} else {
-					button.textContent = "EIN";
-					button.style.color = "green";
-					list = document.getElementsByName("critical");
-    				for(i = 0; i < list.length; i++) {
-      					list[i].style.display = "block";
-    				}
-				}
+    		    switchBtn("critical-button", "critical");
 			}
 		</script>
 	</body>

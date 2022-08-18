@@ -20,6 +20,7 @@ class LocalDataBaseManager:
                                             "kArticle" integer NOT NULL, 
                                             "ean" integer NOT NULL, 
                                             "hersteller" TEXT, 
+                                            "kategorie" TEXT, 
                                             PRIMARY KEY("id") 
                                         );"""
 
@@ -145,20 +146,35 @@ class LocalDataBaseManager:
             cur.execute("SELECT DISTINCT hersteller FROM scans")
             return cur.fetchall()
 
-    def add_new_scan(self, k_article, ean, hersteller):
+    def add_new_scan(self, k_article, ean, hersteller, kategorie):
         with contextlib.closing(self.connection.cursor()) as cur:
             if hersteller is not None and hersteller.cName != "":
-                cur.execute(''' INSERT INTO scans(date,time,kArticle,ean,hersteller)
-                            VALUES(date('now','localtime'), time('now','localtime'),?,?,?) ''',
-                            (k_article, ean, hersteller.cName))
+                cur.execute(''' INSERT INTO scans(date,time,kArticle,ean,hersteller,kategorie)
+                            VALUES(date('now','localtime'), time('now','localtime'),?,?,?,?) ''',
+                            (k_article, ean, hersteller.cName, kategorie))
             else:
-                cur.execute(''' INSERT INTO scans(date,time,kArticle,ean)
-                        VALUES(date('now','localtime'), time('now','localtime'),?,?) ''', (k_article, ean))
+                cur.execute(''' INSERT INTO scans(date,time,kArticle,ean,kategorie)
+                        VALUES(date('now','localtime'), time('now','localtime'),?,?,?) ''', (k_article, ean, kategorie))
             self.connection.commit()
             id_ = cur.lastrowid
         return id_
 
-    def get_rating_by_k_article(self, k_article):
+    def getKategorieList(self):
         with contextlib.closing(self.connection.cursor()) as cur:
-            cur.execute("SELECT AVG(rating) FROM scans WHERE kArticle = ?", [k_article])
-            return cur.fetchone()
+            cur.execute("SELECT DISTINCT kategorie FROM scans")
+            return cur.fetchall()
+
+    def count_scans_at_date_where_kategorie_is(self, date: datetime.date, kategorie: str):
+        if kategorie == "Unbekannt":
+            with contextlib.closing(self.connection.cursor()) as cur:
+                cur.execute("SELECT COUNT(1) FROM scans WHERE date = ? AND kategorie is NULL",
+                            (date.isoformat(),))
+                return cur.fetchall()
+        else:
+            with contextlib.closing(self.connection.cursor()) as cur:
+                cur.execute("SELECT COUNT(1) FROM scans WHERE date = ? AND kategorie = ?",
+                            (date.isoformat(), kategorie))
+                return cur.fetchall()
+
+
+
