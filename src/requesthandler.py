@@ -1,6 +1,7 @@
 import calendar
 import shutil
-import re
+import random
+
 
 from http.server import BaseHTTPRequestHandler
 from datetime import datetime, timedelta
@@ -25,7 +26,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         # Stelle Verbindung mit lokaler Datenbank her, um Statistiken auslesen zu können
         self.loc_db_mngr = localdatabasemanager.LocalDataBaseManager()
         if self.loc_db_mngr.connect(settings.local_db_path) is None:
-            self.send_error(500, "Konnte keine Verbindung mit der lokalen Datenbank herstellen!")
+            self.trySendError(500, "Konnte keine Verbindung mit der lokalen Datenbank herstellen!")
             return
 
         # Standard HTTP Sende-Status
@@ -117,31 +118,35 @@ class RequestHandler(BaseHTTPRequestHandler):
                     html_status, html_bytes = self.getPageNotFound()
 
                 elif sub_paths[2] == "wochenstatus.html":
-                    html_bytes = self.getWochenStatusPage()
+                    html_bytes = self.getWochenStatusPage([["Alle Artikel"]], self.loc_db_mngr.count_scans_at_date)
 
                 elif sub_paths[2] == "wochenstatus-kategorie.html":
-                    html_bytes = self.getWochenStatusKategoriePage()
+                    html_bytes = self.getWochenStatusPage(self.loc_db_mngr.getKategorieList(),
+                                                          self.loc_db_mngr.count_scans_at_date_where_kategorie_is)
 
                 elif sub_paths[2] == "wochenstatus-hersteller.html":
-                    html_bytes = self.getWochenStatusHerstellerPage()
+                    html_bytes = self.getWochenStatusPage(self.loc_db_mngr.getHerstellerList(),
+                                                          self.loc_db_mngr.count_scans_at_date_where_hersteller_is)
 
                 elif sub_paths[2] == "monatsstatus.html":
-                    html_bytes = self.getMonatsStatusPage()
+                    html_bytes = self.getMonatsStatusPage([["Alle Artikel"]], self.loc_db_mngr.count_scans_at_date)
 
                 elif sub_paths[2] == "monatsstatus-hersteller.html":
-                    html_bytes = self.getMonatsKategorieStatusPage()
+                    html_bytes = self.getMonatsStatusPage(self.loc_db_mngr.getKategorieList(),
+                                                          self.loc_db_mngr.count_scans_at_date_where_kategorie_is)
 
                 elif sub_paths[2] == "monatsstatus-kategorie.html":
-                    html_bytes = self.getMonatsHerstellerStatusPage()
+                    html_bytes = self.getMonatsStatusPage(self.loc_db_mngr.getHerstellerList(),
+                                                          self.loc_db_mngr.count_scans_at_date_where_hersteller_is)
 
                 elif sub_paths[2] == "jahresstatus.html":
-                    html_bytes = self.getJahresStatusPage()
+                    html_bytes = self.getJahresStatusPage([["Alle Artikel"]], -1)
 
                 elif sub_paths[2] == "jahresstatus-kategorie.html":
-                    html_bytes = self.getJahresKategorieStatusPage()
+                    html_bytes = self.getJahresStatusPage(self.loc_db_mngr.getKategorieList(), 6)
 
                 elif sub_paths[2] == "jahresstatus-hersteller.html":
-                    html_bytes = self.getJahresHerstellerStatusPage()
+                    html_bytes = self.getJahresStatusPage(self.loc_db_mngr.getHerstellerList(), 5)
 
                 elif sub_paths[2] == "tabelle":
                     if self.checkPathIsNotValid(sub_paths, 3) or not sub_paths[3].isdigit():
@@ -189,14 +194,9 @@ class RequestHandler(BaseHTTPRequestHandler):
         ####
         except Exception as exc:
             log.error("> Es ist ein Fehler im RequestHandler aufgetreten: {0}".format(exc))
-
             # Write Funktion in eigenem try-catch statement, um Html-Fehler senden zu können, wenn im SQL Teil
-            # etwas fehlschlägt!
-            try:
-                self.send_error(500, "Ein unerwartetes Problem ist aufgetreten!")
-            except Exception as exc:
-                log.warning("> Es ist ein Fehler im RequestHandler aufgetreten: write() failed: {0}".format(exc))
-                return
+            # etwas fehlschlägt!#
+            self.trySendError(500, "Ein unerwartetes Problem ist aufgetreten!")
 
         self.loc_db_mngr = None
         return
@@ -220,351 +220,139 @@ class RequestHandler(BaseHTTPRequestHandler):
         return bts.encode("utf-8")
 
     def getPageNotFound(self) -> (int, bytes):
-        log.debug("> WARNUNG: Seite nicht gefunden: {0}".format(self.path))
+        log.debug("> WARNUNG: (POST) Seite nicht gefunden: {0}".format(self.path))
         return 404, open("../web/html/404.html", "r").read().encode()
 
-    def getWochenStatusPage(self) -> bytes:
-        # Lade HTML TEMPLATE für Wochenstatus mit Javascript Chart
-        html_string = self.getFileText("../web/html/wochenstatus.html")
-        scan_list = [0] * 7
-        weekday = datetime.today().weekday()
-        for day in range(0, weekday + 1):
-            current_day = datetime.today().date() - timedelta(days=day)
-            buf = self.loc_db_mngr.count_scans_at_date(current_day)
-            if buf is not None:
-                scan_list[weekday - day] = buf[0][0]
-        return html_string.replace("%DATA_DATA_SET_1%".encode(), str(scan_list).encode())
+    @staticmethod
+    def getRandomColor(i) -> str:
+        x = random.randint(0, 255)
+        y = random.randint(0, 255)
+        z = random.randint(0, 255)
+        if x+y+z > 600:
+            x = 0
+        return str(x) + ", " + str(y) + ", " + str(z)
 
-    def getWochenStatusKategoriePage(self) -> bytes:
-        # Lade HTML TEMPLATE für Wochenstatus mit Javascript Chart
-        html_string = open("../web/html/wochenstatus-kategorie.html", "r").read()
+    def getWochenStatusPage(self, group_list, counter_func) -> bytes:
+        html_bytes: bytes = self.getFileText("../web/html/wochenstatus-template.html")
         replace_str: str = ""
         weekday = datetime.today().weekday()
+        for i in range(0, len(group_list)):
 
-        kategorie_list = self.loc_db_mngr.getKategorieList()
-
-        for i in range(0, len(kategorie_list)):
-            if kategorie_list[i] is None:
+            if group_list[i] is None:
                 continue
-            elif kategorie_list[i][0] is None:
-                kategorie = "Unbekannt"
+            elif group_list[i][0] is None:
+                group = "Unbekannt"
             else:
-                kategorie = kategorie_list[i][0]
-
+                group = group_list[i][0]
             scan_list = [0] * 7
+
             for day in range(0, weekday + 1):
                 current_day = datetime.today().date() - timedelta(days=day)
-                buf = self.loc_db_mngr.count_scans_at_date_where_kategorie_is(current_day, kategorie)
+                buf = counter_func(current_day, group)
                 if buf is not None:
                     scan_list[weekday - day] = buf[0][0]
+
             if replace_str != "":
                 replace_str += ","
+            color = self.getRandomColor(i)
+
             replace_str += "{\r\n" \
-                           + "     label: '" + kategorie + "',\r\n" \
-                           + "     data: " + str(scan_list) + ",\r\n" \
-                           + "     backgroundColor: [\r\n" \
-                           + "         'rgba(" + str((i * 50) % 200) + ", " + \
-                           str((i * 100) % 200) + ", " + \
-                           str((i * 150) % 200) + ", 0.2)'\r\n" \
-                           + "     ],\r\n" \
-                           + "    borderColor: [\r\n" \
-                           + "         'rgba(" + str((i * 50) % 200) + ", " + \
-                           str((i * 100) % 200) + ", " + \
-                           str((i * 150) % 200) + ", 1)'\r\n" \
-                           + "     ],\r\n" \
-                           + "     borderWidth: 2\r\n" \
-                           + "}"
+                + "                    label: '" + group + "',\r\n" \
+                + "                   data: " + str(scan_list) + ",\r\n" \
+                + "                   backgroundColor: [\r\n" \
+                + "                       'rgba(" + color + ", 0.5)'\r\n" \
+                + "                   ],\r\n" \
+                + "                  borderColor: [\r\n" \
+                + "                       'rgba(" + color + ", 1)'\r\n" \
+                + "                   ],\r\n" \
+                + "                   borderWidth: 2\r\n" \
+                + "              }"
+        return html_bytes.replace("%DATA_DATA_SETS%".encode(), replace_str.encode())
 
-        html_string = html_string.replace("%DATA_DATA_SETS%", replace_str)
-        return html_string.encode()
-
-    def getWochenStatusHerstellerPage(self) -> bytes:
-        # Lade HTML TEMPLATE für Wochenstatus mit Javascript Chart
-        html_string = open("../web/html/wochenstatus-hersteller.html", "r").read()
-        replace_str: str = ""
-        weekday = datetime.today().weekday()
-
-        herstellerlist = self.loc_db_mngr.getHerstellerList()
-
-        for i in range(0, len(herstellerlist)):
-            if herstellerlist[i] is None:
-                continue
-            elif herstellerlist[i][0] is None:
-                hersteller = "Unbekannt"
-            else:
-                hersteller = herstellerlist[i][0]
-
-            scan_list = [0] * 7
-            for day in range(0, weekday + 1):
-                current_day = datetime.today().date() - timedelta(days=day)
-                buf = self.loc_db_mngr.count_scans_at_date_where_hersteller_is(current_day,
-                                                                               hersteller)
-                if buf is not None:
-                    scan_list[weekday - day] = buf[0][0]
-            if replace_str != "":
-                replace_str += ","
-            replace_str += "{\r\n" \
-                           + "     label: '" + hersteller + "',\r\n" \
-                           + "     data: " + str(scan_list) + ",\r\n" \
-                           + "     backgroundColor: [\r\n" \
-                           + "         'rgba(" + str((i * 50) % 200) + ", " + \
-                           str((i * 100) % 200) + ", " + \
-                           str((i * 150) % 200) + ", 0.2)'\r\n" \
-                           + "     ],\r\n" \
-                           + "    borderColor: [\r\n" \
-                           + "         'rgba(" + str((i * 50) % 200) + ", " + \
-                           str((i * 100) % 200) + ", " + \
-                           str((i * 150) % 200) + ", 1)'\r\n" \
-                           + "     ],\r\n" \
-                           + "     borderWidth: 2\r\n" \
-                           + "}"
-
-        html_string = html_string.replace("%DATA_DATA_SETS%", replace_str)
-        return html_string.encode()
-
-    def getMonatsStatusPage(self) -> bytes:
-
-        # Lade HTML TEMPLATE für Monatsstatus mit Javascript Chart
-        html_string = open("../web/html/monatsstatus.html", "r").read()
+    def getMonatsStatusPage(self, group_list, counter_func) -> bytes:
+        html_bytes: bytes = self.getFileText("../web/html/monatsstatus-template.html")
         now = datetime.now()
         days_of_month = calendar.monthrange(now.year, now.month)[1]
         day_of_month = int(now.strftime("%d")) - 1
-
-        scan_list = [0] * days_of_month
-        for day in range(0, day_of_month + 1):
-            current_day = datetime.today().date() - timedelta(days=day)
-            scan_list[day_of_month - day] = self.loc_db_mngr.count_scans_at_date(current_day)[0][0]
-        html_string = html_string.replace("%DATA_DATA_SET_1%", str(scan_list))
-
-        label_list = [""] * days_of_month
-        for i in range(0, days_of_month):
-            label_list[i] = str(i + 1) + "."
-        html_string = html_string.replace("%DATA_LABEL_SET_1%", str(label_list))
-        return html_string.encode()
-
-    def getMonatsKategorieStatusPage(self) -> bytes:
-
-        # Lade HTML TEMPLATE für Wochenstatus mit Javascript Chart
-        html_string = open("../web/html/monatsstatus-kategorie.html", "r").read()
-
-        now = datetime.now()
-        days_of_month = calendar.monthrange(now.year, now.month)[1]
-        day_of_month = int(now.strftime("%d")) - 1
-
         replace_str: str = ""
-        kategorie_list = self.loc_db_mngr.getKategorieList()
 
-        for i in range(0, len(kategorie_list)):
-            if kategorie_list[i] is None:
+        for i in range(0, len(group_list)):
+            if group_list[i] is None:
                 continue
-            elif kategorie_list[i][0] is None:
-                kategorie = "Unbekannt"
+            elif group_list[i][0] is None:
+                group = "Unbekannt"
             else:
-                kategorie = kategorie_list[i][0]
+                group = group_list[i][0]
 
             scan_list = [0] * days_of_month
             for day in range(0, day_of_month + 1):
                 current_day = datetime.today().date() - timedelta(days=day)
-                buf = self.loc_db_mngr.count_scans_at_date_where_kategorie_is(current_day, kategorie)
+                buf = counter_func(current_day, group)
                 if buf is not None:
                     scan_list[day_of_month - day] = buf[0][0]
 
             if replace_str != "":
                 replace_str += ","
+            color = self.getRandomColor(i)
+
             replace_str += "{\r\n" \
-                           + "     label: '" + kategorie + "',\r\n" \
-                           + "     data: " + str(scan_list) + ",\r\n" \
-                           + "     backgroundColor: [\r\n" \
-                           + "         'rgba(" + str((i * 50) % 200) + ", " + \
-                           str((i * 100) % 200) + ", " + \
-                           str((i * 150) % 200) + ", 0.2)'\r\n" \
-                           + "     ],\r\n" \
-                           + "    borderColor: [\r\n" \
-                           + "         'rgba(" + str((i * 50) % 200) + ", " + \
-                           str((i * 100) % 200) + ", " + \
-                           str((i * 150) % 200) + ", 1)'\r\n" \
-                           + "     ],\r\n" \
-                           + "     borderWidth: 2\r\n" \
-                           + "}"
-
-        html_string = html_string.replace("%DATA_DATA_SETS%", replace_str)
-
+                           + "                    label: '" + group + "',\r\n" \
+                           + "                   data: " + str(scan_list) + ",\r\n" \
+                           + "                   backgroundColor: [\r\n" \
+                           + "                       'rgba(" + color + ", 0.5)'\r\n" \
+                           + "                   ],\r\n" \
+                           + "                  borderColor: [\r\n" \
+                           + "                       'rgba(" + color + ", 1)'\r\n" \
+                           + "                   ],\r\n" \
+                           + "                   borderWidth: 2\r\n" \
+                           + "              }"
+        html_bytes = html_bytes.replace("%DATA_DATA_SETS%".encode(), replace_str.encode())
         label_list = [""] * days_of_month
         for i in range(0, days_of_month):
             label_list[i] = str(i + 1) + "."
-        html_string = html_string.replace("%DATA_LABEL_SET%", str(label_list))
-        return html_string.encode()
+        return html_bytes.replace("%DATA_LABEL_SET%".encode(), str(label_list).encode())
 
-    def getMonatsHerstellerStatusPage(self) -> bytes:
-
-        # Lade HTML TEMPLATE für Wochenstatus mit Javascript Chart
-        html_string = open("../web/html/monatsstatus-hersteller.html", "r").read()
-
-        now = datetime.now()
-        days_of_month = calendar.monthrange(now.year, now.month)[1]
-        day_of_month = int(now.strftime("%d")) - 1
-
-        replace_str: str = ""
-        herstellerlist = self.loc_db_mngr.getHerstellerList()
-
-        for i in range(0, len(herstellerlist)):
-            if herstellerlist[i] is None:
-                continue
-            elif herstellerlist[i][0] is None:
-                hersteller = "Unbekannt"
-            else:
-                hersteller = herstellerlist[i][0]
-
-            scan_list = [0] * days_of_month
-            for day in range(0, day_of_month + 1):
-                current_day = datetime.today().date() - timedelta(days=day)
-                buf = self.loc_db_mngr.count_scans_at_date_where_hersteller_is(current_day, hersteller)
-                if buf is not None:
-                    scan_list[day_of_month - day] = buf[0][0]
-
-            if replace_str != "":
-                replace_str += ","
-            replace_str += "{\r\n" \
-                           + "     label: '" + hersteller + "',\r\n" \
-                           + "     data: " + str(scan_list) + ",\r\n" \
-                           + "     backgroundColor: [\r\n" \
-                           + "         'rgba(" + str((i * 50) % 200) + ", " + \
-                           str((i * 100) % 200) + ", " + \
-                           str((i * 150) % 200) + ", 0.2)'\r\n" \
-                           + "     ],\r\n" \
-                           + "    borderColor: [\r\n" \
-                           + "         'rgba(" + str((i * 50) % 200) + ", " + \
-                           str((i * 100) % 200) + ", " + \
-                           str((i * 150) % 200) + ", 1)'\r\n" \
-                           + "     ],\r\n" \
-                           + "     borderWidth: 2\r\n" \
-                           + "}"
-
-        html_string = html_string.replace("%DATA_DATA_SETS%", replace_str)
-
-        label_list = [""] * days_of_month
-        for i in range(0, days_of_month):
-            label_list[i] = str(i + 1) + "."
-        html_string = html_string.replace("%DATA_LABEL_SET%", str(label_list))
-        return html_string.encode()
-
-    def getJahresStatusPage(self) -> bytes:
-
-        # Lade HTML TEMPLATE für Jahresstatus mit Javascript Chart
-        html_string = open("../web/html/jahresstatus.html", "r").read()
-        scan_list = [0] * 12
-        s_list = self.loc_db_mngr.get_all_scans()
-        current_year = datetime.now().year
-
-        for m in range(1, 13):
-            for scan in s_list:
-                scan_d = datetime.fromisoformat(scan[1])
-                if scan_d.year == current_year and scan_d.month == m:
-                    scan_list[m - 1] += 1
-        html_string = html_string.replace("%DATA_DATA_SET_1%", str(scan_list))
-        return html_string.encode()
-
-    def getJahresKategorieStatusPage(self) -> bytes:
-
-        # Lade HTML TEMPLATE für Jahresstatus mit Javascript Chart
-        html_string = open("../web/html/jahresstatus-kategorie.html", "r").read()
+    def getJahresStatusPage(self, group_list, array_index) -> bytes:
+        html_bytes: bytes = self.getFileText("../web/html/jahresstatus-template.html")
         replace_str: str = ""
         current_year = datetime.now().year
-
         s_list = self.loc_db_mngr.get_all_scans()
-        kategorie_list = self.loc_db_mngr.getKategorieList()
-        for i in range(0, len(kategorie_list)):
-            if kategorie_list[i] is None:
-                continue
-            elif kategorie_list[i][0] is None:
-                kategorie = "Unbekannt"
-            else:
-                kategorie = kategorie_list[i][0]
 
-            ####
-            # DRINGEND MIT SQL STATEMENT SCHNELLER MACHEN!!!!!!
-            ####
+        for i in range(0, len(group_list)):
+            if group_list[i] is None:
+                continue
+            elif group_list[i][0] is None:
+                group = "Unbekannt"
+            else:
+                group = group_list[i][0]
+
             scan_list = [0] * 12
             for m in range(1, 13):
                 for scan in s_list:
                     scan_d = datetime.fromisoformat(scan[1])
                     if scan_d.year == current_year and scan_d.month == m:
-                        if scan[5] is None and kategorie == "Unbekannt":
+                        if array_index == -1:
                             scan_list[m - 1] += 1
-                        elif scan[6] == kategorie:
+                        elif scan[array_index] is None and group == "Unbekannt":
                             scan_list[m - 1] += 1
-
-            if replace_str != "":
-                replace_str += ","
-            replace_str += "{\r\n" \
-                           + "     label: '" + kategorie + "',\r\n" \
-                           + "     data: " + str(scan_list) + ",\r\n" \
-                           + "     backgroundColor: [\r\n" \
-                           + "         'rgba(" + str((i * 50) % 200) + ", " + \
-                           str((i * 100) % 200) + ", " + \
-                           str((i * 150) % 200) + ", 0.2)'\r\n" \
-                           + "     ],\r\n" \
-                           + "    borderColor: [\r\n" \
-                           + "         'rgba(" + str((i * 50) % 200) + ", " + \
-                           str((i * 100) % 200) + ", " + \
-                           str((i * 150) % 200) + ", 1)'\r\n" \
-                           + "     ],\r\n" \
-                           + "     borderWidth: 2\r\n" \
-                           + "}"
-
-        html_string = html_string.replace("%DATA_DATA_SETS%", replace_str)
-        return html_string.encode()
-
-    def getJahresHerstellerStatusPage(self) -> bytes:
-
-        # Lade HTML TEMPLATE für Jahresstatus mit Javascript Chart
-        html_string = open("../web/html/jahresstatus-hersteller.html", "r").read()
-        replace_str: str = ""
-        current_year = datetime.now().year
-
-        s_list = self.loc_db_mngr.get_all_scans()
-        herstellerlist = self.loc_db_mngr.getHerstellerList()
-        for i in range(0, len(herstellerlist)):
-            if herstellerlist[i] is None:
-                continue
-            elif herstellerlist[i][0] is None:
-                hersteller = "Unbekannt"
-            else:
-                hersteller = herstellerlist[i][0]
-
-            ####
-            # DRINGEND MIT SQL STATEMENT SCHNELLER MACHEN!!!!!!
-            ####
-            scan_list = [0] * 12
-            for m in range(1, 13):
-                for scan in s_list:
-                    scan_d = datetime.fromisoformat(scan[1])
-                    if scan_d.year == current_year and scan_d.month == m:
-                        if scan[5] is None and hersteller == "Unbekannt":
-                            scan_list[m - 1] += 1
-                        elif scan[5] == hersteller:
+                        elif scan[array_index] == group:
                             scan_list[m - 1] += 1
 
             if replace_str != "":
                 replace_str += ","
+            color = self.getRandomColor(i)
             replace_str += "{\r\n" \
-                           + "     label: '" + hersteller + "',\r\n" \
-                           + "     data: " + str(scan_list) + ",\r\n" \
-                           + "     backgroundColor: [\r\n" \
-                           + "         'rgba(" + str((i * 50) % 200) + ", " + \
-                           str((i * 100) % 200) + ", " + \
-                           str((i * 150) % 200) + ", 0.2)'\r\n" \
-                           + "     ],\r\n" \
-                           + "    borderColor: [\r\n" \
-                           + "         'rgba(" + str((i * 50) % 200) + ", " + \
-                           str((i * 100) % 200) + ", " + \
-                           str((i * 150) % 200) + ", 1)'\r\n" \
-                           + "     ],\r\n" \
-                           + "     borderWidth: 2\r\n" \
-                           + "}"
-
-        html_string = html_string.replace("%DATA_DATA_SETS%", replace_str)
-        return html_string.encode()
+                           + "                    label: '" + group + "',\r\n" \
+                           + "                   data: " + str(scan_list) + ",\r\n" \
+                           + "                   backgroundColor: [\r\n" \
+                           + "                       'rgba(" + color + ", 0.5)'\r\n" \
+                           + "                   ],\r\n" \
+                           + "                  borderColor: [\r\n" \
+                           + "                       'rgba(" + color + ", 1)'\r\n" \
+                           + "                   ],\r\n" \
+                           + "                   borderWidth: 2\r\n" \
+                           + "              }"
+        return html_bytes.replace("%DATA_DATA_SETS%".encode(), replace_str.encode())
 
     def getTabellenPage(self, page_num) -> bytes:
         html_string = self.getFileText("../web/html/tabelle.html").decode()
@@ -605,8 +393,8 @@ class RequestHandler(BaseHTTPRequestHandler):
         return html_string.replace("%LINES%", send_data).encode()
 
     def getSettingsPage(self) -> bytes:
-        html_bytes = self.getFileText("../web/html/settings.html")
-        return self.replaceVarsInSettingsHtml(html_bytes.decode()).encode()
+        html = self.getFileText("../web/html/settings.html")
+        return self.replaceVarsInSettingsHtml(html)
 
     @staticmethod
     def getLogPage() -> bytes:
@@ -638,213 +426,91 @@ class RequestHandler(BaseHTTPRequestHandler):
                 text += ">" + line.rstrip() + "</p>\n"
         return html_string.replace("%DATA%", text).encode()
 
-    @staticmethod
-    def replaceVarsInSettingsHtml(html: str) -> str:
-        html = html.replace("%anzeigezeit_Hersteller_value%", str(settings.SHOW_PRODUCER_INFOS_TIME))
-        html = html.replace("%anzeigezeit_value%", str(settings.SHOW_TIME))
-        html = html.replace("%changeAdvertiseTime_value%", str(settings.CHANGE_ADVERTISE_TIME))
-
-        for i in range(1, 5):
-            html = html.replace("%STATUS" + str(i) + "%", "")
-        return html
+    def trySendError(self, status, msg):
+        try:
+            self.send_error(status, msg)
+        except Exception as exc:
+            log.warning("> Es ist ein Fehler im RequestHandler aufgetreten: write() failed: {0}".format(exc))
+            return
 
     def do_POST(self):
-        content_length = int(self.headers['Content-Length'])  # <--- Gets the size of data
-        post_data = self.rfile.read(content_length)  # <--- Gets the data itself
-        html_string: str = ""
-        html_status: int = 200
 
         self.loc_db_mngr = localdatabasemanager.LocalDataBaseManager()
-        self.loc_db_mngr.connect(settings.local_db_path)
+        if self.loc_db_mngr.connect(settings.local_db_path) is None:
+            log.error("Konnte keine Verbindung mit der lokalen Datenbank herstellen!")
+            self.trySendError(500, "Konnte keine Verbindung mit der lokalen Datenbank herstellen!")
+            return
+
+        # Standard HTTP Sende-Status
+        html_status: int = 200
+        html_bytes: bytes
+        content_type: str = "text/html"
+        sub_paths = self.path.split("/")
+        content_length = int(self.headers['Content-Length'])  # <--- Gets the size of data
+        if content_length <= 0:
+            log.warning("POST without data!")
+            self.trySendError(411, "Die Anfrage kann ohne ein „Content-Length“-Header-Feld nicht bearbeitet werden,"
+                                   " bzw war 0.")
+            return
 
         try:
-            if self.path == "/html/log.html":
-                log.debug("> Try to clear log...")
+            ####
+            # Create List with Pairs of Data: [ Input1_Name, Input1_Value, Input2_Name, Input2_Value, ... ]
+            ####
+            data = self.getPosDataList(self.rfile.read(content_length).decode())
 
-                if "password=" + settings.clear_log_file_pw + "&" in str(post_data):
-                    if settings.log_file_delete_mode == "RENAME":
-                        shutil.copyfile(settings.log_file_path, settings.log_file_path.replace(".log", "") + "_backup_"
-                                        + datetime.now().strftime("%m-%d-%Y_%H-%M-%S") + ".log")
+            # Check if Path is OK ( and not Startpage )
+            if self.checkPathIsNotValid(sub_paths, 1) or sub_paths[1] != "html" \
+                    or self.checkPathIsNotValid(sub_paths, 2):
+                html_status, html_bytes = self.getPageNotFound()
 
-                        fo = open(settings.log_file_path, "w")
-                        fo.truncate()
-                        fo.close()
-
-                        log.info("    -> Log renamed")
-
-                        self.do_GET()
-                        return
-                    elif settings.log_file_delete_mode == "DELETE":
-                        fo = open(settings.log_file_path, "w")
-                        fo.truncate()
-                        fo.close()
-
-                        log.info("    -> Log deleted")
-
-                        self.do_GET()
-                        return
-                    else:
-                        log.error("   -> Fehler: Unbekannter log_file_delete_mode: {0}"
-                                  .format(settings.log_file_delete_mode))
-                        self.do_GET()
-                        return
+            elif sub_paths[2] == "log.html":
+                if "deleteLog" in data and "password" in data:
+                    html_bytes = self.deleteLogPostRequest(data)
                 else:
-                    log.warning("   -> Clear/Delete failed: Wrong password: ".format(str(post_data)))
-                    html_string = open("../web/html/tabelle-falsches-pw.html", "r").read()
+                    html_status, html_bytes = self.getPageNotFound()
 
-            elif self.path == "/html/settings.html":
-                if str(post_data.decode()) == "ReloadAdvertiseListButton=Neu+laden":
-                    settings.want_reload_advertise = True
-                    log.info("> Reload Advertise List")
-                    self.do_GET()
-                    return
+            elif sub_paths[2] == "settings.html":
+                html = self.getFileText("../web/html/settings.html")
+
+                if "ReloadAdvertiseListButton" in data:
+                    html_bytes = self.settingsReloadAdvertiseListPostRequest()
+
+                elif "anzeigezeit_value" in data:
+                    html_bytes = self.settingsUpdateShowTime(data, html)
+
+                elif "anzeigezeit_Hersteller_value" in data:
+                    html_bytes = self.settingsUpdateProducerShowTime(data, html)
+
+                elif"changeAdvertiseTime_value" in data:
+                    html_bytes = self.settingsUpdateAdvertiseToggleTime(data, html)
+
+                elif "changePasswordNewPW_value" in data:
+                    html_bytes = self.settingsChangePassword(data, html)
+
                 else:
-                    data = re.split('&|='.encode(), post_data)
-                    admin: bool = False
-
-                    if "adminPW".encode() in data and data.index("adminPW".encode()) < (len(data) - 1):
-                        if data[data.index("adminPW".encode()) + 1].decode() == settings.clear_log_file_pw:
-                            admin = True
-                        else:
-                            log.warning(" > Falsches Passwort in Webeinstellungen: {0}".
-                                        format(data[data.index("adminPW".encode()) + 1].decode()))
-                    else:
-                        log.error(" > Kein Passwort in Webeinstellungen Postanfrage!.")
-
-                    for i in range(0, len(data), 2):
-
-                        if i == len(data) - 1 or data[i].decode() == "adminPW":
-                            continue
-
-                        elif data[i].decode() == "anzeigezeit_value":
-                            # post_data.startswith("anzeigezeit_value=".encode("utf-8"))
-                            html_string = open("../web/html/settings.html", "r").read()
-
-                            if not admin:
-                                html_string = html_string.replace("%anzeigezeit_value%", str(settings.SHOW_TIME))
-                                html_string = html_string.replace("%STATUS1%",
-                                                                  "<font color='red'>Aktualisierung fehlgeschlagen! "
-                                                                  "Falsches Admin Passwort</font>")
-                            elif data[i + 1].isdigit():
-                                time = int(data[i + 1])
-                                self.loc_db_mngr.setDelayTime("ARTIKEL", time)
-                                settings.SHOW_TIME = time
-                                html_string = html_string.replace("%anzeigezeit_value%", str(settings.SHOW_TIME))
-                                html_string = html_string.replace("%STATUS1%",
-                                                                  "<font color='green'>Erfolgreich aktualisiert!</font>"
-                                                                  "")
-                                log.info("> Aktualisiere Artikel Information Anzeigezeit zu: {0} Sekunden.".
-                                         format(settings.SHOW_TIME))
-
-                            else:
-                                html_string = html_string.replace("%anzeigezeit_value%", str(settings.SHOW_TIME))
-                                html_string = html_string.replace("%STATUS1%",
-                                                                  "<font color='red'>Aktualisierung fehlgeschlagen! "
-                                                                  "Keine Zahl?</font>")
-                            html_string = self.replaceVarsInSettingsHtml(html_string)
-
-                        elif data[i].decode() == "anzeigezeit_Hersteller_value":
-                            # post_data.startswith("anzeigezeit_Hersteller_value=".encode("utf-8")):
-                            html_string = open("../web/html/settings.html", "r").read()
-
-                            if not admin:
-                                html_string = html_string.replace("%anzeigezeit_Hersteller_value%",
-                                                                  str(settings.SHOW_TIME))
-                                html_string = html_string.replace("%STATUS2%",
-                                                                  "<font color='red'>Aktualisierung fehlgeschlagen! "
-                                                                  "Falsches Admin Passwort</font>")
-                            elif data[i + 1].isdigit():
-                                time = int(data[i + 1])
-                                self.loc_db_mngr.setDelayTime("HERSTELLER", time)
-                                settings.SHOW_PRODUCER_INFOS_TIME = time
-                                html_string = html_string.replace("%anzeigezeit_Hersteller_value%",
-                                                                  str(settings.SHOW_PRODUCER_INFOS_TIME))
-                                html_string = html_string.replace("%STATUS2%",
-                                                                  "<font color='green'>Erfolgreich aktualisiert!</font>"
-                                                                  "")
-                                log.info("> Aktualisiere Hersteller Informationen Anzeigezeit zu: {0} Sekunden.".
-                                         format(settings.SHOW_PRODUCER_INFOS_TIME))
-                            else:
-                                html_string = html_string.replace("%anzeigezeit_Hersteller_value%",
-                                                                  str(settings.SHOW_PRODUCER_INFOS_TIME))
-                                html_string = html_string.replace("%STATUS2%",
-                                                                  "<font color='red'>Aktualisierung fehlgeschlagen! "
-                                                                  "Keine Zahl?</font>")
-                            html_string = self.replaceVarsInSettingsHtml(html_string)
-
-                        elif data[i].decode() == "changeAdvertiseTime_value":
-                            # post_data.startswith("changeAdvertiseTime_value=".encode("utf-8")):
-                            html_string = open("../web/html/settings.html", "r").read()
-
-                            if not admin:
-                                html_string = html_string.replace("%anzeigezeit_Hersteller_value%",
-                                                                  str(settings.SHOW_TIME))
-                                html_string = html_string.replace("%STATUS3%",
-                                                                  "<font color='red'>Aktualisierung fehlgeschlagen! "
-                                                                  "Falsches Admin Passwort</font>")
-                            elif data[i + 1].isdigit():
-                                time = int(data[i + 1])
-                                self.loc_db_mngr.setDelayTime("CHANGE_ADVERTISE", time)
-                                settings.CHANGE_ADVERTISE_TIME = time
-                                print(time)
-                                html_string = html_string.replace("%anzeigezeit_Hersteller_value%",
-                                                                  str(settings.CHANGE_ADVERTISE_TIME))
-                                html_string = html_string.replace("%STATUS3%",
-                                                                  "<font color='green'>Erfolgreich aktualisiert!</font>"
-                                                                  "")
-                                log.info(
-                                    "> Aktualisiere Wechselzeit zwischen Startseite und Werbung Seite zu: {0}"
-                                    " Sekunden.".
-                                    format(settings.CHANGE_ADVERTISE_TIME))
-                            else:
-                                html_string = html_string.replace("%anzeigezeit_Hersteller_value%",
-                                                                  str(settings.CHANGE_ADVERTISE_TIME))
-                                html_string = html_string.replace("%STATUS3%",
-                                                                  "<font color='red'>Aktualisierung fehlgeschlagen! "
-                                                                  "Keine Zahl?</font>")
-                            html_string = self.replaceVarsInSettingsHtml(html_string)
-
-                        elif data[i].decode() == "changePasswordNewPW_value":
-                            # post_data.startswith("changeAdvertiseTime_value=".encode("utf-8")):
-                            html_string = open("../web/html/settings.html", "r").read()
-
-                            if not admin:
-                                html_string = html_string.replace("%STATUS4%",
-                                                                  "<font color='red'>Aktualisierung fehlgeschlagen! "
-                                                                  "Falsches Admin Passwort</font>")
-                            else:
-                                self.loc_db_mngr.setPassword("ADMIN", data[i + 1].decode())
-                                settings.clear_log_file_pw = data[i + 1].decode()
-
-                                html_string = html_string.replace("%STATUS4%",
-                                                                  "<font color='green'>Erfolgreich aktualisiert!</font>"
-                                                                  "")
-                                log.info("> Ändere das Admin Passwort")
-                            html_string = self.replaceVarsInSettingsHtml(html_string)
-                        else:
-                            log.warning("> Unbekannter POST: {0}".format(str(post_data)))
-                            html_string = open("../web/html/404.html", "r").read()
-                            html_status = 404
+                    html_status, html_bytes = self.getPageNotFound()
 
             else:
-                log.debug("> WARNUNG: Post Seite nicht gefunden: {0}".format(self.path))
+                html_status, html_bytes = self.getPageNotFound()
 
-                html_string = open("../web/html/404.html", "r").read()
-                html_status = 404
+            if len(html_bytes) == 0:
+                html_status, html_bytes = self.getPageNotFound()
 
-            if html_string == "":
-                log.warning("> Unbearbeiteter POST: {0}".format(str(post_data)))
-                html_string = open("../web/html/404.html", "r").read()
-                html_status = 404
-
+            ####
+            # Send Headers
+            ####
             self.send_response(html_status)
-            self.send_header('Content-type', 'text/html; charset=utf-8')
+            self.send_header('Content-type', content_type)
             self.end_headers()
 
+            ####
+            # Send Data
+            ####
             # Write Funktion in eigenem try-catch statement, um Html-Fehler senden zu können, wenn im SQL Teil
             # etwas fehlschlägt!
             try:
-                self.wfile.write(html_string.encode("utf-8"))
+                self.wfile.write(html_bytes)
             except Exception as exc:
                 log.warning("> Es ist ein Fehler im RequestHandler aufgetreten: write() failed: {0}".format(exc))
                 self.loc_db_mngr = None
@@ -855,11 +521,130 @@ class RequestHandler(BaseHTTPRequestHandler):
 
             # Write Funktion in eigenem try-catch statement, um Html-Fehler senden zu können, wenn im SQL Teil
             # etwas fehlschlägt!
-            try:
-                self.send_error(500, "Ein unerwartetes Problem ist aufgetreten!")
-            except Exception as exc:
-                log.warning("> Es ist ein Fehler im RequestHandler aufgetreten: write() failed: {0}".format(exc))
-                return
+            self.trySendError(500, "Ein unerwartetes Problem ist aufgetreten!")
 
         self.loc_db_mngr = None
         return
+
+    @staticmethod
+    def getPosDataList(post_data) -> list:
+        tmp_data = post_data.split("&")
+        data: list = []
+        for d in tmp_data:
+            tmp = d.split("=")
+            if len(tmp) == 0:
+                continue
+            if len(tmp) == 1:
+                data += [tmp, ""]
+            elif len(tmp) > 1:
+                data += tmp[:2]
+        return data
+
+    def deleteLogPostRequest(self, data) -> bytes:
+        log.debug("> Try to clear/rename Logfile...")
+        # Check if Password is correct
+        if self.adminPasswordIsCorrect(data, "password"):
+            if settings.log_file_delete_mode == "RENAME":
+                shutil.copyfile(settings.log_file_path, settings.log_file_path.replace(".log", "") + "_backup_"
+                                + datetime.now().strftime("%m-%d-%Y_%H-%M-%S") + ".log")
+                log.info("    -> Logfile copied")
+
+            fo = open(settings.log_file_path, "w")
+            fo.truncate()
+            fo.close()
+            log.info("    -> (Old) Logfile deleted")
+            return self.getLogPage()
+        else:
+            log.warning("   -> Clear/Delete Logfile failed: Wrong password: ".format(str(data)))
+            return self.getFileText("../web/html/tabelle-falsches-pw.html")
+
+    @staticmethod
+    def adminPasswordIsCorrect(data, password_field: str):
+        return password_field in data and data[data.index(password_field) + 1] == settings.clear_log_file_pw
+
+    def settingsReloadAdvertiseListPostRequest(self) -> bytes:
+        settings.want_reload_advertise = True
+        log.info("> Want reload Advertise List...")
+        return self.getSettingsPage()
+
+    def settingsUpdateShowTime(self, data, html: bytes) -> bytes:
+        status: str = "<font color='green'>Erfolgreich aktualisiert!</font>"
+        value: str = data[data.index("anzeigezeit_value") + 1]
+
+        if not self.adminPasswordIsCorrect(data, "adminPW"):
+            status = "<font color='red'>Aktualisierung fehlgeschlagen! Falsches Passwort</font>"
+            log.debug("Aktualisierung fehlgeschlagen! Falsches Passwort")
+
+        elif value.isdigit():
+            time = int(value)
+            self.loc_db_mngr.setDelayTime("ARTIKEL", time)
+            settings.SHOW_TIME = time
+            log.info("> Aktualisiere Artikel Information Anzeigezeit zu: {0} Sekunden.".format(settings.SHOW_TIME))
+
+        else:
+            status = "<font color='red'>Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!</font>"
+            log.debug("Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!")
+
+        return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS1%-->".encode(), status.encode()))
+
+    def settingsUpdateProducerShowTime(self, data, html: bytes) -> bytes:
+        status: str = "<font color='green'>Erfolgreich aktualisiert!</font>"
+        value: str = data[data.index("anzeigezeit_Hersteller_value") + 1]
+
+        if not self.adminPasswordIsCorrect(data, "adminPW"):
+            status = "<font color='red'>Aktualisierung fehlgeschlagen! Falsches Passwort</font>"
+            log.debug("Aktualisierung fehlgeschlagen! Falsches Passwort")
+
+        elif value.isdigit():
+            time = int(value)
+            self.loc_db_mngr.setDelayTime("HERSTELLER", time)
+            settings.SHOW_PRODUCER_INFOS_TIME = time
+            log.info("> Aktualisiere Hersteller Informationen Anzeigezeit zu: {0} Sekunden.".
+                     format(settings.SHOW_PRODUCER_INFOS_TIME))
+
+        else:
+            status = "<font color='red'>Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!</font>"
+            log.debug("Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!")
+
+        return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS2%-->".encode(), status.encode()))
+
+    def settingsUpdateAdvertiseToggleTime(self, data, html: bytes) -> bytes:
+        status: str = "<font color='green'>Erfolgreich aktualisiert!</font>"
+        value: str = data[data.index("changeAdvertiseTime_value") + 1]
+
+        if not self.adminPasswordIsCorrect(data, "adminPW"):
+            status = "<font color='red'>Aktualisierung fehlgeschlagen! Falsches Passwort</font>"
+            log.debug("Aktualisierung fehlgeschlagen! Falsches Passwort")
+
+        elif value.isdigit():
+            time = int(value)
+            self.loc_db_mngr.setDelayTime("CHANGE_ADVERTISE", time)
+            settings.CHANGE_ADVERTISE_TIME = time
+            log.info("> Aktualisiere Wechselzeit zwischen Startseite und Werbung Seite zu: {0} Sekunden.".
+                     format(settings.CHANGE_ADVERTISE_TIME))
+
+        else:
+            status = "<font color='red'>Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!</font>"
+            log.debug("Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!")
+
+        return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS3%-->".encode(), status.encode()))
+
+    def settingsChangePassword(self, data, html: bytes) -> bytes:
+        status: str = "<font color='green'>Erfolgreich aktualisiert!</font>"
+        value: str = data[data.index("changePasswordNewPW_value") + 1]
+
+        if not self.adminPasswordIsCorrect(data, "adminPW"):
+            status = "<font color='red'>Aktualisierung fehlgeschlagen! Falsches Passwort</font>"
+            log.debug("Aktualisierung fehlgeschlagen! Falsches Passwort")
+        else:
+            self.loc_db_mngr.setPassword("ADMIN", value)
+            settings.clear_log_file_pw = value
+            log.info("> Ändere das Admin Passwort")
+
+        return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS4%-->".encode(), status.encode()))
+
+    @staticmethod
+    def replaceVarsInSettingsHtml(html: bytes) -> bytes:
+        html = html.replace("%anzeigezeit_Hersteller_value%".encode(), str(settings.SHOW_PRODUCER_INFOS_TIME).encode())
+        html = html.replace("%anzeigezeit_value%".encode(), str(settings.SHOW_TIME).encode())
+        return html.replace("%changeAdvertiseTime_value%".encode(), str(settings.CHANGE_ADVERTISE_TIME).encode())

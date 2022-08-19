@@ -125,7 +125,7 @@ class LocalDataBaseManager:
             else:
                 return int(count)
 
-    def count_scans_at_date(self, date: datetime.date):
+    def count_scans_at_date(self, date: datetime.date, place_holder):
         with contextlib.closing(self.connection.cursor()) as cur:
             cur.execute("SELECT COUNT(1) FROM scans WHERE date = ?", [date.isoformat()])
             return cur.fetchall()

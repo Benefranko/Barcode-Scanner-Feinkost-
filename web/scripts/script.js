@@ -73,5 +73,20 @@ var switchBtn = function(buttonName, messageName) {
         }
     };
 
+
+var markSelected = function() {
+    if( window.location.href.endsWith("hersteller.html")) {
+        auswahlBtn = document.getElementById('auswahlBtn3');
+
+    } else if (window.location.href.endsWith("kategorie.html")) {
+        auswahlBtn = document.getElementById('auswahlBtn2');
+
+    } else {
+        auswahlBtn = document.getElementById('auswahlBtn1');
+    }
+    auswahlBtn.classList.add("auswahlLinkSelected");
+    auswahlBtn.textContent = "\u{1F535}" + auswahlBtn.textContent;
+}
+
 var monthsList = ["Januar", "Februar", "M\u00E4rz", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
 var weekdaysList = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];

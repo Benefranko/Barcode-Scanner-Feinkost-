@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<title>Canvas Diagramm</title>
+		<title>Feinkost Barcode Scanner Webserver</title>
 		<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 		<link rel="stylesheet" href="/css/style.css">
 
@@ -12,9 +12,8 @@
 	</head>
 	<body>
 		<div class="titel">
-			<h1 class="titel-font" >Wochenstatistik:</h1>
+			<h1 class="titel-font">Monatsstatistik:</h1>
 		</div>
-
 		<div class="spacer"></div>
 		<div class="chart-container">
 			<canvas id="myChart"></canvas>
@@ -22,9 +21,9 @@
 		<div class="spacer"></div>
 
 		<div class="row">
-			<a class="m-btn auswahlLink m-btn-green" href="/html/wochenstatus.html">Alle Artikel</a>
-			<a class="m-btn auswahlLink m-btn-green" href="/html/wochenstatus-kategorie.html">Nach Kategorie</a>
-			<a class="m-btn auswahlLink m-btn-green auswahlLinkSelected" href="/html/wochenstatus-hersteller.html"> &#128309; Nach Hersteller</a>
+			<a class="m-btn auswahlLink m-btn-green" id="auswahlBtn1" href="/html/monatsstatus.html">Alle Artikel</a>
+			<a class="m-btn auswahlLink m-btn-green" id="auswahlBtn2" href="/html/monatsstatus-kategorie.html">Nach Kategorie</a>
+			<a class="m-btn auswahlLink m-btn-green" id="auswahlBtn3" href="/html/monatsstatus-hersteller.html">Nach Hersteller</a>
 		</div>
 
 		<div class="spacer"></div>
@@ -39,14 +38,16 @@
 		<script >
 			const ctx = document.getElementById('myChart').getContext('2d');
 			const data = {
-					labels: weekdaysList,
+					labels: %DATA_LABEL_SET%,
 					datasets: [ %DATA_DATA_SETS% ]
 				};
 			const myChart = createBarChart(ctx, data);
-
 			function switchStacked() {
 				toggleStackedBtn("stack-button", myChart);
 			}
+			markSelected();
+
 		</script>
-		</body>
+
+	</body>
 </html>
