@@ -13,7 +13,9 @@
 		<h1 class="titel-font" >Jahresstatistik:</h1>
 	</div>
 	<div class="spacer"></div>
-	<canvas id="myChart"></canvas>
+	<div class="chart-container">
+		<canvas id="myChart"></canvas>
+	</div >
 	<div class="spacer"></div>
 
 	<div class="row">
@@ -27,14 +29,12 @@
 	<div class="pageEnd"></div>
 
 
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+	<script src="/scripts/script.js"></script>
 	<script >
 		const ctx = document.getElementById('myChart').getContext('2d');
-		let delayed;
-		const myChart = new Chart(ctx, {
-			type: 'bar',
-			data: {
-				labels: ["Januar", "Februar", "M&auml;rz", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"],
+		const data = {
+				labels: monthsList,
 				datasets: [{
 					label: ' Alle Artikel',
 					data: %DATA_DATA_SET_1%,
@@ -68,53 +68,9 @@
 					],
 					borderWidth: 2
 				}]
-			},
-			options: {
-				animation: {
-				    onComplete: () => {
-					    delayed = true;
-				    },
-				    delay: (context) => {
-						let delay = 0;
-						if (context.type === 'data' && context.mode === 'default' && !delayed) {
-					  		delay = context.dataIndex * 50 + context.datasetIndex * 25;
-						}
-						return delay;
-				    },
-				},
-				scales: {
-				  	x: {
-				  		stacked: true,
-				  	},
-				  	y: {
-						stacked: true,
-						beginAtZero: true
-				  	}
-				}
-			}
-		});
-		var toggleStackedBtn = function(buttonName, chart) {
-				button = document.getElementById(buttonName);
-				if( button.value == "true" ) {
-					button.value = "false";
-					button.textContent = "Nebeneinander";
-					button.classList.remove("m-btn-green")
-					button.classList.add("m-btn-blue")
-
-				 	chart.options.scales.x.stacked = false;
-				 	chart.options.scales.y.stacked = false;
-
-				} else {
-					button.value = "true"
-					button.textContent = "Gestapelt";
-					button.classList.remove("m-btn-blue")
-					button.classList.add("m-btn-green")
-
-					chart.options.scales.x.stacked = true;
-					chart.options.scales.y.stacked = true;
-				}
-				chart.update();
 			};
+
+		const myChart = createBarChart(ctx, data);
 
 		function switchStacked() {
 			toggleStackedBtn("stack-button", myChart);

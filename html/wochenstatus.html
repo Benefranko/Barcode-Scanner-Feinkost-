@@ -16,7 +16,9 @@
 		</div>
 
 		<div class="spacer"></div>
-		<canvas style="background-color: white" id="myChart"></canvas>
+		<div class="chart-container">
+			<canvas id="myChart"></canvas>
+		</div >
 		<div class="spacer"></div>
 
 		<div class="row">
@@ -29,14 +31,12 @@
 			<a class="m-btn m-btn-blue" href="/"> &#8962; Zur Startseite</a>
 		<div class="pageEnd"></div>
 
-		<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+		<script src="/scripts/script.js"></script>
 		<script >
 			const ctx = document.getElementById('myChart').getContext('2d');
-			let delayed;
-			const myChart = new Chart(ctx, {
-				type: 'bar',
-				data: {
-					labels: ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'],
+			const data = {
+					labels: weekdaysList,
 					datasets: [{
 						label: ' Alle Artikel',
 						data: %DATA_DATA_SET_1%,
@@ -61,58 +61,12 @@
 						],
 						borderWidth: 2
 					}]
-				},
-				options: {
-					animation: {
-				    	onComplete: () => {
-							delayed = true;
-						},
-						delay: (context) => {
-							let delay = 0;
-							if (context.type === 'data' && context.mode === 'default' && !delayed) {
-								delay = context.dataIndex * 50 + context.datasetIndex * 25;
-							}
-							return delay;
-						},
-					},
-					scales: {
-						x: {
-							stacked: true,
-						},
-						y: {
-							stacked: true,
-							beginAtZero: true
-						}
-					}
-				}
-			});
-			var toggleStackedBtn = function(buttonName, chart) {
-				button = document.getElementById(buttonName);
-				if( button.value == "true" ) {
-					button.value = "false";
-					button.textContent = "Nebeneinander";
-					button.classList.remove("m-btn-green")
-					button.classList.add("m-btn-blue")
+				};
+			const myChart = createBarChart(ctx, data);
 
-				 	chart.options.scales.x.stacked = false;
-				 	chart.options.scales.y.stacked = false;
-
-				} else {
-					button.value = "true"
-					button.textContent = "Gestapelt";
-					button.classList.remove("m-btn-blue")
-					button.classList.add("m-btn-green")
-
-					chart.options.scales.x.stacked = true;
-					chart.options.scales.y.stacked = true;
-				}
-				chart.update();
-			};
-
-		function switchStacked() {
-			toggleStackedBtn("stack-button", myChart);
-		}
+			function switchStacked() {
+				toggleStackedBtn("stack-button", myChart);
+			}
 		</script>
-	
 	</body>
 </html>

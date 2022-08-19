@@ -10,92 +10,45 @@
 
 		</style>
 	</head>
-<body>
+	<body>
 
-	<div class="titel">
-		<h1 class="titel-font">Monatsstatistik:</h1>
-	</div>
+		<div class="titel">
+			<h1 class="titel-font">Monatsstatistik:</h1>
+		</div>
 
-	<div class="spacer"></div>
-	<canvas style="background-color: white" id="myChart"></canvas>
-	<div class="spacer"></div>
+		<div class="spacer"></div>
+		<div class="chart-container">
+			<canvas id="myChart"></canvas>
+		</div >
+		<div class="spacer"></div>
 
-	<div class="row">
-		<a class="m-btn auswahlLink m-btn-green" href="/monatsstatus.html">Alle Artikel</a>
-		<a class="m-btn auswahlLink m-btn-green auswahlLinkSelected" href="/monatsstatus-kategorie.html"> &#128309; Nach Kategorie</a>
-		<a class="m-btn auswahlLink m-btn-green" href="/monatsstatus-hersteller.html">Nach Hersteller</a>
-	</div>
+		<div class="row">
+			<a class="m-btn auswahlLink m-btn-green" href="/monatsstatus.html">Alle Artikel</a>
+			<a class="m-btn auswahlLink m-btn-green auswahlLinkSelected" href="/monatsstatus-kategorie.html"> &#128309; Nach Kategorie</a>
+			<a class="m-btn auswahlLink m-btn-green" href="/monatsstatus-hersteller.html">Nach Hersteller</a>
+		</div>
 
-	<div class="spacer"></div>
-	<div class="row jc-left">
-		<a class="m-btn m-btn-blue" href="/"> &#8962; Zur Startseite</a>
-		<button class="m-btn-green m-btn btn-stacked-width row-block-distance-60" onclick="switchStacked()" id="stack-button" value="true" >Gestapelt</button>
-	</div>
-	<div class="pageEnd"></div>
+		<div class="spacer"></div>
+		<div class="row jc-left">
+			<a class="m-btn m-btn-blue" href="/"> &#8962; Zur Startseite</a>
+			<button class="m-btn-gray m-btn btn-stacked-width row-block-distance-60" onclick="switchStacked()" id="stack-button" value="true" >Gestapelt</button>
+		</div>
+		<div class="pageEnd"></div>
 
-	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-	<script >
-		const ctx = document.getElementById('myChart').getContext('2d');
-		let delayed;
-		const myChart = new Chart(ctx, {
-			type: 'bar',
-			data: {
-				labels: %DATA_LABEL_SET%,
-				datasets: [ %DATA_DATA_SETS% ]
-			},
-			options: {
-				animation: {
-				    onComplete: () => {
-					    delayed = true;
-				    },
-				    delay: (context) => {
-						let delay = 0;
-						if (context.type === 'data' && context.mode === 'default' && !delayed) {
-					  		delay = context.dataIndex * 50 + context.datasetIndex * 25;
-						}
-						return delay;
-				    },
-				},
-				scales: {
-				  	x: {
-				  		stacked: true,
-				  	},
-				  	y: {
-						stacked: true,
-						beginAtZero: true
-				  	}
-				}
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+		<script src="/scripts/script.js"></script>
+		<script >
+			const ctx = document.getElementById('myChart').getContext('2d');
+			const data = {
+					labels: %DATA_LABEL_SET%,
+					datasets: [ %DATA_DATA_SETS% ]
+				};
+			const myChart = createBarChart(ctx, data);
+			function switchStacked() {
+				toggleStackedBtn("stack-button", myChart);
 			}
-		});
 
-		var toggleStackedBtn = function(buttonName, chart) {
-				button = document.getElementById(buttonName);
-				if( button.value == "true" ) {
-					button.value = "false";
-					button.textContent = "Nebeneinander";
-					button.classList.remove("m-btn-green")
-					button.classList.add("m-btn-blue")
+		</script>
 
-				 	chart.options.scales.x.stacked = false;
-				 	chart.options.scales.y.stacked = false;
-
-				} else {
-					button.value = "true"
-					button.textContent = "Gestapelt";
-					button.classList.remove("m-btn-blue")
-					button.classList.add("m-btn-green")
-
-					chart.options.scales.x.stacked = true;
-					chart.options.scales.y.stacked = true;
-				}
-				chart.update();
-			};
-
-		function switchStacked() {
-			toggleStackedBtn("stack-button", myChart);
-		}
-
-	</script>
-	
 	</body>
 </html>

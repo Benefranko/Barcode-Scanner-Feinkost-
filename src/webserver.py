@@ -83,6 +83,17 @@ class RequestHandler(BaseHTTPRequestHandler):
                     self.loc_db_mngr = None
                     return
                 return
+            elif self.path == "/scripts/script.js":
+                self.send_response(200)
+                self.send_header('content-type', 'text/javascript')
+                self.end_headers()
+                # Open the file, read bytes, serve
+                with open("../html/scripts/script.js", 'rb') as file:
+                    bts = file.read()
+                if not self.tryWriteOK(bts):
+                    self.loc_db_mngr = None
+                    return
+                return
 
             # Je nach URL Pfad / je nach aufgerufener Internetseite:
             sub_paths = self.path.split("/")
@@ -165,15 +176,15 @@ class RequestHandler(BaseHTTPRequestHandler):
                     day_of_month = int(now.strftime("%d")) - 1
 
                     replace_str: str = ""
-                    kategorieList = self.loc_db_mngr.getKategorieList()
+                    kategorie_list = self.loc_db_mngr.getKategorieList()
 
-                    for i in range(0, len(kategorieList)):
-                        if kategorieList[i] is None:
+                    for i in range(0, len(kategorie_list)):
+                        if kategorie_list[i] is None:
                             continue
-                        elif kategorieList[i][0] is None:
+                        elif kategorie_list[i][0] is None:
                             kategorie = "Unbekannt"
                         else:
-                            kategorie = kategorieList[i][0]
+                            kategorie = kategorie_list[i][0]
 
                         scan_list = [0] * days_of_month
                         for day in range(0, day_of_month + 1):
@@ -262,6 +273,48 @@ class RequestHandler(BaseHTTPRequestHandler):
 
                     html_string = html_string.replace("%DATA_DATA_SETS%", replace_str)
 
+                elif sub_paths[1] == "wochenstatus-kategorie.html":
+                    # Lade HTML TEMPLATE für Wochenstatus mit Javascript Chart
+                    html_string = open("../html/wochenstatus-kategorie.html", "r").read()
+                    replace_str: str = ""
+                    weekday = datetime.today().weekday()
+
+                    kategorie_list = self.loc_db_mngr.getKategorieList()
+
+                    for i in range(0, len(kategorie_list)):
+                        if kategorie_list[i] is None:
+                            continue
+                        elif kategorie_list[i][0] is None:
+                            kategorie = "Unbekannt"
+                        else:
+                            kategorie = kategorie_list[i][0]
+
+                        scan_list = [0] * 7
+                        for day in range(0, weekday + 1):
+                            current_day = datetime.today().date() - timedelta(days=day)
+                            buf = self.loc_db_mngr.count_scans_at_date_where_kategorie_is(current_day, kategorie)
+                            if buf is not None:
+                                scan_list[weekday - day] = buf[0][0]
+                        if replace_str != "":
+                            replace_str += ","
+                        replace_str += "{\r\n" \
+                                       + "     label: '" + kategorie + "',\r\n" \
+                                       + "     data: " + str(scan_list) + ",\r\n" \
+                                       + "     backgroundColor: [\r\n" \
+                                       + "         'rgba(" + str((i * 50) % 200) + ", " + \
+                                       str((i * 100) % 200) + ", " + \
+                                       str((i * 150) % 200) + ", 0.2)'\r\n" \
+                                       + "     ],\r\n" \
+                                       + "    borderColor: [\r\n" \
+                                       + "         'rgba(" + str((i * 50) % 200) + ", " + \
+                                       str((i * 100) % 200) + ", " + \
+                                       str((i * 150) % 200) + ", 1)'\r\n" \
+                                       + "     ],\r\n" \
+                                       + "     borderWidth: 2\r\n" \
+                                       + "}"
+
+                    html_string = html_string.replace("%DATA_DATA_SETS%", replace_str)
+
                 elif sub_paths[1] == "jahresstatus.html":
                     # Lade HTML TEMPLATE für Jahresstatus mit Javascript Chart
                     html_string = open("../html/jahresstatus.html", "r").read()
@@ -310,6 +363,55 @@ class RequestHandler(BaseHTTPRequestHandler):
                             replace_str += ","
                         replace_str += "{\r\n" \
                                        + "     label: '" + hersteller + "',\r\n" \
+                                       + "     data: " + str(scan_list) + ",\r\n" \
+                                       + "     backgroundColor: [\r\n" \
+                                       + "         'rgba(" + str((i * 50) % 200) + ", " + \
+                                       str((i * 100) % 200) + ", " + \
+                                       str((i * 150) % 200) + ", 0.2)'\r\n" \
+                                       + "     ],\r\n" \
+                                       + "    borderColor: [\r\n" \
+                                       + "         'rgba(" + str((i * 50) % 200) + ", " + \
+                                       str((i * 100) % 200) + ", " + \
+                                       str((i * 150) % 200) + ", 1)'\r\n" \
+                                       + "     ],\r\n" \
+                                       + "     borderWidth: 2\r\n" \
+                                       + "}"
+
+                    html_string = html_string.replace("%DATA_DATA_SETS%", replace_str)
+                elif sub_paths[1] == "jahresstatus-kategorie.html":
+
+                    # Lade HTML TEMPLATE für Jahresstatus mit Javascript Chart
+                    html_string = open("../html/jahresstatus-kategorie.html", "r").read()
+                    replace_str: str = ""
+                    current_year = datetime.now().year
+
+                    s_list = self.loc_db_mngr.get_all_scans()
+                    kategorie_list = self.loc_db_mngr.getKategorieList()
+                    for i in range(0, len(kategorie_list)):
+                        if kategorie_list[i] is None:
+                            continue
+                        elif kategorie_list[i][0] is None:
+                            kategorie = "Unbekannt"
+                        else:
+                            kategorie = kategorie_list[i][0]
+
+                        ####
+                        # DRINGEND MIT SQL STATEMENT SCHNELLER MACHEN!!!!!!
+                        ####
+                        scan_list = [0] * 12
+                        for m in range(1, 13):
+                            for scan in s_list:
+                                scan_d = datetime.fromisoformat(scan[1])
+                                if scan_d.year == current_year and scan_d.month == m:
+                                    if scan[5] is None and kategorie == "Unbekannt":
+                                        scan_list[m - 1] += 1
+                                    elif scan[6] == kategorie:
+                                        scan_list[m - 1] += 1
+
+                        if replace_str != "":
+                            replace_str += ","
+                        replace_str += "{\r\n" \
+                                       + "     label: '" + kategorie + "',\r\n" \
                                        + "     data: " + str(scan_list) + ",\r\n" \
                                        + "     backgroundColor: [\r\n" \
                                        + "         'rgba(" + str((i * 50) % 200) + ", " + \
@@ -437,6 +539,21 @@ class RequestHandler(BaseHTTPRequestHandler):
                                 text += last
                             text += ">" + line.rstrip() + "</p>\n"
                     html_string = html_string.replace("%DATA%", text)
+                elif sub_paths[1] == "download":
+                    if len(sub_paths) < 3 or sub_paths[2] is None or sub_paths[2] == "":
+                        html_string = open("../html/404.html", "r").read()
+                        html_status = 404
+                    elif sub_paths[2] == "Logfile.txt":
+                        self.send_response(200)
+                        self.send_header('content-type', 'text/x-please-download-me')
+                        self.end_headers()
+                        # Open the file, read bytes, serve
+                        with open(settings.log_file_path, 'r') as file:
+                            bts = file.read().encode("utf-8")
+                        if not self.tryWriteOK(bts):
+                            self.loc_db_mngr = None
+                            return
+                        return
                 else:
                     log.debug("> WARNUNG: Seite nicht gefunden: {0}".format(self.path))
                     html_string = open("../html/404.html", "r").read()
@@ -527,9 +644,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                     html_string = open("../html/tabelle-falsches-pw.html", "r").read()
 
             elif self.path == "/settings.html":
-                if "ReloadAdvertiseListButton=TRUE" in str(post_data) \
-                        or ("ReloadAdvertiseListButton.x" in
-                            str(post_data) and "ReloadAdvertiseListButton.y" in str(post_data)):
+                if str(post_data.decode()) == "ReloadAdvertiseListButton=Neu+laden":
                     settings.want_reload_advertise = True
                     log.info("> Reload Advertise List")
                     self.do_GET()

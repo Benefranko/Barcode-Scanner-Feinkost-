@@ -4,17 +4,29 @@
 		<meta charset="UTF-8">
 		<title>Einstellungen</title>
 		<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
-		<link rel="stylesheet" href="style.css">
+		<link rel="stylesheet" href="/style.css">
 		<style>
 			body {
 				width: 95%;
+				line-height: 1.5;
 			}
 			ul {
 				font-size: 22px;
 				font-family: 'Source Sans Pro', sans-serif;
 			}
 			li {
-				margin-top:40px;
+				margin-top:30px;
+			}
+			.textInputField {
+				padding: 2px 2px;
+				height: 20px;
+				margin-left: 5px;
+			}
+			.imageButton{
+				border: 1px solid #000;
+				width:40px;
+				vertical-align:middle;
+				margin-left: 15px;
 			}
 		</style>
 
@@ -27,40 +39,50 @@
 		 <ul>
 			  <li>
 				  <form action="" method="post">
-					Lade Liste mit Werbung neu:
-					<input type="image" src="/images/reload.png" name="ReloadAdvertiseListButton" style="border: 1px solid #000; width:30px; vertical-align:middle;"></input>
+					  <strong>Lade Liste mit Werbung neu:</strong>
+					  <input class="small-btn m-btn-gray" style="margin-left: 54px" type="submit" value="Neu laden" name="ReloadAdvertiseListButton">
 				  </form>
 			  </li>
 			  <li>
 				  <form action="" method="post">
-					  <label for="showArticleTime">Anzeigezeit der Artikelinformationen:</label><br>
-					  Admin Passwort: <input type="password" name="adminPW" value=""><br>
-					  Zeit in Sekunden: <input type="text" id="showArticleTime" name="anzeigezeit_value" value="%anzeigezeit_value%">
-					  <input type="submit" value="Anwenden"> %STATUS1%
+					  <label for="showArticleTime"><strong>Anzeigezeit der Artikelinformationen:</strong></label><br>
+					  Admin Passwort: <input class="textInputField" type="password" name="adminPW" value=""><br>
+					  Zeit in Sekunden: <input class="textInputField" type="text" id="showArticleTime" name="anzeigezeit_value" value="%anzeigezeit_value%">
+					  <input class="small-btn m-btn-gray" type="submit" value="Anwenden"> %STATUS1%
 				  </form>
 			  </li>
 			  <li>
 				  <form action="" method="post">
-					  <label for="showHerstellerTime">Anzeigezeit der Herstellerinformationen:</label><br>
-					  Admin Passwort: <input type="password" name="adminPW" value=""><br>
-					  Zeit in Sekunden: <input type="text" id="showHerstellerTime" name="anzeigezeit_Hersteller_value" value="%anzeigezeit_Hersteller_value%">
-					  <input type="submit" value="Anwenden"> %STATUS2%
+					  <label for="showHerstellerTime"><strong>Anzeigezeit der Herstellerinformationen:</strong></label><br>
+					  Admin Passwort:  <input class="textInputField" type="password" name="adminPW" value=""><br>
+					  Zeit in Sekunden: <input class="textInputField" type="text" id="showHerstellerTime" name="anzeigezeit_Hersteller_value" value="%anzeigezeit_Hersteller_value%">
+					  <input class="small-btn m-btn-gray" type="submit" value="Anwenden"> %STATUS2%
 				  </form>
 			  </li>
 			  <li>
 				  <form action="" method="post">
-					  <label for="changeAdvertiseTime">Zeit zwischen Wechsel der Werbungsseite und Startseite:</label><br>
-					  Admin Passwort: <input type="password" name="adminPW" value=""><br>
-					  Zeit in Sekunden: <input type="text" id="changeAdvertiseTime" name="changeAdvertiseTime_value" value="%changeAdvertiseTime_value%">
-					  <input type="submit" value="Anwenden"> %STATUS3%
+					  <label for="changeAdvertiseTime"><strong>Zeit zwischen Wechsel der Werbungsseite und Startseite:</strong></label><br>
+					  Admin Passwort:  <input class="textInputField" type="password" name="adminPW" value=""><br>
+					  Zeit in Sekunden: <input class="textInputField" type="text" id="changeAdvertiseTime" name="changeAdvertiseTime_value" value="%changeAdvertiseTime_value%">
+					  <input class="small-btn m-btn-gray" type="submit" value="Anwenden"> %STATUS3%
 				  </form>
 			  </li>
 			 <li>
 				  <form action="" method="post">
-					  <label for="changePasswordNewPW">Admin Passwort &auml;ndern:</label><br>
-					  Admin Passwort: <input type="password" name="adminPW" value=""><br>
-					  Neues Passwort: <input type="password" id="changePasswordNewPW" name="changePasswordNewPW_value" value="">
-					  <input type="submit" value="Anwenden"> %STATUS4%
+					  <label for="changePasswordNewPW"><strong>Admin Passwort &auml;ndern:</strong></label><br>
+					  Admin Passwort: <input class="textInputField" type="password" name="adminPW" value=""><br>
+					  Neues Passwort: <input class="textInputField" type="password" id="changePasswordNewPW" name="changePasswordNewPW_value" value="">
+					  <input class="small-btn m-btn-gray" type="submit" value="Anwenden"> %STATUS4%
+				  </form>
+			  </li>
+
+			 <li>
+				  <form action="" method="post">
+					  <label for="changePasswordNewPW"><strong>Programm Aktualisieren:</strong></label><br>
+					  Sie verwenden bereits die neuste Version ( XYZ ) <br>
+					  Es ist eine neuere Version ( 9.9.9 ) als ihre ( 8.8.8 ) verf&uuml;gbar!<br>
+					  Admin Passwort: <input class="textInputField" type="password" name="adminPW" value="">
+					  <input class="small-btn m-btn-gray" type="submit" value="Update starten">
 				  </form>
 			  </li>
 		</ul>
