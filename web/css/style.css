@@ -43,8 +43,8 @@ body {
 
 .m-btn-blue{
     color: black;
-    background-color: cyan;
-    border-color: cyan;
+    background-color: #2196F3 !important;
+    border-color: #2196F3 !important;
 }
 
 .m-btn-orange{
@@ -64,7 +64,7 @@ body {
 }
 
 .m-btn-blue:hover{
-    background-color: #008b8b;
+    background-color: #0d8bf2 !important;
 }
 
 .m-btn-orange:hover{
