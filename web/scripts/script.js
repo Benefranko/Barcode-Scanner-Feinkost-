@@ -83,6 +83,7 @@ var markSelected = function() {
 
     } else {
         auswahlBtn = document.getElementById('auswahlBtn1');
+        document.getElementById("stack-button").style.visibility = 'hidden';
     }
     auswahlBtn.classList.add("auswahlLinkSelected");
     auswahlBtn.textContent = "\u{1F535}" + auswahlBtn.textContent;

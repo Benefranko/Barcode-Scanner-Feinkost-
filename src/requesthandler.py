@@ -6,7 +6,7 @@ import random
 from http.server import BaseHTTPRequestHandler
 from datetime import datetime, timedelta
 
-import settings
+import constants as consts
 import localdatabasemanager
 
 import logging
@@ -19,13 +19,13 @@ log = logging.getLogger(Path(__file__).name)
 class RequestHandler(BaseHTTPRequestHandler):
     # class RequestHandler(SimpleHTTPRequestHandler):
     # Objekte
-    loc_db_mngr = None
+    loc_db_mngr: localdatabasemanager.LocalDataBaseManager = None
 
     # HTTP Methode um Internetseitenquelltext zu bekommen:
     def do_GET(self):
         # Stelle Verbindung mit lokaler Datenbank her, um Statistiken auslesen zu können
         self.loc_db_mngr = localdatabasemanager.LocalDataBaseManager()
-        if self.loc_db_mngr.connect(settings.local_db_path) is None:
+        if self.loc_db_mngr.connect(consts.local_db_path) is None:
             self.trySendError(500, "Konnte keine Verbindung mit der lokalen Datenbank herstellen!")
             return
 
@@ -104,7 +104,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                     html_status, html_bytes = self.getPageNotFound()
 
                 elif sub_paths[2] == "Logfile.txt":
-                    html_bytes = self.getFileText(settings.log_file_path)
+                    html_bytes = self.getFileText(consts.log_file_path)
 
                 else:
                     html_status, html_bytes = self.getPageNotFound()
@@ -118,26 +118,22 @@ class RequestHandler(BaseHTTPRequestHandler):
                     html_status, html_bytes = self.getPageNotFound()
 
                 elif sub_paths[2] == "wochenstatus.html":
-                    html_bytes = self.getWochenStatusPage([["Alle Artikel"]], self.loc_db_mngr.count_scans_at_date)
+                    html_bytes = self.getWochenStatusPage([["Alle Artikel"]], None)
 
                 elif sub_paths[2] == "wochenstatus-kategorie.html":
-                    html_bytes = self.getWochenStatusPage(self.loc_db_mngr.getKategorieList(),
-                                                          self.loc_db_mngr.count_scans_at_date_where_kategorie_is)
+                    html_bytes = self.getWochenStatusPage(self.loc_db_mngr.getKategorieList(), "kategorie")
 
                 elif sub_paths[2] == "wochenstatus-hersteller.html":
-                    html_bytes = self.getWochenStatusPage(self.loc_db_mngr.getHerstellerList(),
-                                                          self.loc_db_mngr.count_scans_at_date_where_hersteller_is)
+                    html_bytes = self.getWochenStatusPage(self.loc_db_mngr.getHerstellerList(), "hersteller")
 
                 elif sub_paths[2] == "monatsstatus.html":
-                    html_bytes = self.getMonatsStatusPage([["Alle Artikel"]], self.loc_db_mngr.count_scans_at_date)
+                    html_bytes = self.getMonatsStatusPage([["Alle Artikel"]], None)
 
                 elif sub_paths[2] == "monatsstatus-hersteller.html":
-                    html_bytes = self.getMonatsStatusPage(self.loc_db_mngr.getKategorieList(),
-                                                          self.loc_db_mngr.count_scans_at_date_where_kategorie_is)
+                    html_bytes = self.getMonatsStatusPage(self.loc_db_mngr.getKategorieList(), "kategorie")
 
                 elif sub_paths[2] == "monatsstatus-kategorie.html":
-                    html_bytes = self.getMonatsStatusPage(self.loc_db_mngr.getHerstellerList(),
-                                                          self.loc_db_mngr.count_scans_at_date_where_hersteller_is)
+                    html_bytes = self.getMonatsStatusPage(self.loc_db_mngr.getHerstellerList(), "hersteller")
 
                 elif sub_paths[2] == "jahresstatus.html":
                     html_bytes = self.getJahresStatusPage([["Alle Artikel"]], -1)
@@ -186,7 +182,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self.wfile.write(html_bytes)
             except Exception as exc:
                 log.warning("> Es ist ein Fehler im RequestHandler aufgetreten: write() failed: {0}".format(exc))
-                self.loc_db_mngr = None
+                self.loc_db_mngr.disconnect()
                 return
 
         ####
@@ -198,7 +194,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             # etwas fehlschlägt!#
             self.trySendError(500, "Ein unerwartetes Problem ist aufgetreten!")
 
-        self.loc_db_mngr = None
+        self.loc_db_mngr.disconnect()
         return
 
     @staticmethod
@@ -232,7 +228,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             x = 0
         return str(x) + ", " + str(y) + ", " + str(z)
 
-    def getWochenStatusPage(self, group_list, counter_func) -> bytes:
+    def getWochenStatusPage(self, group_list, name) -> bytes:
         html_bytes: bytes = self.getFileText("../web/html/wochenstatus-template.html")
         replace_str: str = ""
         weekday = datetime.today().weekday()
@@ -248,9 +244,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 
             for day in range(0, weekday + 1):
                 current_day = datetime.today().date() - timedelta(days=day)
-                buf = counter_func(current_day, group)
-                if buf is not None:
-                    scan_list[weekday - day] = buf[0][0]
+                scan_list[weekday - day] = self.loc_db_mngr.count_scans_at_date_where(current_day, name, group)
 
             if replace_str != "":
                 replace_str += ","
@@ -269,7 +263,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 + "              }"
         return html_bytes.replace("%DATA_DATA_SETS%".encode(), replace_str.encode())
 
-    def getMonatsStatusPage(self, group_list, counter_func) -> bytes:
+    def getMonatsStatusPage(self, group_list, name) -> bytes:
         html_bytes: bytes = self.getFileText("../web/html/monatsstatus-template.html")
         now = datetime.now()
         days_of_month = calendar.monthrange(now.year, now.month)[1]
@@ -287,9 +281,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             scan_list = [0] * days_of_month
             for day in range(0, day_of_month + 1):
                 current_day = datetime.today().date() - timedelta(days=day)
-                buf = counter_func(current_day, group)
-                if buf is not None:
-                    scan_list[day_of_month - day] = buf[0][0]
+                scan_list[day_of_month - day] = self.loc_db_mngr.count_scans_at_date_where(current_day, name, group)
 
             if replace_str != "":
                 replace_str += ","
@@ -357,7 +349,7 @@ class RequestHandler(BaseHTTPRequestHandler):
     def getTabellenPage(self, page_num) -> bytes:
         html_string = self.getFileText("../web/html/tabelle.html").decode()
         page: int = int(page_num)
-        page_count: int = int(self.loc_db_mngr.getItemCount() / settings.item_count_on_web_server_list)
+        page_count: int = int(self.loc_db_mngr.getItemCount() / self.loc_db_mngr.getItemCountOnWebTable())
 
         if page < 0 or page > page_count:
             page = page_count
@@ -376,8 +368,8 @@ class RequestHandler(BaseHTTPRequestHandler):
         else:
             html_string = html_string.replace("%BACK%", str(page - 1))
 
-        s_list = self.loc_db_mngr.getRange(settings.item_count_on_web_server_list * page,
-                                           settings.item_count_on_web_server_list)
+        s_list = self.loc_db_mngr.getRange(self.loc_db_mngr.getItemCountOnWebTable() * page,
+                                           self.loc_db_mngr.getItemCountOnWebTable())
         send_data = ""
         for scan in s_list:
             send_data += """<tr>\n
@@ -400,7 +392,7 @@ class RequestHandler(BaseHTTPRequestHandler):
     def getLogPage() -> bytes:
         html_string = open("../web/html/log.html", "r").read()
         text: str = ""
-        with open(settings.log_file_path, "r") as file:
+        with open(consts.log_file_path, "r") as file:
             last: str = ""
             for line in file:
                 text += "<p "
@@ -436,7 +428,7 @@ class RequestHandler(BaseHTTPRequestHandler):
     def do_POST(self):
 
         self.loc_db_mngr = localdatabasemanager.LocalDataBaseManager()
-        if self.loc_db_mngr.connect(settings.local_db_path) is None:
+        if self.loc_db_mngr.connect(consts.local_db_path) is None:
             log.error("Konnte keine Verbindung mit der lokalen Datenbank herstellen!")
             self.trySendError(500, "Konnte keine Verbindung mit der lokalen Datenbank herstellen!")
             return
@@ -513,7 +505,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self.wfile.write(html_bytes)
             except Exception as exc:
                 log.warning("> Es ist ein Fehler im RequestHandler aufgetreten: write() failed: {0}".format(exc))
-                self.loc_db_mngr = None
+                self.loc_db_mngr.disconnect()
                 return
 
         except Exception as exc:
@@ -523,7 +515,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             # etwas fehlschlägt!
             self.trySendError(500, "Ein unerwartetes Problem ist aufgetreten!")
 
-        self.loc_db_mngr = None
+        self.loc_db_mngr.disconnect()
         return
 
     @staticmethod
@@ -544,12 +536,12 @@ class RequestHandler(BaseHTTPRequestHandler):
         log.debug("> Try to clear/rename Logfile...")
         # Check if Password is correct
         if self.adminPasswordIsCorrect(data, "password"):
-            if settings.log_file_delete_mode == "RENAME":
-                shutil.copyfile(settings.log_file_path, settings.log_file_path.replace(".log", "") + "_backup_"
+            if consts.log_file_delete_mode == "RENAME":
+                shutil.copyfile(consts.log_file_path, consts.log_file_path.replace(".log", "") + "_backup_"
                                 + datetime.now().strftime("%m-%d-%Y_%H-%M-%S") + ".log")
                 log.info("    -> Logfile copied")
 
-            fo = open(settings.log_file_path, "w")
+            fo = open(consts.log_file_path, "w")
             fo.truncate()
             fo.close()
             log.info("    -> (Old) Logfile deleted")
@@ -558,12 +550,11 @@ class RequestHandler(BaseHTTPRequestHandler):
             log.warning("   -> Clear/Delete Logfile failed: Wrong password: ".format(str(data)))
             return self.getFileText("../web/html/tabelle-falsches-pw.html")
 
-    @staticmethod
-    def adminPasswordIsCorrect(data, password_field: str):
-        return password_field in data and data[data.index(password_field) + 1] == settings.clear_log_file_pw
+    def adminPasswordIsCorrect(self, data, password_field: str):
+        return password_field in data and data[data.index(password_field) + 1] == self.loc_db_mngr.getAdminPw()
 
     def settingsReloadAdvertiseListPostRequest(self) -> bytes:
-        settings.want_reload_advertise = True
+        localdatabasemanager.want_reload_advertise = True
         log.info("> Want reload Advertise List...")
         return self.getSettingsPage()
 
@@ -577,10 +568,11 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         elif value.isdigit():
             time = int(value)
-            self.loc_db_mngr.setDelayTime("ARTIKEL", time)
-            settings.SHOW_TIME = time
-            log.info("> Aktualisiere Artikel Information Anzeigezeit zu: {0} Sekunden.".format(settings.SHOW_TIME))
-
+            if self.loc_db_mngr.setArticleShowTime(time):
+                log.info("> Aktualisiere Artikel Information Anzeigezeit zu: {0} Sekunden."
+                         .format(self.loc_db_mngr.getArticleShowTime()))
+            # else:
+                # Error
         else:
             status = "<font color='red'>Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!</font>"
             log.debug("Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!")
@@ -597,11 +589,11 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         elif value.isdigit():
             time = int(value)
-            self.loc_db_mngr.setDelayTime("HERSTELLER", time)
-            settings.SHOW_PRODUCER_INFOS_TIME = time
-            log.info("> Aktualisiere Hersteller Informationen Anzeigezeit zu: {0} Sekunden.".
-                     format(settings.SHOW_PRODUCER_INFOS_TIME))
-
+            if self.loc_db_mngr.setProducerShowTime(time):
+                log.info("> Aktualisiere Hersteller Informationen Anzeigezeit zu: {0} Sekunden.".
+                        format(self.loc_db_mngr.getProducerShowTime()))
+            # else:
+                # Error
         else:
             status = "<font color='red'>Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!</font>"
             log.debug("Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!")
@@ -618,11 +610,11 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         elif value.isdigit():
             time = int(value)
-            self.loc_db_mngr.setDelayTime("CHANGE_ADVERTISE", time)
-            settings.CHANGE_ADVERTISE_TIME = time
-            log.info("> Aktualisiere Wechselzeit zwischen Startseite und Werbung Seite zu: {0} Sekunden.".
-                     format(settings.CHANGE_ADVERTISE_TIME))
-
+            if self.loc_db_mngr.setAdvertiseToggleTime(time):
+                log.info("> Aktualisiere Wechselzeit zwischen Startseite und Werbung Seite zu: {0} Sekunden.".
+                        format(self.loc_db_mngr.getAdvertiseToggleTime()))
+            # else:
+                # Error
         else:
             status = "<font color='red'>Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!</font>"
             log.debug("Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!")
@@ -637,14 +629,16 @@ class RequestHandler(BaseHTTPRequestHandler):
             status = "<font color='red'>Aktualisierung fehlgeschlagen! Falsches Passwort</font>"
             log.debug("Aktualisierung fehlgeschlagen! Falsches Passwort")
         else:
-            self.loc_db_mngr.setPassword("ADMIN", value)
-            settings.clear_log_file_pw = value
-            log.info("> Ändere das Admin Passwort")
-
+            if self.loc_db_mngr.setAdminPw(value):
+                log.info("> Ändere das Admin Passwort")
+            # else:
+                # Error
         return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS4%-->".encode(), status.encode()))
 
-    @staticmethod
-    def replaceVarsInSettingsHtml(html: bytes) -> bytes:
-        html = html.replace("%anzeigezeit_Hersteller_value%".encode(), str(settings.SHOW_PRODUCER_INFOS_TIME).encode())
-        html = html.replace("%anzeigezeit_value%".encode(), str(settings.SHOW_TIME).encode())
-        return html.replace("%changeAdvertiseTime_value%".encode(), str(settings.CHANGE_ADVERTISE_TIME).encode())
+    def replaceVarsInSettingsHtml(self, html: bytes) -> bytes:
+        html = html.replace("%anzeigezeit_Hersteller_value%".encode(),
+                            str(self.loc_db_mngr.getProducerShowTime()).encode())
+        html = html.replace("%anzeigezeit_value%".encode(),
+                            str(self.loc_db_mngr.getArticleShowTime()).encode())
+        return html.replace("%changeAdvertiseTime_value%".encode(),
+                            str(self.loc_db_mngr.getAdvertiseToggleTime()).encode())

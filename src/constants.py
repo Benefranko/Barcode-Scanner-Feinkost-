@@ -1,6 +1,10 @@
 
+
+# !Hier nur konstanten!!!! --> die einstellungen in localdb manager verschieben
+
 ####
 # Einstellungen
+# ...Können von derzeitigen Einstellungen aus DB abweichen → Teils nur Init-Einstellungen
 ####
 
 # Programm Version
@@ -20,10 +24,17 @@ ms_sql_server_ip: str = "home.obermui.de"
 # MS SQL Server Port
 ms_sql_server_port: int = 18769
 
+ms_sql_user = "test"
+ms_sql_pw = "altinsystems"
+ms_sql_mandant = "Mandant_1"
+
+# def connect(self, ip: str = "PC-MARKUS", port: int = 1433, pw: str = "altinsystems",
+#             usr: str = "test", db: str = "Mandant_1"):
+
 # Merkmal MetaLine aktive value
 wawi_advertise_aktive_meta_keyword: str = 'ANZEIGEN=TRUE'
 
-want_reload_advertise: bool = False
+
 
 ####
 # SQL Lite Datenbank
@@ -41,7 +52,7 @@ local_db_path: str = "../db/sqlLiteDB.db"
 local_http_server_ip: str = "0.0.0.0"
 # Lokaler HTTP SERVER LISTEN Port
 local_http_server_port: int = 8888
-# Passwort zum Leeren des Logfiles
+# Start Passwort zum Leeren des Logfiles
 clear_log_file_pw: str = "pass"
 # Anzahl der Elemente auf einer Internetseite beim Webserver !!! > 0 !!!
 item_count_on_web_server_list: int = 150

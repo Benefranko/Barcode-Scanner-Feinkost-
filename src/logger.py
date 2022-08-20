@@ -4,7 +4,7 @@ import sys
 import os
 import sqlite3
 import logging
-import settings as s
+import constants as consts
 import datetime
 
 from pathlib import Path
@@ -34,9 +34,9 @@ def print_debug_versions():
     log.debug("{0}[ Programm Version: {1} ] [ Python Version: {2} ] [ Qt Version: {3} ]\n"
               "[ PyODBC Version: {4} ] [ SQL Lite3 Version: {5} ] [ Unterstützte MS ODBC Driver Version: {6} ]\n"
               "[ Unterstützte FreeTDS Driver Version: {7} {8} ] [ Arbeitsverzeichnis: {9} ]".
-              format("", s.PROGRAMM_VERSION, sys.version, QtCore.qVersion(),
-                     pyodbc.version, sqlite3.version, s.SQL_DRIVER_USED_VERSION_MS_DRIVER,
-                     s.SQL_DRIVER_USED_VERSION_FreeTDS, s.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION,
+              format("", consts.PROGRAMM_VERSION, sys.version, QtCore.qVersion(),
+                     pyodbc.version, sqlite3.version, consts.SQL_DRIVER_USED_VERSION_MS_DRIVER,
+                     consts.SQL_DRIVER_USED_VERSION_FreeTDS, consts.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION,
                      os.path.abspath("./")))
     # Infoausgabe
     # print("------------------------------------------------------------------")

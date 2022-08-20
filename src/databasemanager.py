@@ -1,6 +1,6 @@
 # Open Source Bibliothek für MS SQL
 import pyodbc
-import settings as s
+import constants as consts
 import time
 
 import logging
@@ -58,7 +58,8 @@ class DataBaseManager:
                 if "ODBC Driver 18 for SQL Server" in driver_names:
                     log.debug("Verwende Driver: ODBC Driver 18 for SQL Server...")
 
-                    self.conn = pyodbc.connect(driver=s.SQL_DRIVER_USED_VERSION_MS_DRIVER, server=ip + "," + str(port),
+                    self.conn = pyodbc.connect(driver=consts.SQL_DRIVER_USED_VERSION_MS_DRIVER, server=ip + ","
+                                               + str(port),
                                                database=db,
                                                user=usr,
                                                password=pw,
@@ -68,14 +69,14 @@ class DataBaseManager:
                     break
 
                 elif "FreeTDS" in driver_names:
-                    log.debug("Verwende Driver: FreeTDS {0} ...".format(s.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION))
+                    log.debug("Verwende Driver: FreeTDS {0} ...".format(consts.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION))
 
                     self.conn = pyodbc.connect('DRIVER={0}; SERVER={1}; PORT={2}; DATABASE={3}; UID={4}; PWD={5}; '
-                                               'TDS_Version={6};'.format(s.SQL_DRIVER_USED_VERSION_FreeTDS,
+                                               'TDS_Version={6};'.format(consts.SQL_DRIVER_USED_VERSION_FreeTDS,
                                                                          ip, port, db, usr, pw,
-                                                                         s.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION))
+                                                                         consts.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION))
                     log.info("Erfolgreich mit MS SQL Server verbunden über FreeTDS Driver {0} ".format(
-                        s.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION))
+                        consts.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION))
                     break
                 else:
                     log.critical('Error: No suitable driver found. Cannot connect.')
@@ -92,6 +93,7 @@ class DataBaseManager:
         return self.conn
 
     def exec_sql(self, sql, value, fetch_one: bool = True):
+        # log.debug("        exec_sql MS SQL DATABASE: {0} ARGS: {1} FETCHONE: {2}".format(sql, value, fetch_one))
         try:
             cursor = self.conn.cursor()
             if value:

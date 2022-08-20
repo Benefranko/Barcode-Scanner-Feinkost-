@@ -8,7 +8,7 @@ import datetime
 import os
 import sys
 
-import settings as s
+import constants as consts
 
 import logging
 from pathlib import Path
@@ -23,7 +23,7 @@ if __name__ == "__main__":
 
     # Tee stderr to log and to console
     try:
-        logger.setup(s.log_file_path)
+        logger.setup(consts.log_file_path)
     except Exception as e:
         print("Failed to setup Logger: {0}".format(e))
         sys.exit(99)
@@ -50,12 +50,12 @@ if __name__ == "__main__":
 
     try:
         # Starte Lokalen Statistiken Server
-        w_server = webserver.Server(s.local_http_server_ip, s.local_http_server_port)
+        w_server = webserver.Server(consts.local_http_server_ip, consts.local_http_server_port)
         w_server.start_listen()
 
         # Erstelle Key Press Event Handler und Ui - MainWindow
         m_app = mapplication.MApplication(sys.argv)
-        m_win = mainwindow.MainWindow(s.local_db_path, s.ms_sql_server_ip, s.ms_sql_server_port, s.ui_file_path)
+        m_win = mainwindow.MainWindow(consts.local_db_path, consts.ui_file_path)
 
         # connect MApplication ( EventFilter ) with MainWindow( handle_EVENT )
         m_app.newScan.connect(m_win.new_scan)
