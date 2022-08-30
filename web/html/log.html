@@ -26,6 +26,7 @@
 				font-size:18px;
 				width: 250px;
 			}
+
 		</style>
 	</head>
 	<body>
@@ -34,25 +35,27 @@
 		</div>
 		<div class="spacer"></div>
 
-		<div class="row jc-left">
+		<div class="bordered">
+			<div class="row jc-left">
 			<p class="msg" >DEBUG - Nachrichten:</p>
 			<button class="switch_button swBtnOff" onclick="debugSwitch()" id="debug-button" >AUS</button>
-		</div>
-		<div class="row jc-left">
-			<p class="msg" >INFO - Nachrichten:</p>
-			<button class="switch_button swBtnOn" onclick="infoSwitch()" id="info-button" >EIN</button>
-		</div>
-		<div class="row jc-left">
-			<p class="msg" >WARNING - Nachrichten:</p>
-			<button class="switch_button swBtnOn" onclick="warningSwitch()" id="warning-button" >EIN</button>
-		</div>
-		<div class="row jc-left">
-			<p class="msg" >ERROR - Nachrichten:</p>
-			<button class="switch_button swBtnOn" onclick="errorSwitch()" id="error-button" >EIN</button>
-		</div>
-		<div class="row jc-left">
-			<p class="msg" >CRITICAL - Nachrichten:</p>
-			<button class="switch_button swBtnOn" onclick="criticalSwitch()" id="critical-button" >EIN</button>
+			</div>
+			<div class="row jc-left">
+				<p class="msg" >INFO - Nachrichten:</p>
+				<button class="switch_button swBtnOn" onclick="infoSwitch()" id="info-button" >EIN</button>
+			</div>
+			<div class="row jc-left">
+				<p class="msg" >WARNING - Nachrichten:</p>
+				<button class="switch_button swBtnOn" onclick="warningSwitch()" id="warning-button" >EIN</button>
+			</div>
+			<div class="row jc-left">
+				<p class="msg" >ERROR - Nachrichten:</p>
+				<button class="switch_button swBtnOn" onclick="errorSwitch()" id="error-button" >EIN</button>
+			</div>
+			<div class="row jc-left">
+				<p class="msg" >CRITICAL - Nachrichten:</p>
+				<button class="switch_button swBtnOn" onclick="criticalSwitch()" id="critical-button" >EIN</button>
+			</div>
 		</div>
 
 		<div class="spacer"></div>
@@ -72,9 +75,9 @@
 		</div>
 		<div class="spacer"></div>
 
-		<h2>Protokoll:</h2>
+		<div class="bordered">
+			<h2>Protokoll:</h2>
 
-		<div>
 			%DATA%
 		</div>
 

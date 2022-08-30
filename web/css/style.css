@@ -16,6 +16,12 @@ body {
   width: 80vw;
 }
 
+.bordered {
+    border-radius: 5px;
+    border: 2px solid #04AA6D;
+    padding: 10px 20px;
+}
+
 
 .m-btn{
       text-decoration: none;
