@@ -3,7 +3,7 @@
 ####
 
 # Programm Version
-PROGRAMM_VERSION: str = "1.4.1"
+PROGRAMM_VERSION: str = "1.10.0"
 
 ####
 # MS SQL Server
