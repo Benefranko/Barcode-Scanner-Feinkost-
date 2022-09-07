@@ -76,12 +76,18 @@ class LocalDataBaseManager:
                                    );"""
 
     def create_table_ne(self):
-        if self.isConnected:
-            with contextlib.closing(self.connection.cursor()) as c:
-                c.execute(self.scans_table)
-                c.execute(self.times_table)
-                c.execute(self.passwords_table)
-                log.info("Erfolgreich mit lokaler SQL Lite Datenbank verbunden und Tables erstellt!")
+        try:
+            if self.isConnected:
+                with contextlib.closing(self.connection.cursor()) as c:
+                    c.execute(self.scans_table)
+                    c.execute(self.times_table)
+                    c.execute(self.passwords_table)
+                    log.info("Erfolgreich mit lokaler SQL Lite Datenbank verbunden und Tables erstellt!")
+        except Exception as e:
+            log.critical("Das erstellen der Tabellen in der lokalen SQL Lite Datenbank ist fehlgeschlagen: {0}"
+                         .format(e))
+            return None
+        return "SUCCESS"
 
     def disconnect(self):
         self.connection.close()

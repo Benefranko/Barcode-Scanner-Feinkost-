@@ -20,7 +20,6 @@ log: Logger = logging.getLogger(Path(__file__).name)
 
 
 # Klasse steuert die Grafik und managed die Datenbanken
-
 class MainWindow(QMainWindow):
     # Attributes
     # Sekundenspeicher für rückwärts zählenden Timer für Informationsanzeige
@@ -48,11 +47,10 @@ class MainWindow(QMainWindow):
 
     screenSize: QRect = None
 
-    # Liste mit Werbung → muss aktualisiert werden! Entweder mit später über Web implementierter Funktion oder über
-    # täglichen Reboot!
+    # Liste mit Werbung
     advertise_kArtikel_list = None
 
-    # Enum mit Objektzuständen - Warte auf Scan - Zeige Scan an
+    # Enum mit Objektzuständen
     class STATES(Enum):
         UNKNOWN = 0
         SHOW_PRODUCT_DESCRIPTION = 1
@@ -62,121 +60,71 @@ class MainWindow(QMainWindow):
 
     state = STATES.SHOW_PRODUCT_DESCRIPTION
 
-    # Stoppe Sekunden Timer im Destruktor
-    def cleanUp(self):
-        # Stop Timer
-        self.killTimer(self.timerID)
-        self.databasemanager.disconnect()
-        self.loc_db_mngr.disconnect()
-
     def __init__(self, sql_lite_path, ui_file_path, parent=None):
         # Falls Fenster ein übergeordnetes Objekt erhält, übergib dieses der Basisklasse QMainWindow
         super(MainWindow, self).__init__(parent)
-        ####
-        # USER INTERFACE
-        ####
-
         ###
-        # Lade Grafik aus Qt-Creator UI Datei
+        # ### Lade Grafik aus Qt-Creator UI Datei
         if self.load_ui(ui_file_path) is None:
             raise Exception("Konnte UI nicht Laden")
 
+        # ### Vollbild auf Screen0 bzw 1:
         self.screenSize = QApplication.desktop().screenGeometry(screen=1)
         self.setGeometry(self.screenSize)
-        # Vollbild:
         self.showFullScreen()
 
-        # self.setFixedSize(800, 400)
-        # self.setWindowFlags(Qt.CustomizeWindowHint | Qt.FramelessWindowHint)
+        # ### init Sonderpreis redLine, init Sonderpreis Label...
+        self.initQtObjects()
 
-        # init Sonderpreis red HLine...
-        self.special_price_red_line = QFrame(self.window.widget_preis)
-        self.special_price_red_line.setFrameShape(QFrame.HLine)
-        # self.special_price_red_line.setFixedHeight(20)
-        self.special_price_red_line.setLineWidth(6)
-        self.special_price_red_line.setStyleSheet("color: rgba(255, 0, 0, 150)")
-        self.special_price_red_line.hide()
-
-        # init Sonderpreis Label
-        self.special_price_label = QLabel(self.window.widget_preis)
-        self.special_price_label.setStyleSheet("color: rgba(255, 0, 0, 255)")
-        self.special_price_label.setFont(QFont("Segoe UI", consts.SPECIAL_PRICE_FONT_SIZE, QFont.Bold))
-        self.special_price_label.hide()
-
-        # MainWindow Nach-Einstellungen
-        self.setWindowTitle("Feinkost Barcode Scanner")
-
-        ###
-        # Verbinde SIGNALS und SLOTS
-        ###
-
+        # ### Verbinde SIGNALS und SLOTS:...
         # Weitere Information zum Hersteller anzeigen Button wird mit Funktion clickMoreInfosHerstellerButton verbunden
         self.window.pushButton_more_infos_hersteller.clicked.connect(self.clickMoreInfosHerstellerButton)
         # Zurück von Hersteller Anzeigen Seite zu Infos-Seite wird mit Funktion verbunden
         self.window.pushButton_back_from_hersteller_page.clicked.connect(
             self.click_pushButton_back_from_hersteller_page)
 
-        # Lade Grafiken
+        # ### Lade Grafiken...
         # "Kein Bild gefunden"-Grafik...
-        img_path: str = "../images/no_picture_found.jpg"
-        pix = QPixmap(img_path)
-        if pix.isNull():
-            log.error("Konnte Bild nicht laden: {0}".format(img_path))
-        else:
-            self.window.frame.setPixmap(pix.scaled(pix.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        self.window.frame.setPixmap(self.getImage("../images/no_picture_found.jpg"))
 
         # "Barcode Scanner Bild mit Handy Beispiel"-Grafik
-        img_path = "../images/sunmi_scan.png"
-        pix = QPixmap(img_path)
-        if pix.isNull():
-            log.error("Konnte Bild nicht laden: {0}".format(img_path))
-        else:
-            # self.window.img1.setPixmap(pix.scaled(pix.size() / 2, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-            max_width = (0.9 * (self.screenSize.width() / 2))
-            max_height = (0.8 * (self.screenSize.height()))
-            pix = pix.scaled(max_width, max_height, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-            self.window.img1.setPixmap(pix)
-
+        max_width = (0.9 * (self.screenSize.width() / 2))
+        max_height = (0.8 * (self.screenSize.height()))
+        self.window.img1.setPixmap(self.getImage("../images/sunmi_scan.png").
+                                   scaled(max_width, max_height, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         # InnKaufHaus-Logo-Grafik
-        img_path = "../images/logo.jpg"
-        pix = QPixmap(img_path)
-        if pix.isNull():
-            log.error("Konnte Bild nicht laden: {0}".format(img_path))
-        else:
-            self.window.Innkaufhauslogo.setPixmap(
-                pix.scaled(pix.toImage().size() / 2, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        self.window.Innkaufhauslogo.setPixmap(self.getImage("../images/logo.jpg", 2))
 
-        ####
-        # DATA BASES
-        ####
+        # ### DATA BASES...
         # Stelle Verbindung mit lokaler SQL Lite Datenbank her
         self.loc_db_mngr = localdatabasemanager.LocalDataBaseManager()
         if self.loc_db_mngr.connect(sql_lite_path) is None:
             raise Exception("Konnte Verbindung mit der SQL Lite Datenbank nicht herstellen")
-        else:
-            try:
-                self.loc_db_mngr.create_table_ne()
-            except Exception as e:
-                raise Exception("Das erstellen der Tabellen in der lokalen SQL Lite Datenbank ist fehlgeschlagen: {0}"
-                                .format(e))
+        elif self.loc_db_mngr.create_table_ne() is None:
+            raise Exception("create_table_ne failed!")
         self.loc_db_mngr.loadAllSettings()
 
-        ####
         # Update Timers
         self.showTimeTimer: int = self.loc_db_mngr.getArticleShowTime()
         # Sekundenspeicher für rückwärts zählenden Timer für Wechsel der Warte-Anzeige
         self.changeAdvertiseTimer: int = self.loc_db_mngr.getAdvertiseToggleTime()
-        ####
 
         # Stelle Verbindung mit MS SQL Datenbank her
         self.databasemanager = DataBaseManager()
         self.tryConnectToMS_SQL_DB_and_load_advertise_list()
 
-        ####
-        # EVENTS SIGNALS SLOTS TIMER
-        ####
         # Starte Sekunden Event Timer
         self.timerID = self.startTimer(1000)
+
+    # Stoppe Sekunden Timer im Destruktor
+    def cleanUp(self):
+        # Stop Timer
+        self.killTimer(self.timerID)
+        # Trenne Verbindungen zu Datenbanken
+        self.databasemanager.disconnect()
+        self.loc_db_mngr.disconnect()
+        # Unbekannter Objektzustand
+        self.state = self.STATES.UNKNOWN
 
     def load_ui(self, ui_path):
         try:
@@ -184,7 +132,6 @@ class MainWindow(QMainWindow):
             ui_file = QFile(ui_path)
             if not ui_file.open(QIODevice.ReadOnly):
                 log.critical(str(f"Cannot open {ui_path}: {ui_file.errorString()}"))
-
                 return None
             loader = QUiLoader()
             self.window = loader.load(ui_file, self)
@@ -199,6 +146,33 @@ class MainWindow(QMainWindow):
             log.critical("Konnte Gui aus Ui.Datei nicht laden: {0}!".format(exc))
             return None
 
+    def initQtObjects(self):
+        # init Sonderpreis red HLine...
+        self.special_price_red_line = QFrame(self.window.widget_preis)
+        self.special_price_red_line.setFrameShape(QFrame.HLine)
+        # self.special_price_red_line.setFixedHeight(20)
+        self.special_price_red_line.setLineWidth(6)
+        self.special_price_red_line.setStyleSheet("color: rgba(255, 0, 0, 150)")
+        self.special_price_red_line.hide()
+
+        # init Sonderpreis Label
+        self.special_price_label = QLabel(self.window.widget_preis)
+        self.special_price_label.setStyleSheet("color: rgba(255, 0, 0, 255)")
+        self.special_price_label.setFont(QFont("Segoe UI", consts.SPECIAL_PRICE_FONT_SIZE, QFont.Bold))
+        self.special_price_label.hide()
+
+    @staticmethod
+    def getImage(path, scale: int = 1) -> QPixmap:
+        pix = QPixmap(path)
+        if not pix.isNull():
+            if scale == 1:
+                return pix
+            else:
+                return pix.scaled(pix.toImage().size() / scale, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        log.error("Konnte Bild nicht laden: {0}".format(path))
+        return QPixmap()
+
+    @Slot()
     def timerEvent(self, event: QTimerEvent) -> None:
         # Leite jede Sekunde Event TIMER an EventHandler weiter
         self.event_handler("TIMER")
@@ -214,31 +188,38 @@ class MainWindow(QMainWindow):
         self.event_handler("BUTTON_BACK_TO_INFOS_CLICKED")
         return
 
+    # Funktion (Slot), die mit dem Signal aus MApplication verbunden ist, und bei einem Scan aufgerufen wird
+    @Slot(str)
+    def new_scan(self, value):
+        # Gib den Scan dem Event-Handler weiter...
+        log.debug("Neuen Barcode Scan erhalten: {0}".format(value))
+        self.event_handler("NEW_SCAN", value)
+
+    def loadAdvertiseList(self):
+        self.advertise_kArtikel_list = self.databasemanager.getAdvertiseList(
+            consts.wawi_advertise_aktive_meta_keyword)
+        log.debug("DEBUG: LISTE MIT WERBUNG: {0}".format(self.advertise_kArtikel_list))
+
+        if self.advertise_kArtikel_list is None or len(self.advertise_kArtikel_list) < 2:
+            log.warning("  Not more than 1 Advertise found !")
+            self.advertise_kArtikel_list = None
+        return self.advertise_kArtikel_list  # return None if len() < 2
+
     def switchArtikelPreViewPageAndStartPage(self):
         # Wenn artikel mit Merkmal für Vorschau existieren, lade neue Anzeige und wechsle zu dieser
         try:
             if self.loc_db_mngr.checkWantReloadAdvertiseList():
                 self.loc_db_mngr.setWantReloadAdvertiseList(False)
-                self.advertise_kArtikel_list = self.databasemanager.getAdvertiseList(
-                    consts.wawi_advertise_aktive_meta_keyword)
-                log.debug("DEBUG: LISTE MIT WERBUNG: {0}".format(self.advertise_kArtikel_list))
-
-                if self.advertise_kArtikel_list is None or len(self.advertise_kArtikel_list) < 2:
-                    print("  Not more than 1 Advertise found !")
-                    log.warning("  Not more than 1 Advertise found !")
-                    self.advertise_kArtikel_list = None
+                if not self.loadAdvertiseList():
                     return
-
             if self.advertise_kArtikel_list is not None and self.window.stackedWidget_advertise.currentIndex() == 1:
                 if self.new_advertise() is not None:
                     self.window.stackedWidget_advertise.setCurrentIndex(0)
-            else:
-                # sonst zeige weiter Startseite an
-                self.window.stackedWidget_advertise.setCurrentIndex(1)
-
+                    return
         except Exception as e:
             log.error("Failed to load new Advertise: {0}".format(e))
-            self.window.stackedWidget_advertise.setCurrentIndex(1)
+        # wenn fehler auftritt:  zeige weiter Startseite an
+        self.window.stackedWidget_advertise.setCurrentIndex(1)
 
     def new_advertise(self):
         try:
@@ -390,10 +371,8 @@ class MainWindow(QMainWindow):
             self.window.hersteller_img.hide()
         else:
             # update sizes:
-            self.window.stackedWidget.setCurrentIndex(0)
-            self.window.stackedWidget.setCurrentIndex(1)
-            self.window.stackedWidget.setCurrentIndex(0)
-            self.window.stackedWidget.setCurrentIndex(3)
+            for i in range(0, 4):
+                self.window.stackedWidget.setCurrentIndex(i)
 
             p = QPixmap.fromImage(img).scaled(self.window.hersteller_img.size() / 1.3,
                                               Qt.KeepAspectRatio,
@@ -410,48 +389,37 @@ class MainWindow(QMainWindow):
         self.state = self.STATES.SHOW_PRODUCT_DESCRIPTION
 
         # Versuche Informationen vom MS SQL Server zu dem Artikel abzufragen
-        try:
-            ean: int = int(scan_article_ean)
-        except Exception as exc:
-            log.warning("    Ungültiger Scan: Can't cast to int: {0}: {1}".format(scan_article_ean, exc))
-            self.event_handler("LOAD_ARTICLE_FAILED", scan_article_ean)
-            return
+        if not scan_article_ean.isdigit() or int(scan_article_ean) <= 0:
+            log.warning("    Ungültiger Scan: No Integer EAN: {0}".format(scan_article_ean))
+            return self.event_handler("LOAD_ARTICLE_FAILED", scan_article_ean)
 
-        # Ungültiger Schlüssel in der MS Sql Datenbank
-        if ean <= 0:
-            self.window.stackedWidget.setCurrentIndex(2)
-            self.showTimeTimer = self.loc_db_mngr.getNothingFoundPageShowTime()
-            return
+        ean: int = int(scan_article_ean)
         data = self.databasemanager.getDataByBarcode(ean)
 
         if data is None:
             # Wenn keine Informationen zu dem Artikel gefunden werden kann, welche zu "nichts-gefunden"-Seite
-            self.window.stackedWidget.setCurrentIndex(2)
-            self.showTimeTimer = self.loc_db_mngr.getNothingFoundPageShowTime()
-            return
+            log.warning("    Es konnten keine Informationen zu dem Artikel gefunden werden: EAN: {0}".format(ean))
+            return self.event_handler("LOAD_ARTICLE_FAILED", ean)
+        else:
+            k_artikel = data.kArtikel
 
-        descript = self.databasemanager.getArticleDescription(data.kArtikel)
+        descript = self.databasemanager.getArticleDescription(k_artikel)
         if descript is None:
-            log.warning("    Keine Artikelbeschreibung vorhanden! k_artikel={0}".format(data.kArtikel))
-            self.event_handler("LOAD_ARTICLE_FAILED", scan_article_ean)
-            return
+            log.warning("    Keine Artikelbeschreibung vorhanden! k_artikel={0}".format(k_artikel))
+            return self.event_handler("LOAD_ARTICLE_FAILED", ean)
 
         steuersatz: float = self.databasemanager.getSteuerSatz(data.kSteuerklasse)
         if steuersatz == -1:
             log.error("    Failed to get steuersatz kSteuerklasse={0}".format(data.kSteuerklasse))
-            self.event_handler("LOAD_ARTICLE_FAILED", scan_article_ean)
-            return
+            return self.event_handler("LOAD_ARTICLE_FAILED", scan_article_ean)
 
         # Wechsle aktuelle Seite zur Startseite, um das Layout zu aktualisieren, damit auch die Positionen der
         # Labels aktualisiert werden, um dann auch die richtige Position des Preis-Labels zu erhalten,
-        # um den Sonderpreis richtig Positionieren zu können
-
-        self.window.stackedWidget.setCurrentIndex(0)
-        self.window.stackedWidget.setCurrentIndex(1)
-        self.window.stackedWidget.setCurrentIndex(0)
+        # um den Sonderpreis richtig Positionieren zu können: Wechsle: 0 -> 1 -> 0
+        for i in range(0, 3):
+            self.window.stackedWidget.setCurrentIndex(i % 2)
 
         # Aktualisiere die Labels im User Interface mit den Werten aus der Datenbank...
-
         # Artikel Namen
         if descript.cName != "":
             self.window.p_name.setText(descript.cName)
@@ -464,35 +432,30 @@ class MainWindow(QMainWindow):
                 font.setPixelSize(font.pixelSize() - 1)
             self.window.p_name.setFont(font)
         else:
-            self.event_handler("LOAD_ARTICLE_FAILED", scan_article_ean)
-            log.info("    LOAD_ARTICLE_FAILED: {0} -> data.Artikelname == \"\" ".format(scan_article_ean))
-            return
+            log.info("    LOAD_ARTICLE_FAILED: {0} -> data.Artikelname == \"\" ".format(ean))
+            return self.event_handler("LOAD_ARTICLE_FAILED", scan_article_ean)
 
         # Artikel Preis
         self.window.preis.setText(
             str(self.databasemanager.roundToStr(float(data.fVKNetto) * (steuersatz + 1.0))) + " €")
 
-        # Artikel Inhalt
-        # self.window.inhalt.setText("value")
-
         # Artikel Hersteller
         hersteller = None
         if data.kHersteller == 0:
-            log.warning("    Kein Hersteller für den Artikel k_artikel={0} vorhanden!".format(data.kArtikel))
+            log.warning("    Kein Hersteller für den Artikel k_artikel={0} vorhanden!".format(k_artikel))
         else:
-            hersteller = self.databasemanager.getHerstellerInfos(k_article=data.kArtikel)
+            hersteller = self.databasemanager.getHerstellerInfos(k_article=k_artikel)
 
         if hersteller is None or hersteller.cName == "":
             self.window.hersteller.hide()
             self.window.hersteller_label.hide()
-
             self.window.pushButton_more_infos_hersteller.hide()
         else:
             self.window.hersteller.setText(hersteller.cName)
             self.window.hersteller.show()
             self.window.hersteller_label.show()
             # Lade Hersteller seite
-            if self.loadHerstellerPage(data.kArtikel) is not None:
+            if self.loadHerstellerPage(k_artikel) is not None:
                 self.window.pushButton_more_infos_hersteller.show()
             else:
                 self.window.pushButton_more_infos_hersteller.hide()
@@ -515,12 +478,12 @@ class MainWindow(QMainWindow):
 
         # Lade Grafik aus MS SQL Datenbank zu dem Artikel
         # Verwende dazu das erste vorhandene Bild, das es gibt
-        content = self.databasemanager.getFirstImageBykArtikel(data.kArtikel)
+        content = self.databasemanager.getFirstImageBykArtikel(k_artikel)
         img = QImage()
 
         if content is None or content.bBild is None or img.loadFromData(content.bBild) is False:
             if content:
-                log.warning("    Failed to load img from db: Invalid Img: k=artikel={0}".format(data.kArtikel))
+                log.warning("    Failed to load img from db: Invalid Img: k=artikel={0}".format(k_artikel))
             # self.window.img.setPixmap(
             #     QPixmap("../images/kein-bild-vorhanden.webp").scaled(self.window.img.size() / 1.5, Qt.KeepAspectRatio,
             #                                                          Qt.SmoothTransformation))
@@ -534,7 +497,7 @@ class MainWindow(QMainWindow):
         self.window.stackedWidget.setCurrentIndex(1)
 
         # Überprüfe, ob ein Sonderangebot im Moment vorliegt
-        special_price = self.databasemanager.getSpecialPrice(data.kArtikel)
+        special_price = self.databasemanager.getSpecialPrice(k_artikel)
         # wenn ja:
         if special_price is not None:
             # Mach Sonderangebots-Label sichtbar:
@@ -544,7 +507,6 @@ class MainWindow(QMainWindow):
             # Aktualisiere Sonderpreis-Label mit auf 2-Stellen gerundetem Sonderpreis in €
             self.special_price_label.setText(self.databasemanager.roundToStr(float(special_price.fNettoPreis)
                                                                              * (steuersatz + 1.0)) + " €")
-
             # Berechne Position der "Streich Linie":
             # Breite des Normal-Preis-Textes (Abhängig von Schriftart und Größe)
             br_price = QFontMetrics(self.window.preis.font()).boundingRect(self.window.preis.text())
@@ -552,18 +514,11 @@ class MainWindow(QMainWindow):
             br_special_price = QFontMetrics(self.special_price_label.font()). \
                 boundingRect(self.special_price_label.text())
 
-            # Lege Position der roten Streichlinie fest: x = normal_preis.x
-            #                                            y = normal_preis.y + ( 0.5 * normal_preis.höhe )
-            #                                       breite = sonder_preis.breite
-            #                                       höhe   = KONSTANT: SPECIAL_PRICE_RED_LINE_HEIGHT
             self.special_price_red_line.setGeometry(self.window.preis.x() - 5,
                                                     self.window.preis.y() + 0.5 * self.window.preis.height(),
                                                     br_price.width() + 10,
                                                     consts.SPECIAL_PRICE_RED_LINE_HEIGHT)
-            # Lege Position des Streichpreises fest:    x = normal_preis.x + normal_preis.breite + KONSTANT: Abstand
-            #                                      y = normal_preis.y - ( sonder_preis.höhe - 0.5 * normal_preis.höhe )
-            #                                      breite = sonder_preis.breite + 2
-            #                                      höhe   = sonder_preis.höhe
+
             self.special_price_label.setGeometry(self.window.preis.x() + br_price.width()
                                                  + consts.SPACE_BETWEEN_PRICE_AND_SPECIAL_PRICE,
                                                  self.window.preis.y() - int((float(br_special_price.height()) * 0.5
@@ -577,7 +532,7 @@ class MainWindow(QMainWindow):
             self.special_price_label.hide()
             self.special_price_red_line.hide()
 
-        mengen_preis_line = self.databasemanager.getMengenPreisStr(k_article=data.kArtikel)
+        mengen_preis_line = self.databasemanager.getMengenPreisStr(k_article=k_artikel)
         if mengen_preis_line is not None:
             self.window.inhalt.setText(mengen_preis_line)
             self.window.inhalt.show()
@@ -585,10 +540,9 @@ class MainWindow(QMainWindow):
         else:
             # self.window.inhalt.hide()
             # self.window.label_inhalt.hide()
-            self.event_handler("LOAD_ARTICLE_FAILED", scan_article_ean)
-            return None
+            return self.event_handler("LOAD_ARTICLE_FAILED", ean)
 
-        lagerbestand = self.databasemanager.getLagerBestand(data.kArtikel)
+        lagerbestand = self.databasemanager.getLagerBestand(k_artikel)
         if lagerbestand == -1:
             self.window.label_lagerbstand_value.hide()
             self.window.label_lagerbstand_text.hide()
@@ -604,14 +558,14 @@ class MainWindow(QMainWindow):
             self.window.label_lagerbstand_value.show()
 
         # getKategorie for statistics
-        ret = self.databasemanager.getKategorieByKArtikel(k_article=data.kArtikel)
+        ret = self.databasemanager.getKategorieByKArtikel(k_article=k_artikel)
         if ret:
             kategorie = ret.cName
         else:
             kategorie = "Unbekannt"
 
         # Füge den Scan der lokalen Statistiken-Datenbank hinzu:
-        if self.loc_db_mngr.add_new_scan(data.kArtikel, scan_article_ean, hersteller, kategorie) is None:
+        if self.loc_db_mngr.add_new_scan(k_artikel, ean, hersteller, kategorie) is None:
             log.error("    Error: Das speichern des Scans für Statistiken ist fehlgeschlagen:")
         return
 
@@ -625,18 +579,9 @@ class MainWindow(QMainWindow):
             self.state = self.STATES.NOT_CONNECTED
             self.window.stackedWidget.setCurrentIndex(4)
         else:
-            ####
-            # Lade init Data aus dem SQL Server
-            ####
-
+            # ### Lade init Data aus dem SQL Server...
             # Lade Liste mit Artikeln, zu denen die Vorschau angezeigt werden soll...
-            self.advertise_kArtikel_list = self.databasemanager.getAdvertiseList(
-                consts.wawi_advertise_aktive_meta_keyword)
-            if self.advertise_kArtikel_list is None or len(self.advertise_kArtikel_list) < 2:
-                log.warning("Not more than 1 Advertise found !")
-                self.advertise_kArtikel_list = None
-            log.debug("* DEBUG: LISTE MIT WERBUNG: {0}".format(self.advertise_kArtikel_list))
-
+            self.loadAdvertiseList()
             # Lege Startzustand Fest und zeige dementsprechende Seite an
             self.state = self.STATES.WAIT_FOR_SCAN
             self.window.stackedWidget.setCurrentIndex(0)
@@ -646,31 +591,28 @@ class MainWindow(QMainWindow):
     # Eventhandler: Je nach Objektzustand führe die übergebenen Aktionen aus
     def event_handler(self, action, value=None):
         if action != "TIMER" and action != "CHANGE_ADVERTISE":
-            log.debug("NEW EVENT ( EXCEPT TIMER AND CHANGE_ADVERTISE ): {0} VALUE: {1}; STATE: {2}".
+            log.debug("-> [NEW EVENT] ( EXCEPT TIMER AND CHANGE_ADVERTISE ): {0} VALUE: {1}; STATE: {2}".
                       format(action, value, self.state))
 
         try:
-
             # Speichere, falls Aktion nicht ausgeführt wurde (für Debug Nachrichten)
             # für Aktionen, die mehrere If-Statements "erreichen" können, wo kein return am Ende vorliegt.
             # Wenn diese Funktion in keinem If-Statement an ein return gelangt, wird Warnung ausgegeben
             handled: bool = False
 
             # Zustands unabhängige Aktionen:
-
             if self.state != self.STATES.UNKNOWN and self.state != self.STATES.NOT_CONNECTED:
                 # Es wurde ein Barcode gescannt-> Ermittle Informationen und zeige diese an
                 if action == "NEW_SCAN":
-                    self.newScanHandling(value)
-                    handled = True
-                elif action == "TIMER":
-                    self.waiting_points_counter = (self.waiting_points_counter + 1) % 4
-                    self.window.label_waiting_for_scan.setText("Warten auf Scan" + self.waiting_points_counter * ".")
+                    return self.newScanHandling(value)
+                elif action == "LOAD_ARTICLE_FAILED":
+                    self.window.stackedWidget.setCurrentIndex(2)
+                    self.showTimeTimer = self.loc_db_mngr.getNothingFoundPageShowTime()
+                    return
 
             # Zustands spezifische Aktionen:
             # Zustand: Warte für Barcode Scan:
             if self.state == self.STATES.WAIT_FOR_SCAN:
-
                 # Timer wurde erreicht-> Wechsle die Warte-Auf-Eingabe Seite, bzw zeige neue Werbung an
                 if action == "CHANGE_ADVERTISE":
                     self.switchArtikelPreViewPageAndStartPage()
@@ -683,6 +625,10 @@ class MainWindow(QMainWindow):
                     else:
                         self.changeAdvertiseTimer = self.loc_db_mngr.getAdvertiseToggleTime()
                         self.event_handler("CHANGE_ADVERTISE")
+                    # Warten auf Scan [.][.][.]...-Anzeige
+                    self.waiting_points_counter = (self.waiting_points_counter + 1) % 4
+                    self.window.label_waiting_for_scan.setText("Warten auf Scan" + self.waiting_points_counter * ".")
+
                     return
 
             # Zustand: Zeige Produktinformationen:
@@ -692,10 +638,6 @@ class MainWindow(QMainWindow):
                     self.state = self.STATES.WAIT_FOR_SCAN
                     return
 
-                elif action == "LOAD_ARTICLE_FAILED":
-                    self.window.stackedWidget.setCurrentIndex(2)
-                    self.showTimeTimer = self.loc_db_mngr.getNothingFoundPageShowTime()
-                    return
                 elif action == "BUTTON_MORE_PRODUCER_INFOS_CLICKED":
                     # Setzte Zeit auf Maximalwert zurück: auf SHOW_PRODUCER_INFOS_TIME Anzeigezeit
                     self.showTimeTimer = self.loc_db_mngr.getProducerShowTime()
@@ -766,10 +708,6 @@ class MainWindow(QMainWindow):
                                                                          os.path.split(
                                                                              exc_tb.tb_frame.f_code.co_filename)[1],
                                                                          exc_tb.tb_lineno))
+        return
 
-    # Funktion (Slot), die mit dem Signal aus MApplication verbunden ist, und bei einem Scan aufgerufen wird
-    @Slot(str)
-    def new_scan(self, value):
-        # Gib den Scan dem Event-Handler weiter...
-        log.debug("Neuen Barcode Scan erhalten: {0}".format(value))
-        self.event_handler("NEW_SCAN", value)
+
