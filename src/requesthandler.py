@@ -474,11 +474,26 @@ class RequestHandler(BaseHTTPRequestHandler):
                 elif "anzeigezeit_Hersteller_value" in data:
                     html_bytes = self.settingsUpdateProducerShowTime(data, html)
 
-                elif"changeAdvertiseTime_value" in data:
+                elif "changeAdvertiseTime_value" in data:
                     html_bytes = self.settingsUpdateAdvertiseToggleTime(data, html)
 
                 elif "changePasswordNewPW_value" in data:
                     html_bytes = self.settingsChangePassword(data, html)
+
+                elif "changeNothingFoundTime_value" in data:
+                    html_bytes = self.settingsUpdateNothingFoundTime(data, html)
+
+                elif "table_row_count_value" in data:
+                    html_bytes = self.settingsUpdateTableRowCount(data, html)
+
+                elif "sql_server_port_value" in data and "sql_server_ip_value" in data:
+                    html_bytes = self.settingsUpdateSQLServerAddress(data, html)
+
+                elif "sql_server_username_value" in data and "sql_server_password_value" in data:
+                    html_bytes = self.settingsUpdateSQLServerLoginData(data, html)
+
+                elif "mandant_name" in data:
+                    html_bytes = self.settingsUpdateMandant(data, html)
 
                 else:
                     html_status, html_bytes = self.getPageNotFound()
@@ -554,7 +569,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         return password_field in data and data[data.index(password_field) + 1] == self.loc_db_mngr.getAdminPw()
 
     def settingsReloadAdvertiseListPostRequest(self) -> bytes:
-        localdatabasemanager.want_reload_advertise = True
+        self.loc_db_mngr.setWantReloadAdvertiseList(True)
         log.info("> Want reload Advertise List...")
         return self.getSettingsPage()
 
@@ -591,7 +606,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             time = int(value)
             if self.loc_db_mngr.setProducerShowTime(time):
                 log.info("> Aktualisiere Hersteller Informationen Anzeigezeit zu: {0} Sekunden.".
-                        format(self.loc_db_mngr.getProducerShowTime()))
+                         format(self.loc_db_mngr.getProducerShowTime()))
             # else:
                 # Error
         else:
@@ -612,7 +627,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             time = int(value)
             if self.loc_db_mngr.setAdvertiseToggleTime(time):
                 log.info("> Aktualisiere Wechselzeit zwischen Startseite und Werbung Seite zu: {0} Sekunden.".
-                        format(self.loc_db_mngr.getAdvertiseToggleTime()))
+                         format(self.loc_db_mngr.getAdvertiseToggleTime()))
             # else:
                 # Error
         else:
@@ -620,6 +635,110 @@ class RequestHandler(BaseHTTPRequestHandler):
             log.debug("Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!")
 
         return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS3%-->".encode(), status.encode()))
+
+    def settingsUpdateNothingFoundTime(self, data, html: bytes) -> bytes:
+        status: str = "<font color='green'>Erfolgreich aktualisiert!</font>"
+        value: str = data[data.index("changeNothingFoundTime_value") + 1]
+
+        if not self.adminPasswordIsCorrect(data, "adminPW"):
+            status = "<font color='red'>Aktualisierung fehlgeschlagen! Falsches Passwort</font>"
+            log.debug("Aktualisierung fehlgeschlagen! Falsches Passwort")
+
+        elif value.isdigit():
+            time = int(value)
+            if self.loc_db_mngr.setNothingFoundPageShowTime(time):
+                log.info("> Aktualisiere NothingFoundPageShowTime zu: {0} Sekunden.".
+                         format(self.loc_db_mngr.getNothingFoundPageShowTime()))
+            # else:
+                # Error
+        else:
+            status = "<font color='red'>Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!</font>"
+            log.debug("Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!")
+
+        return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS5%-->".encode(), status.encode()))
+
+    def settingsUpdateTableRowCount(self, data, html: bytes) -> bytes:
+        status: str = "<font color='green'>Erfolgreich aktualisiert!</font>"
+        value: str = data[data.index("table_row_count_value") + 1]
+
+        if not self.adminPasswordIsCorrect(data, "adminPW"):
+            status = "<font color='red'>Aktualisierung fehlgeschlagen! Falsches Passwort</font>"
+            log.debug("Aktualisierung fehlgeschlagen! Falsches Passwort")
+
+        elif value.isdigit():
+            time = int(value)
+            if self.loc_db_mngr.setItemCountOnWebtable(time):
+                log.info("> Aktualisiere ItemCountOnWebtable zu: {0}.".
+                         format(self.loc_db_mngr.getItemCountOnWebTable()))
+            # else:
+                # Error
+        else:
+            status = "<font color='red'>Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!</font>"
+            log.debug("Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!")
+
+        return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS6%-->".encode(), status.encode()))
+
+    def settingsUpdateSQLServerAddress(self, data, html: bytes) -> bytes:
+        status: str = "<font color='green'>Erfolgreich aktualisiert!</font>"
+        value_1: str = data[data.index("sql_server_ip_value") + 1]
+        value_2: str = data[data.index("sql_server_port_value") + 1]
+
+        if not self.adminPasswordIsCorrect(data, "adminPW"):
+            status = "<font color='red'>Aktualisierung fehlgeschlagen! Falsches Passwort</font>"
+            log.debug("Aktualisierung fehlgeschlagen! Falsches Passwort")
+
+        elif value_1 != "" and value_2.isdigit():
+            if self.loc_db_mngr.setMS_SQL_ServerAddr(value_1, int(value_2)):
+                log.info("> Aktualisiere ItemCountOnWebtable zu: {0}.".
+                         format(self.loc_db_mngr.getMS_SQL_ServerAddr()))
+            # else:
+                # Error
+        else:
+            status = "<font color='red'>Aktualisierung fehlgeschlagen! Ungültige Eingabe!</font>"
+            log.debug("Aktualisierung fehlgeschlagen! Ungültige Eingabe!")
+
+        return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS7%-->".encode(), status.encode()))
+
+    def settingsUpdateSQLServerLoginData(self, data, html: bytes) -> bytes:
+        status: str = "<font color='green'>Erfolgreich aktualisiert!</font>"
+        username: str = data[data.index("sql_server_username_value") + 1]
+        password: str = data[data.index("sql_server_password_value") + 1]
+
+        if not self.adminPasswordIsCorrect(data, "adminPW"):
+            status = "<font color='red'>Aktualisierung fehlgeschlagen! Falsches Passwort</font>"
+            log.debug("Aktualisierung fehlgeschlagen! Falsches Passwort")
+
+        elif username != "" and password != "":
+            if self.loc_db_mngr.setMS_SQL_LoginData(username, password):
+                log.info("> Aktualisiere MS_SQL_LoginData zu: {0}|{1}.".
+                         format(self.loc_db_mngr.getMS_SQL_LoginData()[0], "*****"))
+            # else:
+                # Error
+        else:
+            status = "<font color='red'>Aktualisierung fehlgeschlagen! Ungültige Eingabe!</font>"
+            log.debug("Aktualisierung fehlgeschlagen! Ungültige Eingabe!")
+
+        return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS8%-->".encode(), status.encode()))
+
+    def settingsUpdateMandant(self, data, html: bytes) -> bytes:
+        status: str = "<font color='green'>Erfolgreich aktualisiert!</font>"
+        value: str = data[data.index("mandant_name") + 1]
+
+        if not self.adminPasswordIsCorrect(data, "adminPW"):
+            status = "<font color='red'>Aktualisierung fehlgeschlagen! Falsches Passwort</font>"
+            log.debug("Aktualisierung fehlgeschlagen! Falsches Passwort")
+
+        elif value != "":
+            if self.loc_db_mngr.setMS_SQL_Mandant(value):
+                log.info("> Aktualisiere mandant_name zu: {0}.".
+                         format(self.loc_db_mngr.getMS_SQL_Mandant()))
+            # else:
+                # Error
+        else:
+            status = "<font color='red'>Aktualisierung fehlgeschlagen! Ungültige Eingabe!</font>"
+            log.debug("Aktualisierung fehlgeschlagen! Ungültige Eingabe!")
+
+        return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS9%-->".encode(), status.encode()))
 
     def settingsChangePassword(self, data, html: bytes) -> bytes:
         status: str = "<font color='green'>Erfolgreich aktualisiert!</font>"
@@ -640,5 +759,22 @@ class RequestHandler(BaseHTTPRequestHandler):
                             str(self.loc_db_mngr.getProducerShowTime()).encode())
         html = html.replace("%anzeigezeit_value%".encode(),
                             str(self.loc_db_mngr.getArticleShowTime()).encode())
-        return html.replace("%changeAdvertiseTime_value%".encode(),
+        html = html.replace("%changeNothingFoundTime_value%".encode(),
+                            str(self.loc_db_mngr.getNothingFoundPageShowTime()).encode())
+        html = html.replace("%changeAdvertiseTime_value%".encode(),
                             str(self.loc_db_mngr.getAdvertiseToggleTime()).encode())
+
+        html = html.replace("%table_row_count_value%".encode(),
+                            str(self.loc_db_mngr.getItemCountOnWebTable()).encode())
+
+        html = html.replace("%sql_server_ip_value%".encode(),
+                            str(self.loc_db_mngr.getMS_SQL_ServerAddr()[0]).encode())
+        html = html.replace("%sql_server_port_value%".encode(),
+                            str(self.loc_db_mngr.getMS_SQL_ServerAddr()[1]).encode())
+
+        html = html.replace("%sql_server_username_value%".encode(),
+                            str(self.loc_db_mngr.getMS_SQL_LoginData()[0]).encode())
+
+        html = html.replace("%mandant_name%".encode(),
+                            str(self.loc_db_mngr.getMS_SQL_Mandant()).encode())
+        return html

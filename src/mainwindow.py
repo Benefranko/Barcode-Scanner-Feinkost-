@@ -1,6 +1,7 @@
 from enum import Enum
 from logging import Logger
-
+import os
+import sys
 from PySide2.QtCore import QFile, QTimerEvent, Qt, QIODevice, QRect
 from PySide2.QtCore import Slot
 from PySide2.QtGui import QImage, QPixmap, QFontMetrics, QFont
@@ -57,6 +58,7 @@ class MainWindow(QMainWindow):
         SHOW_PRODUCT_DESCRIPTION = 1
         WAIT_FOR_SCAN = 2
         SHOW_PRODUCER_INFOS = 3
+        NOT_CONNECTED = 4
 
     state = STATES.SHOW_PRODUCT_DESCRIPTION
 
@@ -79,15 +81,8 @@ class MainWindow(QMainWindow):
         if self.load_ui(ui_file_path) is None:
             raise Exception("Konnte UI nicht Laden")
 
-        # Lege Startzustand Fest und zeige dementsprechende Seite an
-        self.state = self.STATES.WAIT_FOR_SCAN
-        self.window.stackedWidget.setCurrentIndex(0)
-        self.window.stackedWidget_advertise.setCurrentIndex(1)
-
-        screen = 1
-        self.screenSize = QApplication.desktop().screenGeometry(screen)
+        self.screenSize = QApplication.desktop().screenGeometry(screen=1)
         self.setGeometry(self.screenSize)
-
         # Vollbild:
         self.showFullScreen()
 
@@ -150,10 +145,10 @@ class MainWindow(QMainWindow):
         else:
             self.window.Innkaufhauslogo.setPixmap(
                 pix.scaled(pix.toImage().size() / 2, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+
         ####
         # DATA BASES
         ####
-
         # Stelle Verbindung mit lokaler SQL Lite Datenbank her
         self.loc_db_mngr = localdatabasemanager.LocalDataBaseManager()
         if self.loc_db_mngr.connect(sql_lite_path) is None:
@@ -166,28 +161,6 @@ class MainWindow(QMainWindow):
                                 .format(e))
         self.loc_db_mngr.loadAllSettings()
 
-        # Stelle Verbindung mit MS SQL Datenbank her
-        self.databasemanager = DataBaseManager()
-
-        if self.databasemanager.connect(ip=self.loc_db_mngr.getMS_SQL_ServerAddr()[0],
-                                        port=int(self.loc_db_mngr.getMS_SQL_ServerAddr()[1]),
-                                        pw=self.loc_db_mngr.getMS_SQL_LoginData()[1],
-                                        usr=self.loc_db_mngr.getMS_SQL_LoginData()[0],
-                                        db=self.loc_db_mngr.getMS_SQL_Mandant()) is None:
-            raise Exception("Konnte Verbindung mit dem MS SQL Server nicht herstellen")
-
-        ####
-        # Lade init Data aus dem SQL Server
-        ####
-
-        # Lade Liste mit Artikeln, zu denen die Vorschau angezeigt werden soll...
-        self.advertise_kArtikel_list = self.databasemanager.getAdvertiseList(consts.wawi_advertise_aktive_meta_keyword)
-        if self.advertise_kArtikel_list is None or len(self.advertise_kArtikel_list) < 2:
-            log.warning("Not more than 1 Advertise found !")
-            self.advertise_kArtikel_list = None
-
-        log.debug("* DEBUG: LISTE MIT WERBUNG: {0}".format(self.advertise_kArtikel_list))
-
         ####
         # Update Timers
         self.showTimeTimer: int = self.loc_db_mngr.getArticleShowTime()
@@ -195,10 +168,14 @@ class MainWindow(QMainWindow):
         self.changeAdvertiseTimer: int = self.loc_db_mngr.getAdvertiseToggleTime()
         ####
 
+        # Stelle Verbindung mit MS SQL Datenbank her
+        self.databasemanager = DataBaseManager()
+        self.state = self.STATES.NOT_CONNECTED
+        self.event_handler("TRY_CONNECT_TO_MS_SQL_DB")
+
         ####
         # EVENTS SIGNALS SLOTS TIMER
         ####
-
         # Starte Sekunden Event Timer
         self.timerID = self.startTimer(1000)
 
@@ -241,8 +218,8 @@ class MainWindow(QMainWindow):
     def switchArtikelPreViewPageAndStartPage(self):
         # Wenn artikel mit Merkmal für Vorschau existieren, lade neue Anzeige und wechsle zu dieser
         try:
-            if localdatabasemanager.want_reload_advertise:
-                localdatabasemanager.want_reload_advertise = False
+            if self.loc_db_mngr.checkWantReloadAdvertiseList():
+                self.loc_db_mngr.setWantReloadAdvertiseList(False)
                 self.advertise_kArtikel_list = self.databasemanager.getAdvertiseList(
                     consts.wawi_advertise_aktive_meta_keyword)
                 log.debug("DEBUG: LISTE MIT WERBUNG: {0}".format(self.advertise_kArtikel_list))
@@ -642,7 +619,8 @@ class MainWindow(QMainWindow):
     # Eventhandler: Je nach Objektzustand führe die übergebenen Aktionen aus
     def event_handler(self, action, value=None):
         if action != "TIMER" and action != "CHANGE_ADVERTISE":
-            log.debug("NEW EVENT ( EXCEPT TIMER AND CHANGE_ADVERTISE ): {0} VALUE: {1}".format(action, value))
+            log.debug("NEW EVENT ( EXCEPT TIMER AND CHANGE_ADVERTISE ): {0} VALUE: {1}; STATE: {2}".
+                      format(action, value, self.state))
 
         try:
 
@@ -653,7 +631,7 @@ class MainWindow(QMainWindow):
 
             # Zustands unabhängige Aktionen:
 
-            if self.state != self.STATES.UNKNOWN:
+            if self.state != self.STATES.UNKNOWN and self.state != self.STATES.NOT_CONNECTED:
                 # Es wurde ein Barcode gescannt-> Ermittle Informationen und zeige diese an
                 if action == "NEW_SCAN":
                     self.newScanHandling(value)
@@ -735,6 +713,40 @@ class MainWindow(QMainWindow):
                         self.event_handler("EXIT_SHOW_DESCRIPTION")
                     return
 
+            elif self.state == self.STATES.NOT_CONNECTED:
+                if action == "TRY_CONNECT_TO_MS_SQL_DB":
+                    if self.databasemanager.connect(ip=self.loc_db_mngr.getMS_SQL_ServerAddr()[0],
+                                                    port=int(self.loc_db_mngr.getMS_SQL_ServerAddr()[1]),
+                                                    pw=self.loc_db_mngr.getMS_SQL_LoginData()[1],
+                                                    usr=self.loc_db_mngr.getMS_SQL_LoginData()[0],
+                                                    db=self.loc_db_mngr.getMS_SQL_Mandant()) is None:
+                        log.error("Konnte Verbindung mit dem MS SQL Server nicht herstellen")
+                        self.state = self.STATES.NOT_CONNECTED
+                        self.window.stackedWidget.setCurrentIndex(4)
+                        return
+                    else:
+                        ####
+                        # Lade init Data aus dem SQL Server
+                        ####
+
+                        # Lade Liste mit Artikeln, zu denen die Vorschau angezeigt werden soll...
+                        self.advertise_kArtikel_list = self.databasemanager.getAdvertiseList(
+                            consts.wawi_advertise_aktive_meta_keyword)
+                        if self.advertise_kArtikel_list is None or len(self.advertise_kArtikel_list) < 2:
+                            log.warning("Not more than 1 Advertise found !")
+                            self.advertise_kArtikel_list = None
+                        log.debug("* DEBUG: LISTE MIT WERBUNG: {0}".format(self.advertise_kArtikel_list))
+
+                        # Lege Startzustand Fest und zeige dementsprechende Seite an
+                        self.state = self.STATES.WAIT_FOR_SCAN
+                        self.window.stackedWidget.setCurrentIndex(0)
+                        self.window.stackedWidget_advertise.setCurrentIndex(1)
+                        return
+                elif action == "TIMER":
+                    handled: bool = True
+                elif action == "NEW_SCAN":
+                    handled: bool = True
+
             # Wenn ein Unbekannter Objektzustand vorliegt, wirf Exception
             else:
                 raise Exception("Unbekannter Objektzustand: ")
@@ -748,6 +760,11 @@ class MainWindow(QMainWindow):
             return False
         except Exception as e:
             log.error("Handle Event ({0})[{1}] failed: [{2}]".format(action, value, e))
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            log.error(" -> ERROR TYPE: {0}, FILE: {1}, LINE: {2}".format(exc_type,
+                                                                         os.path.split(
+                                                                             exc_tb.tb_frame.f_code.co_filename)[1],
+                                                                         exc_tb.tb_lineno))
 
     # Funktion (Slot), die mit dem Signal aus MApplication verbunden ist, und bei einem Scan aufgerufen wird
     @Slot(str)

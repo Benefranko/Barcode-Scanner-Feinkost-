@@ -60,14 +60,3 @@ class Updater(QThread):
     def updateThreadFinished(self):
         # change status
         return
-
-
-
-
-
-
-
-
-
-
-

@@ -58,8 +58,8 @@ class DataBaseManager:
                 if "ODBC Driver 18 for SQL Server" in driver_names:
                     log.debug("Verwende Driver: ODBC Driver 18 for SQL Server...")
 
-                    self.conn = pyodbc.connect(driver=consts.SQL_DRIVER_USED_VERSION_MS_DRIVER, server=ip + ","
-                                               + str(port),
+                    self.conn = pyodbc.connect(driver=consts.SQL_DRIVER_USED_VERSION_MS_DRIVER,
+                                               server=ip + "," + str(port),
                                                database=db,
                                                user=usr,
                                                password=pw,
@@ -74,7 +74,8 @@ class DataBaseManager:
                     self.conn = pyodbc.connect('DRIVER={0}; SERVER={1}; PORT={2}; DATABASE={3}; UID={4}; PWD={5}; '
                                                'TDS_Version={6};'.format(consts.SQL_DRIVER_USED_VERSION_FreeTDS,
                                                                          ip, port, db, usr, pw,
-                                                                         consts.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION))
+                                                                         consts.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION)
+                                               )
                     log.info("Erfolgreich mit MS SQL Server verbunden über FreeTDS Driver {0} ".format(
                         consts.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION))
                     break
@@ -230,8 +231,9 @@ class DataBaseManager:
         mengen_preis: float = float(preis * einheiten_multiplikator * mengen_multiplikator * (1.0 + steuersatz))
 
         return self.roundToStr(float(data.fMassMenge)) + " " + article_einheit.cName + " (" + \
-               self.roundToStr(mengen_preis) + " € / " + self.roundToStr(float(data.fGrundpreisMenge)) + " " + \
-               grundpreis_einheit.cName + ")"
+                                                         self.roundToStr(mengen_preis) + " € / " +\
+                                                         self.roundToStr(float(data.fGrundpreisMenge)) + " " + \
+                                                         grundpreis_einheit.cName + ")"
 
     def getAdvertiseList(self, value):
         return self.exec_sql("SELECT dbo.tArtikel.kArtikel"

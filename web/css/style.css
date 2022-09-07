@@ -18,10 +18,21 @@ body {
 
 .bordered {
     border-radius: 5px;
-    border: 2px solid #04AA6D;
+    border: 3px solid #04AA6D;
     padding: 10px 20px;
 }
 
+.bordered-blue {
+    border-radius: 5px;
+    border: 3px solid #2196F3;
+    padding: 10px 20px;
+}
+
+.bordered-orange {
+    border-radius: 5px;
+    border: 3px solid orange;
+    padding: 10px 20px;
+}
 
 .m-btn{
       text-decoration: none;

@@ -70,6 +70,10 @@ if __name__ == "__main__":
 
     except Exception as exc:
         log.critical("\nError: Critical: {0}".format(exc))
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        log.critical(" -> ERROR TYPE: {0}, FILE: {1}, LINE: {2}".format(exc_type, os.path.split(
+                                                                         exc_tb.tb_frame.f_code.co_filename)[1],
+                                                                        exc_tb.tb_lineno))
         if ret == 0:
             ret = -1
 

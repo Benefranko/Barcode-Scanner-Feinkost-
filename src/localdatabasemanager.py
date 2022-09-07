@@ -9,28 +9,39 @@ from pathlib import Path
 
 log = logging.getLogger(Path(__file__).name)
 
-
-# GLOBAL VAR -> SERVER NOTIFY UI -> GETS EDITED!!!!
-want_reload_advertise: bool = False
-
 ###################################
 # ### EINSTELLUNG-S-VARIABLEN ### #
 ###################################
 
 # Login settings
-admin_pw: str = consts.clear_log_file_pw
-ms_sql_server_login_data: () = (consts.ms_sql_user, consts.ms_sql_pw)
-ms_sql_database_mandant: str = consts.ms_sql_mandant
+admin_pw: str = consts.web_admin_init_pw
+ms_sql_server_login_data: () = ("test", "altinsystems")
+ms_sql_database_mandant: str = "Mandant_1"
 
 # Time settings
-advertise_toggle_time: int = consts.CHANGE_ADVERTISE_TIME
-show_article_infos_time: int = consts.SHOW_TIME
-show_producer_infos_time: int = consts.SHOW_PRODUCER_INFOS_TIME
-show_nothing_found_time: int = consts.SHOW_TIME_NOTHING_FOUND
+# Dauer der Zeit zwischen einem Wechsel der Warte-Anzeige in Sekunden
+advertise_toggle_time: int = 30
+
+# Dauer der Zeit, wie lange die Information zu einem Produkt angezeigt werden, in Sekunden
+show_article_infos_time: int = 30
+
+# Dauer der Zeit, wie lange die Information zum Hersteller angezeigt werden, in Sekunden
+show_producer_infos_time: int = 20
+
+# Dauer der Zeit, wie lange "Keine Informationen zu diesem Produkt gefunden" angezeigt wird, in Sekunden
+show_nothing_found_time: int = 8
 
 # IDK
 item_count_on_web_server_list: int = 150
-ms_sql_server_addr: () = (consts.ms_sql_server_ip, consts.ms_sql_server_port)
+ms_sql_server_addr: () = ("home.obermui.de", 18769)
+#   SERVER NOTIFY UI -> GETS EDITED!!!!
+want_reload_advertise_var: bool = False
+
+
+# Der LocalDataBaseManager läd und speichert u.a. sämtliche Einstellungen.
+# Falls man zum Beispiel den Webserver von der GUI trennen möchte, kann man alle globalen Variablen zu lokalen ändern.
+# Jedoch müssen dann in jeder GET und POST Methode alle Einstellungen neu geladen werden, was zu längeren Ladezeiten der
+# Internetseiten führen kann.
 
 
 class LocalDataBaseManager:
@@ -52,12 +63,12 @@ class LocalDataBaseManager:
                                             PRIMARY KEY("id") 
                                         );"""
 
-    times_table = """CREATE TABLE IF NOT EXISTS times (
+    times_table = """CREATE TABLE IF NOT EXISTS "numbers" (
                                         name TEXT PRIMARY KEY,
                                         value integer NOT NULL
                                     );"""
 
-    passwords_table = """CREATE TABLE IF NOT EXISTS "passwords" (
+    passwords_table = """CREATE TABLE IF NOT EXISTS "logins" (
                                         "name" TEXT,
                                         "user" TEXT,
                                         "password" TEXT,
@@ -164,42 +175,42 @@ class LocalDataBaseManager:
     # ### Settings ### #
     ####################
 
-    def storePassword(self, name: str, user: str, pw: str):
-        return self.exec_sql("INSERT INTO passwords(name, user, password) VALUES(?, ?, ?) ON CONFLICT(name)"
+    def storeLogin(self, name: str, user: str, pw: str):
+        return self.exec_sql("INSERT INTO logins(name, user, password) VALUES(?, ?, ?) ON CONFLICT(name)"
                              " DO UPDATE SET user = ?, password = ?;", (name, user, pw, user, pw), True, True)
 
-    def storeTime(self, name: str, value: int):
-        return self.exec_sql("INSERT INTO times(name,value) VALUES(?,?) ON CONFLICT(name) DO UPDATE SET value = ?;",
+    def storeNumber(self, name: str, value: int):
+        return self.exec_sql("INSERT INTO numbers(name,value) VALUES(?,?) ON CONFLICT(name) DO UPDATE SET value = ?;",
                              (name, value, value), True, True)
 
     def rowExists(self, table, column, value):
         ret = self.exec_sql("SELECT EXISTS(SELECT 1 FROM {0} WHERE {1}=? LIMIT 1);".format(table, column), (value,))
         return bool(ret and int(ret[0]) > 0)
 
-    def loadTime(self, name: str, min_t: int, fallback: int):
-        sql = "SELECT value FROM times WHERE name = ?"
+    def loadNumber(self, name: str, min_t: int, fallback: int):
+        sql = "SELECT value FROM numbers WHERE name = ?"
         time = self.exec_sql(sql, (name,))
         if time and int(time[0]) > min_t:
             return int(time[0])
-        if not self.rowExists("times", "name", name):
-            if self.storeTime(name, fallback):
+        if not self.rowExists("numbers", "name", name):
+            if self.storeNumber(name, fallback):
                 time = self.exec_sql(sql, (name,))
                 if time and int(time[0]) > min_t:
-                    log.debug("    Init Database ( Table times ) Time: {0}".format(name))
+                    log.debug("    Init Database ( Table numbers ) Number: {0}".format(name))
                     return int(time[0])
-        log.warning("    load Time from local Db failed! Fallback to old value: {0}".format(fallback))
+        log.warning("    load Number from local Db failed! Fallback to old value: {0}".format(fallback))
         return fallback
 
-    def loadPassword(self, name: str, fallback: ()) -> ():
-        sql = "SELECT user,password FROM passwords WHERE name = ?"
+    def loadLogin(self, name: str, fallback: ()) -> ():
+        sql = "SELECT user,password FROM logins WHERE name = ?"
         ret = self.exec_sql(sql, (name,))
         if ret:
             return ret
-        if not self.rowExists("passwords", "name", name):
-            if self.storePassword(name, fallback[0], fallback[1]):
+        if not self.rowExists("logins", "name", name):
+            if self.storeLogin(name, fallback[0], fallback[1]):
                 ret = self.exec_sql(sql, (name,))
                 if ret:
-                    log.debug("    Init Database ( passwords ) Password: {0}".format(name))
+                    log.debug("    Init Database ( logins ) Login_data: {0}".format(name))
                     return ret
 
         log.warning("    load Login Data from local Db failed! Fallback to old value: {0}".format(fallback))
@@ -217,85 +228,97 @@ class LocalDataBaseManager:
         global show_nothing_found_time
         global item_count_on_web_server_list
         global ms_sql_server_addr
+        global want_reload_advertise_var
 
-        admin_pw = self.loadPassword("ADMIN", ("", admin_pw))[1]
-        ms_sql_server_login_data = self.loadPassword("MS-SQL-SERVER-LOGIN", ms_sql_server_login_data)
-        ms_sql_database_mandant = self.loadPassword("MANDANT", (ms_sql_database_mandant, ""))[0]
+        admin_pw = self.loadLogin("ADMIN", ("", admin_pw))[1]
+        ms_sql_server_login_data = self.loadLogin("MS-SQL-SERVER-LOGIN", ms_sql_server_login_data)
+        ms_sql_database_mandant = self.loadLogin("MANDANT", (ms_sql_database_mandant, ""))[0]
 
         # Time settings
-        advertise_toggle_time = self.loadTime("CHANGE_ADVERTISE",  1, advertise_toggle_time)
-        show_article_infos_time = self.loadTime("ARTIKEL",       1, show_article_infos_time)
-        show_producer_infos_time = self.loadTime("HERSTELLER",  1, show_producer_infos_time)
-        show_nothing_found_time = self.loadTime("NOTHING-FOUND", 1, show_nothing_found_time)
+        advertise_toggle_time = self.loadNumber("CHANGE_ADVERTISE",  1, advertise_toggle_time)
+        show_article_infos_time = self.loadNumber("ARTIKEL",       1, show_article_infos_time)
+        show_producer_infos_time = self.loadNumber("HERSTELLER",  1, show_producer_infos_time)
+        show_nothing_found_time = self.loadNumber("NOTHING-FOUND", 1, show_nothing_found_time)
 
         # IDK
-        item_count_on_web_server_list = self.loadTime("WEB-TABLE-LENGTH", 1, item_count_on_web_server_list)
-        ms_sql_server_addr = self.loadPassword("SERVER-ADDRESS", ms_sql_server_addr)
+        item_count_on_web_server_list = self.loadNumber("WEB-TABLE-LENGTH", 1, item_count_on_web_server_list)
+        ms_sql_server_addr = self.loadLogin("SERVER-ADDRESS", ms_sql_server_addr)
+        want_reload_advertise_var = bool(self.loadNumber("WANT-RELOAD-ADVERTISE-LIST", -1,
+                                                         int(want_reload_advertise_var)))
 
     def setAdminPw(self, new_value):
         global admin_pw
-        if self.storePassword("ADMIN", "", new_value):
+        if self.storeLogin("ADMIN", "", new_value):
             admin_pw = new_value
             return "SUCCESS"
         return None
 
     def setMS_SQL_LoginData(self, user, pw):
         global ms_sql_server_login_data
-        if self.storePassword("MS-SQL-SERVER-LOGIN", user, pw):
+        if self.storeLogin("MS-SQL-SERVER-LOGIN", user, pw):
             ms_sql_server_login_data = (user, pw)
             return "SUCCESS"
         return None
 
     def setMS_SQL_Mandant(self, new_value):
         global ms_sql_database_mandant
-        if self.storePassword("MANDANT", "", new_value):
+        if self.storeLogin("MANDANT", new_value, ""):
             ms_sql_database_mandant = new_value
             return "SUCCESS"
         return None
 
     def setAdvertiseToggleTime(self, new_value):
         global advertise_toggle_time
-        if self.storeTime("CHANGE_ADVERTISE", new_value):
+        if self.storeNumber("CHANGE_ADVERTISE", new_value):
             advertise_toggle_time = new_value
             return "SUCCESS"
         return None
 
     def setArticleShowTime(self, new_value):
         global show_article_infos_time
-        if self.storeTime("ARTIKEL", new_value):
+        if self.storeNumber("ARTIKEL", new_value):
             show_article_infos_time = new_value
             return "SUCCESS"
         return None
 
     def setProducerShowTime(self, new_value):
         global show_producer_infos_time
-        if self.storeTime("HERSTELLER", new_value):
+        if self.storeNumber("HERSTELLER", new_value):
             show_producer_infos_time = new_value
             return "SUCCESS"
         return None
 
     def setNothingFoundPageShowTime(self, new_value):
         global show_nothing_found_time
-        if self.storeTime("NOTHING-FOUND", new_value):
+        if self.storeNumber("NOTHING-FOUND", new_value):
             show_nothing_found_time = new_value
             return "SUCCESS"
         return None
 
     def setItemCountOnWebtable(self, new_value):
         global item_count_on_web_server_list
-        if self.storeTime("WEB-TABLE-LENGTH", new_value):
+        if self.storeNumber("WEB-TABLE-LENGTH", new_value):
             item_count_on_web_server_list = new_value
             return "SUCCESS"
         return None
 
     def setMS_SQL_ServerAddr(self, ip: str, port: int):
         global ms_sql_server_addr
-        if self.storePassword("SERVER-ADDRESS", ip, str(port)):
+        if self.storeLogin("SERVER-ADDRESS", ip, str(port)):
             ms_sql_server_addr = (ip, port)
             return "SUCCESS"
         return None
 
+    def setWantReloadAdvertiseList(self, value: bool):
+        global want_reload_advertise_var
+        if self.storeNumber("WANT-RELOAD-ADVERTISE-LIST", int(value)):
+            want_reload_advertise_var = value
+            return "SUCCESS"
+        return None
+
+    ####
     # Getter
+    ####
 
     @staticmethod
     def getAdminPw():
@@ -333,5 +356,6 @@ class LocalDataBaseManager:
     def getMS_SQL_ServerAddr():
         return ms_sql_server_addr
 
-
-
+    @staticmethod
+    def checkWantReloadAdvertiseList() -> bool:
+        return want_reload_advertise_var
