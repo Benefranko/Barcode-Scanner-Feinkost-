@@ -256,11 +256,11 @@ class DataBaseManager:
                              " dbo.tArtikelBeschreibung.kArtikel = ?", k_article)
 
     def getLagerBestand(self, k_article) -> int:
-        bestand = self.exec_sql("SELECT fLagerbestand FROM [dbo].[tlagerbestand] WHERE kArtikel = ?", k_article)
+        bestand = self.exec_sql("SELECT fLagerbestandEigen FROM [dbo].[tlagerbestand] WHERE kArtikel = ?", k_article)
         if bestand is None:
             return -1
         else:
-            return int(bestand.fLagerbestand)
+            return int(bestand.fLagerbestandEigen)
 
     def getKategorieByKArtikel(self, k_article):
         return self.exec_sql("SELECT [tKategorieSprache].cName"

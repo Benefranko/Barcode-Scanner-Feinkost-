@@ -170,8 +170,7 @@ class MainWindow(QMainWindow):
 
         # Stelle Verbindung mit MS SQL Datenbank her
         self.databasemanager = DataBaseManager()
-        self.state = self.STATES.NOT_CONNECTED
-        self.event_handler("TRY_CONNECT_TO_MS_SQL_DB")
+        self.tryConnectToMS_SQL_DB_and_load_advertise_list()
 
         ####
         # EVENTS SIGNALS SLOTS TIMER
@@ -616,6 +615,34 @@ class MainWindow(QMainWindow):
             log.error("    Error: Das speichern des Scans für Statistiken ist fehlgeschlagen:")
         return
 
+    def tryConnectToMS_SQL_DB_and_load_advertise_list(self):
+        if self.databasemanager.connect(ip=self.loc_db_mngr.getMS_SQL_ServerAddr()[0],
+                                        port=int(self.loc_db_mngr.getMS_SQL_ServerAddr()[1]),
+                                        pw=self.loc_db_mngr.getMS_SQL_LoginData()[1],
+                                        usr=self.loc_db_mngr.getMS_SQL_LoginData()[0],
+                                        db=self.loc_db_mngr.getMS_SQL_Mandant()) is None:
+            log.error("Konnte Verbindung mit dem MS SQL Server nicht herstellen")
+            self.state = self.STATES.NOT_CONNECTED
+            self.window.stackedWidget.setCurrentIndex(4)
+        else:
+            ####
+            # Lade init Data aus dem SQL Server
+            ####
+
+            # Lade Liste mit Artikeln, zu denen die Vorschau angezeigt werden soll...
+            self.advertise_kArtikel_list = self.databasemanager.getAdvertiseList(
+                consts.wawi_advertise_aktive_meta_keyword)
+            if self.advertise_kArtikel_list is None or len(self.advertise_kArtikel_list) < 2:
+                log.warning("Not more than 1 Advertise found !")
+                self.advertise_kArtikel_list = None
+            log.debug("* DEBUG: LISTE MIT WERBUNG: {0}".format(self.advertise_kArtikel_list))
+
+            # Lege Startzustand Fest und zeige dementsprechende Seite an
+            self.state = self.STATES.WAIT_FOR_SCAN
+            self.window.stackedWidget.setCurrentIndex(0)
+            self.window.stackedWidget_advertise.setCurrentIndex(1)
+        return
+
     # Eventhandler: Je nach Objektzustand führe die übergebenen Aktionen aus
     def event_handler(self, action, value=None):
         if action != "TIMER" and action != "CHANGE_ADVERTISE":
@@ -715,33 +742,7 @@ class MainWindow(QMainWindow):
 
             elif self.state == self.STATES.NOT_CONNECTED:
                 if action == "TRY_CONNECT_TO_MS_SQL_DB":
-                    if self.databasemanager.connect(ip=self.loc_db_mngr.getMS_SQL_ServerAddr()[0],
-                                                    port=int(self.loc_db_mngr.getMS_SQL_ServerAddr()[1]),
-                                                    pw=self.loc_db_mngr.getMS_SQL_LoginData()[1],
-                                                    usr=self.loc_db_mngr.getMS_SQL_LoginData()[0],
-                                                    db=self.loc_db_mngr.getMS_SQL_Mandant()) is None:
-                        log.error("Konnte Verbindung mit dem MS SQL Server nicht herstellen")
-                        self.state = self.STATES.NOT_CONNECTED
-                        self.window.stackedWidget.setCurrentIndex(4)
-                        return
-                    else:
-                        ####
-                        # Lade init Data aus dem SQL Server
-                        ####
-
-                        # Lade Liste mit Artikeln, zu denen die Vorschau angezeigt werden soll...
-                        self.advertise_kArtikel_list = self.databasemanager.getAdvertiseList(
-                            consts.wawi_advertise_aktive_meta_keyword)
-                        if self.advertise_kArtikel_list is None or len(self.advertise_kArtikel_list) < 2:
-                            log.warning("Not more than 1 Advertise found !")
-                            self.advertise_kArtikel_list = None
-                        log.debug("* DEBUG: LISTE MIT WERBUNG: {0}".format(self.advertise_kArtikel_list))
-
-                        # Lege Startzustand Fest und zeige dementsprechende Seite an
-                        self.state = self.STATES.WAIT_FOR_SCAN
-                        self.window.stackedWidget.setCurrentIndex(0)
-                        self.window.stackedWidget_advertise.setCurrentIndex(1)
-                        return
+                    return self.tryConnectToMS_SQL_DB_and_load_advertise_list()
                 elif action == "TIMER":
                     handled: bool = True
                 elif action == "NEW_SCAN":

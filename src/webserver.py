@@ -35,6 +35,7 @@ class Server:
 
     # Stoppe Server und warte auf Beenden des Threads
     def stop_listen(self):
+        log.info("[WEBSERVER]: Stoppe Webserver....")
         if self.webserver:
             self.webserver.shutdown()
         self.thread.join(10)
@@ -42,7 +43,9 @@ class Server:
     # Thread - Funktion: Server wartet auf eingehende TCP Verbindungen und erstellt für jede einen
     # Thread mit einem RequestHandler
     def run_web_server(self):
+        log.info("[WEBSERVER]: Starte Webserver....")
         with ThreadingHTTPServer((self.listenIP, self.listenPort), RequestHandler) as server:
             self.webserver = server
+            log.info("[WEBSERVER]: Warte auf Verbindungen....")
             server.serve_forever()
         return None

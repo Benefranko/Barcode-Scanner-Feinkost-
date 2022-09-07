@@ -2,7 +2,6 @@ import calendar
 import shutil
 import random
 
-
 from http.server import BaseHTTPRequestHandler
 from datetime import datetime, timedelta
 
@@ -224,7 +223,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         x = random.randint(0, 255)
         y = random.randint(0, 255)
         z = random.randint(0, 255)
-        if x+y+z > 600:
+        if x + y + z > 600:
             x = 0
         return str(x) + ", " + str(y) + ", " + str(z)
 
@@ -251,16 +250,16 @@ class RequestHandler(BaseHTTPRequestHandler):
             color = self.getRandomColor(i)
 
             replace_str += "{\r\n" \
-                + "                    label: '" + group + "',\r\n" \
-                + "                   data: " + str(scan_list) + ",\r\n" \
-                + "                   backgroundColor: [\r\n" \
-                + "                       'rgba(" + color + ", 0.5)'\r\n" \
-                + "                   ],\r\n" \
-                + "                  borderColor: [\r\n" \
-                + "                       'rgba(" + color + ", 1)'\r\n" \
-                + "                   ],\r\n" \
-                + "                   borderWidth: 2\r\n" \
-                + "              }"
+                           + "                    label: '" + group + "',\r\n" \
+                           + "                   data: " + str(scan_list) + ",\r\n" \
+                           + "                   backgroundColor: [\r\n" \
+                           + "                       'rgba(" + color + ", 0.5)'\r\n" \
+                           + "                   ],\r\n" \
+                           + "                  borderColor: [\r\n" \
+                           + "                       'rgba(" + color + ", 1)'\r\n" \
+                           + "                   ],\r\n" \
+                           + "                   borderWidth: 2\r\n" \
+                           + "              }"
         return html_bytes.replace("%DATA_DATA_SETS%".encode(), replace_str.encode())
 
     def getMonatsStatusPage(self, group_list, name) -> bytes:
@@ -466,7 +465,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 html = self.getFileText("../web/html/settings.html")
 
                 if "ReloadAdvertiseListButton" in data:
-                    html_bytes = self.settingsReloadAdvertiseListPostRequest()
+                    html_bytes = self.settingsReloadAdvertiseListPostRequest(html)
 
                 elif "anzeigezeit_value" in data:
                     html_bytes = self.settingsUpdateShowTime(data, html)
@@ -568,10 +567,12 @@ class RequestHandler(BaseHTTPRequestHandler):
     def adminPasswordIsCorrect(self, data, password_field: str):
         return password_field in data and data[data.index(password_field) + 1] == self.loc_db_mngr.getAdminPw()
 
-    def settingsReloadAdvertiseListPostRequest(self) -> bytes:
-        self.loc_db_mngr.setWantReloadAdvertiseList(True)
+    def settingsReloadAdvertiseListPostRequest(self, html: bytes) -> bytes:
+        status: str = "<font color='green'>Lade Liste neu...!</font>"
+        if self.loc_db_mngr.setWantReloadAdvertiseList(True) is None:
+            status = "<font color='red'>Aktualisieren der Liste fehlgeschlagen!</font>"
         log.info("> Want reload Advertise List...")
-        return self.getSettingsPage()
+        return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS10%-->".encode(), status.encode()))
 
     def settingsUpdateShowTime(self, data, html: bytes) -> bytes:
         status: str = "<font color='green'>Erfolgreich aktualisiert!</font>"
@@ -586,8 +587,8 @@ class RequestHandler(BaseHTTPRequestHandler):
             if self.loc_db_mngr.setArticleShowTime(time):
                 log.info("> Aktualisiere Artikel Information Anzeigezeit zu: {0} Sekunden."
                          .format(self.loc_db_mngr.getArticleShowTime()))
-            # else:
-                # Error
+            else:
+                status = "<font color='red'>Ein unerwartetes Problem ist aufgetreten!</font>"
         else:
             status = "<font color='red'>Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!</font>"
             log.debug("Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!")
@@ -607,8 +608,8 @@ class RequestHandler(BaseHTTPRequestHandler):
             if self.loc_db_mngr.setProducerShowTime(time):
                 log.info("> Aktualisiere Hersteller Informationen Anzeigezeit zu: {0} Sekunden.".
                          format(self.loc_db_mngr.getProducerShowTime()))
-            # else:
-                # Error
+            else:
+                status = "<font color='red'>Ein unerwartetes Problem ist aufgetreten!</font>"
         else:
             status = "<font color='red'>Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!</font>"
             log.debug("Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!")
@@ -628,8 +629,8 @@ class RequestHandler(BaseHTTPRequestHandler):
             if self.loc_db_mngr.setAdvertiseToggleTime(time):
                 log.info("> Aktualisiere Wechselzeit zwischen Startseite und Werbung Seite zu: {0} Sekunden.".
                          format(self.loc_db_mngr.getAdvertiseToggleTime()))
-            # else:
-                # Error
+            else:
+                status = "<font color='red'>Ein unerwartetes Problem ist aufgetreten!</font>"
         else:
             status = "<font color='red'>Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!</font>"
             log.debug("Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!")
@@ -649,8 +650,8 @@ class RequestHandler(BaseHTTPRequestHandler):
             if self.loc_db_mngr.setNothingFoundPageShowTime(time):
                 log.info("> Aktualisiere NothingFoundPageShowTime zu: {0} Sekunden.".
                          format(self.loc_db_mngr.getNothingFoundPageShowTime()))
-            # else:
-                # Error
+            else:
+                status = "<font color='red'>Ein unerwartetes Problem ist aufgetreten!</font>"
         else:
             status = "<font color='red'>Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!</font>"
             log.debug("Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!")
@@ -670,8 +671,8 @@ class RequestHandler(BaseHTTPRequestHandler):
             if self.loc_db_mngr.setItemCountOnWebtable(time):
                 log.info("> Aktualisiere ItemCountOnWebtable zu: {0}.".
                          format(self.loc_db_mngr.getItemCountOnWebTable()))
-            # else:
-                # Error
+            else:
+                status = "<font color='red'>Ein unerwartetes Problem ist aufgetreten!</font>"
         else:
             status = "<font color='red'>Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!</font>"
             log.debug("Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!")
@@ -691,8 +692,8 @@ class RequestHandler(BaseHTTPRequestHandler):
             if self.loc_db_mngr.setMS_SQL_ServerAddr(value_1, int(value_2)):
                 log.info("> Aktualisiere ItemCountOnWebtable zu: {0}.".
                          format(self.loc_db_mngr.getMS_SQL_ServerAddr()))
-            # else:
-                # Error
+            else:
+                status = "<font color='red'>Ein unerwartetes Problem ist aufgetreten!</font>"
         else:
             status = "<font color='red'>Aktualisierung fehlgeschlagen! Ungültige Eingabe!</font>"
             log.debug("Aktualisierung fehlgeschlagen! Ungültige Eingabe!")
@@ -712,8 +713,8 @@ class RequestHandler(BaseHTTPRequestHandler):
             if self.loc_db_mngr.setMS_SQL_LoginData(username, password):
                 log.info("> Aktualisiere MS_SQL_LoginData zu: {0}|{1}.".
                          format(self.loc_db_mngr.getMS_SQL_LoginData()[0], "*****"))
-            # else:
-                # Error
+            else:
+                status = "<font color='red'>Ein unerwartetes Problem ist aufgetreten!</font>"
         else:
             status = "<font color='red'>Aktualisierung fehlgeschlagen! Ungültige Eingabe!</font>"
             log.debug("Aktualisierung fehlgeschlagen! Ungültige Eingabe!")
@@ -732,8 +733,8 @@ class RequestHandler(BaseHTTPRequestHandler):
             if self.loc_db_mngr.setMS_SQL_Mandant(value):
                 log.info("> Aktualisiere mandant_name zu: {0}.".
                          format(self.loc_db_mngr.getMS_SQL_Mandant()))
-            # else:
-                # Error
+            else:
+                status = "<font color='red'>Ein unerwartetes Problem ist aufgetreten!</font>"
         else:
             status = "<font color='red'>Aktualisierung fehlgeschlagen! Ungültige Eingabe!</font>"
             log.debug("Aktualisierung fehlgeschlagen! Ungültige Eingabe!")
@@ -750,8 +751,9 @@ class RequestHandler(BaseHTTPRequestHandler):
         else:
             if self.loc_db_mngr.setAdminPw(value):
                 log.info("> Ändere das Admin Passwort")
-            # else:
-                # Error
+            else:
+                status = "<font color='red'>Ein unerwartetes Problem ist aufgetreten!</font>"
+
         return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS4%-->".encode(), status.encode()))
 
     def replaceVarsInSettingsHtml(self, html: bytes) -> bytes:
