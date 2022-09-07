@@ -124,13 +124,13 @@
 				</form>
 			</li>
 
-			<li class="bordered" style="font-size: 12px">
+			<li class="bordered">
 				<form action="" method="post">
 					<label for="changePasswordNewPW"><strong>&#8675; Programm Aktualisieren:</strong></label><br>
-					Sie verwenden bereits die neuste Version ( XYZ ) <br>
-					Es ist eine neuere Version ( 9.9.9 ) als ihre ( 8.8.8 ) verf&uuml;gbar!<br>
-					Admin Passwort: <input class="textInputField" type="password" name="adminPW" value="">
-					<input class="small-btn m-btn-gray" style="font-size: 12px" type="submit" value="Update starten">
+					Sie verwenden bereits die neuste Version ( %programmVersion% ) <br>
+					Es ist eine neuere Version ( 9.9.9 ) als ihre ( %programmVersion% ) verf&uuml;gbar!<br>
+					Admin Passwort: <input class="textInputField" type="password" name="adminPW" disabled value="">
+					<input class="small-btn m-btn-gray" type="submit" value="Update starten" disabled>
 				</form>
 			</li>
 		</ul>

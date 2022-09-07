@@ -777,6 +777,9 @@ class RequestHandler(BaseHTTPRequestHandler):
         html = html.replace("%sql_server_username_value%".encode(),
                             str(self.loc_db_mngr.getMS_SQL_LoginData()[0]).encode())
 
+        html = html.replace("%programmVersion%".encode(),
+                            str(consts.PROGRAMM_VERSION).encode())
+
         html = html.replace("%mandant_name%".encode(),
                             str(self.loc_db_mngr.getMS_SQL_Mandant()).encode())
         return html
