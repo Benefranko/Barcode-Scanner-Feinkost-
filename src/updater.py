@@ -18,8 +18,22 @@ class Updater(QThread):
         # super(QThread, self).__init__(parent)
         self.repo = git.Repo(path, search_parent_directories=True)
         print(self.repo.git.status())
-        self.get_most_recent_git_tag()
+        print(self.getCurrentVersion())
+        print(self.getCurrentCommit())
+        self.updateAvailable()
 
+    def updateAvailable(self) -> bool:
+        print(self.repo.git.status("uno"))
+        return True
+
+    def getNewestVersion(self):
+        return
+
+    def commit(self):
+        index = self.repo.index
+        index.add(".")
+        print(self.repo.git.status())
+        index.commit(message="aaaaaa")
 
     def killThread(self):
         if self.isRunning():
@@ -37,15 +51,17 @@ class Updater(QThread):
     def getVersionStatus() -> str:
         return "git status"
 
-    def get_most_recent_git_tag(self):
-        tags = sorted(self.repo.tags, key=lambda t: t.commit.committed_datetime)
+    def getCurrentCommit(self):
+        return self.repo.head.object.hexsha
+
+    def getCurrentVersion(self):
+        tags: [] = sorted(self.repo.tags, key=lambda t: t.commit.committed_datetime)
         print("tags:", tags)
         for ver in reversed(tags):
-            print(ver)
-            if not ver.startsWith("v") or ver.count(".") != 3:
+            if not ver.name.startswith("v") or ver.name.count(".") != 2:
                 continue
-            latest_tag = tags[-1]
-
+            return ver.name[1:]
+        return "-1"
 
     # Für Internet seite: wenn update gestartet → entweder nichts oder Updating... oder Success oder failed... anzeigen
     @staticmethod
