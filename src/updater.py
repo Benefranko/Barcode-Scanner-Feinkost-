@@ -1,11 +1,25 @@
-from PySide2.QtCore import QThread, Signal, Slot
-from git import Repo
+from PySide2.QtCore import QThread, Slot, QObject
+import git
+from enum import Enum
 
 
 class Updater(QThread):
+    # Enum mit Objektzuständen
+    class STATES(Enum):
+        UNKNOWN = 0
+        WAIT_FOR_CHECK = 1
+        UPDATING = 2
+        UPDATE_FINISHED = 3
 
-    def __int__(self, parent):
-        super(QThread, self).__init__(parent)
+    state = STATES.WAIT_FOR_CHECK
+    repo: git.Repo = None
+
+    def __init__(self, parent: QObject, path: str):
+        # super(QThread, self).__init__(parent)
+        self.repo = git.Repo(path, search_parent_directories=True)
+        print(self.repo.git.status())
+        self.get_most_recent_git_tag()
+
 
     def killThread(self):
         if self.isRunning():
@@ -22,6 +36,16 @@ class Updater(QThread):
     @staticmethod
     def getVersionStatus() -> str:
         return "git status"
+
+    def get_most_recent_git_tag(self):
+        tags = sorted(self.repo.tags, key=lambda t: t.commit.committed_datetime)
+        print("tags:", tags)
+        for ver in reversed(tags):
+            print(ver)
+            if not ver.startsWith("v") or ver.count(".") != 3:
+                continue
+            latest_tag = tags[-1]
+
 
     # Für Internet seite: wenn update gestartet → entweder nichts oder Updating... oder Success oder failed... anzeigen
     @staticmethod
@@ -51,12 +75,12 @@ class Updater(QThread):
         # if git pull fails -> reset to old version
         return
 
-    @Slot
+    @Slot()
     def updateThreadStarted(self):
         # change status
         return
 
-    @Slot
+    @Slot()
     def updateThreadFinished(self):
         # change status
         return

@@ -1,4 +1,3 @@
-import sys
 from requesthandler import RequestHandler
 from http.server import ThreadingHTTPServer
 
