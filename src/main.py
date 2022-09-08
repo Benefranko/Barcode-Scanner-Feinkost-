@@ -119,7 +119,7 @@ if __name__ == "__main__":
 
             # Create a Qt widget, which will be our window.
             m_win = QWidget()
-            m_win.setStyleSheet("background: red; ")
+            m_win.setStyleSheet("background: black; ")
             screenSize = QApplication.screens()[len(QApplication.screens()) - 1].availableGeometry()
             m_win.setGeometry(screenSize)
             m_win.showFullScreen()
@@ -135,7 +135,6 @@ if __name__ == "__main__":
         print("DISCONNECT failed:", ex)
     m_win = None
     m_app = None
-
 
     # Stoppe lokalen Server und beende das Programm
     w_server.stop_listen()
