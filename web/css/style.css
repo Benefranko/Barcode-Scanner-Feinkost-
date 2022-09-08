@@ -7,12 +7,10 @@ body {
     font-family: 'Source Sans Pro', sans-serif;
 
 }
-
-
 .chart-container {
   position: relative;
   margin: auto;
-  height: 58vh;
+  height: 65vh;
   width: 80vw;
 }
 

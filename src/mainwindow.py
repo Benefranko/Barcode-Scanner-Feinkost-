@@ -69,7 +69,7 @@ class MainWindow(QMainWindow):
             raise Exception("Konnte UI nicht Laden")
 
         # ### Vollbild auf Screen0 bzw 1:
-        self.screenSize = QApplication.desktop().screenGeometry(screen=1)
+        self.screenSize = QApplication.screens()[len(QApplication.screens()) - 1].availableGeometry()
         self.setGeometry(self.screenSize)
         self.showFullScreen()
 
@@ -383,6 +383,7 @@ class MainWindow(QMainWindow):
         return h_infos.cName
 
     def newScanHandling(self, scan_article_ean: str):
+
         # Barcodescanner hat neues Scan registriert...
         # Setzte Anzeige Timer zurück und ändere Objektzustand
         self.showTimeTimer = self.loc_db_mngr.getArticleShowTime()

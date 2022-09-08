@@ -1,4 +1,4 @@
-from PySide2.QtCore import QEvent, Signal
+from PySide2.QtCore import QEvent, Signal, Slot
 from PySide2.QtWidgets import QApplication
 
 
@@ -22,9 +22,17 @@ class MApplication(QApplication):
     newScan: Signal = Signal(str)
     # don't block quit if try to exit
     want_exiting: bool = False
+    # wenn im black screen mode:
+    ignore_key_input: bool = False
 
     def __init__(self, args):
         super(MApplication, self).__init__(args)
+
+    @Slot()
+    def webserver_finished(self):
+        log.error("Der WEBSERVER wurde unerwartet beendet!")
+        self.want_exiting = True
+        QApplication.quit()
 
     def notify(self, receiver, event: QEvent):
         try:
@@ -33,7 +41,8 @@ class MApplication(QApplication):
                 # Wenn der Key ein Enter war, rufe die newScan Methode mit bisherigen Buffer auf und leere anschließend
                 # diese. Der Barcode Scanner beendet nämlich jeden Scan mit einem r.
                 if event.text() == "\r":
-                    self.newScan.emit(self.inputBuffer)
+                    if self.ignore_key_input is False:
+                        self.newScan.emit(self.inputBuffer)
                     self.inputBuffer = ""
                 # Sonst füge die Taste dem Buffer hinzu
                 else:

@@ -13,6 +13,7 @@ from pathlib import Path
 
 log = logging.getLogger(Path(__file__).name)
 
+from PySide2.QtWidgets import QApplication
 
 # Klasse, die eine TCP Verbindung managed
 class RequestHandler(BaseHTTPRequestHandler):

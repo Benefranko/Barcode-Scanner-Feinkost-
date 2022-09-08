@@ -7,6 +7,9 @@ import logger
 import datetime
 import os
 import sys
+import timeit
+import time
+from PySide2.QtWidgets import QApplication, QWidget
 
 import constants as consts
 
@@ -48,34 +51,91 @@ if __name__ == "__main__":
     ret: int = 0
     m_win: mainwindow = None
 
+    # STarte MApplication
+    try:
+        # Starte Lokalen Statistiken Server
+        if not mapplication.MApplication.instance():
+            m_app = mapplication.MApplication(sys.argv)
+        else:
+            m_app = mapplication.QApplication.instance()
+
+    except Exception as exc:
+        log.critical("\nError: Critical: failed to Start MApplication! {0}".format(exc))
+        sys.exit(1231)
+
+    # Start webserver!
     try:
         # Starte Lokalen Statistiken Server
         w_server = webserver.Server(consts.local_http_server_ip, consts.local_http_server_port)
+        w_server.finished.connect(m_app.webserver_finished)
         w_server.start_listen()
 
-        # Erstelle Key Press Event Handler und Ui - MainWindow
-        m_app = mapplication.MApplication(sys.argv)
-        m_win = mainwindow.MainWindow(consts.local_db_path, consts.ui_file_path)
-
-        # connect MApplication ( EventFilter ) with MainWindow( handle_EVENT )
-        m_app.newScan.connect(m_win.new_scan)
-
-        # Mache das Fenster sichtbar
-        m_win.show()
-
-        # Warte auf exit signal
-        ret = m_app.exec_()
-
-        m_win.cleanUp()
-
     except Exception as exc:
-        log.critical("\nError: Critical: {0}".format(exc))
-        exc_type, exc_obj, exc_tb = sys.exc_info()
-        log.critical(" -> ERROR TYPE: {0}, FILE: {1}, LINE: {2}".format(exc_type, os.path.split(
-                                                                         exc_tb.tb_frame.f_code.co_filename)[1],
-                                                                        exc_tb.tb_lineno))
+        log.critical("\nError: Critical: failed to Start Webserver! {0}".format(exc))
+        sys.exit(1212)
+
+    for index in range(1, 10):
+        start = timeit.default_timer()
+
+        try:
+            # Erstelle Key Press Event Handler und Ui - MainWindow
+            m_win = mainwindow.MainWindow(consts.local_db_path, consts.ui_file_path)
+            # connect MApplication ( EventFilter ) with MainWindow( handle_EVENT )
+            m_app.newScan.connect(m_win.new_scan)
+            # Mache das Fenster sichtbar
+            m_win.show()
+            # Warte auf exit signal
+            ret = m_app.exec_()
+            # Beende alle SQL Verbindungen
+            m_win.cleanUp()
+
+        except Exception as exc:
+            log.critical("\nError: Critical: {0}".format(exc))
+            if ret == 0:
+                ret = -1
+
         if ret == 0:
-            ret = -1
+            break
+        else:
+            try:
+                m_app.newScan.disconnect()
+            except Exception as ex:
+                print("DISCONNECT failed:", ex)
+            m_win = None
+            end = timeit.default_timer()
+            if end - start > 360:
+                index = 1
+            log.critical("Die GUI ist zum {0}. mal abgestürzt. Fehlercode: {1}".format(index, ret))
+            if index < 10:
+                log.critical("Versuche die GUI neu zu starten....")
+            else:
+                log.critical("Maximale Anzahl an Neustartversuchen erreicht! Zeige Black-Screen!")
+
+    # Wenn maximale Anzahl an Neustartversuchen erreicht wurde, zeige Black-Screen!
+    if ret != 0:
+        try:
+            # Ignore Key Input!:
+            m_app.ignore_key_input = True
+
+            # Create a Qt widget, which will be our window.
+            m_win = QWidget()
+            m_win.setStyleSheet("background: red; ")
+            screenSize = QApplication.screens()[len(QApplication.screens()) - 1].availableGeometry()
+            m_win.setGeometry(screenSize)
+            m_win.showFullScreen()
+            m_win.show()
+            # Start the event loop.
+            m_app.exec_()
+        except Exception as exc:
+            log.critical("\nError in BLACK-SCREEN: {0}".format(exc))
+
+    try:
+        w_server.finished.disconnect()
+    except Exception as ex:
+        print("DISCONNECT failed:", ex)
+    m_win = None
+    m_app = None
+
 
     # Stoppe lokalen Server und beende das Programm
     w_server.stop_listen()
