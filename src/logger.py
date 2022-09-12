@@ -45,10 +45,10 @@ def print_debug_versions():
     else:
         ver = "UNKNOWN"
 
-    log.debug("{0}[ Programm Version: {1} ] [ Python Version: {2} ] [ Qt Version: {3} ]\n"
-              "[ PyODBC Version: {4} ] [ SQL Lite3 Version: {5} ] [ Unterstützte MS ODBC Driver Version: {6} ]\n"
-              "[ Unterstützte FreeTDS Driver Version: {7} {8} ] [ Arbeitsverzeichnis: {9} ] \n"
-              "[UPDATE VERFÜGBAR: {10}] [NEUSTE VERSION: {11}]".
+    log.debug("{0}[ Programm Version: {1} ]\n [ Python Version: {2} ]\n"
+              "[ Qt Version: {3} ] [ PyODBC Version: {4} ] [ SQL Lite3 Version: {5} ]\n"
+              "[ Unterstützte MS ODBC Driver Version: {6} ] [ Unterstützte FreeTDS Driver Version: {7} {8} ]\n"
+              "[ Arbeitsverzeichnis: {9} ] [UPDATE VERFÜGBAR: {10}] [NEUSTE VERSION: {11}]".
               format("", ver, sys.version, QtCore.qVersion(),
                      pyodbc.version, sqlite3.version, consts.SQL_DRIVER_USED_VERSION_MS_DRIVER,
                      consts.SQL_DRIVER_USED_VERSION_FreeTDS, consts.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION,
