@@ -398,7 +398,14 @@ class RequestHandler(BaseHTTPRequestHandler):
         text: str = ""
         with open(consts.log_file_path, "r") as file:
             last: str = ""
+            line_count: int = 0
             for line in file:
+                line_count += 1
+                if line_count > 50000:
+                    text += "<h3>...</h3>"
+                    text += "<h3> Logdatei zu groß! Downloade die Datei für mehr Informationen und leere diese oben!" \
+                            "</h3>"
+                    break
                 text += "<p "
                 if "DEBUG:" in line:
                     last = "name=\"debug\" style=\"display: none; color: gray\""
