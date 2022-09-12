@@ -771,9 +771,8 @@ class RequestHandler(BaseHTTPRequestHandler):
             log.debug("Aktualisierung fehlgeschlagen! Falsches Passwort")
         else:
             logger.glob_updater.startUpdate()
-            status = logger.glob_updater.getStatus()
 
-        return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS12%-->".encode(), status.encode()))
+        return self.replaceVarsInSettingsHtml(html)
 
     @staticmethod
     def settingsShutDown():
@@ -810,13 +809,19 @@ class RequestHandler(BaseHTTPRequestHandler):
         html = html.replace("%mandant_name%".encode(),
                             str(self.loc_db_mngr.getMS_SQL_Mandant()).encode())
 
-        status = "Es ist eine neuere Version ( " + str(logger.glob_updater.getNewestVersion()) + " ) verfügbar. " \
-                 "Derzeitige Version: " + str(logger.glob_updater.getCurrentVersion())
+        msg = ""
         if not logger.glob_updater.isUpdateAvailable():
-            status = "Sie verwenden bereits die neuste Version: " + str(logger.glob_updater.getCurrentVersion())
+            msg = "Sie verwenden bereits die neuste Version: " + str(logger.glob_updater.getCurrentVersion())
             html = html.replace("><!--%disabled_update%-->".encode(), "hidden=\"true\">".encode())
+        else:
+            msg = "Es ist eine neuere Version ( " + str(logger.glob_updater.getNewestVersion()) + " ) verfügbar. " \
+                                                                                                  "Derzeitige Version: " + str(
+                logger.glob_updater.getCurrentVersion())
 
-        html = html.replace("<!--%MSG1%-->".encode(), status.encode())
+        status = "<font color='orange'>" + logger.glob_updater.getStatus() + "</font>"
+
+        html = html.replace("<!--%MSG1%-->".encode(), msg.encode())
+        html = html.replace("<!--%STATUS12%-->".encode(), status.encode())
         #
         #
         return html

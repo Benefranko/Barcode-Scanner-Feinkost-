@@ -1,6 +1,6 @@
 from PySide2.QtCore import QThread, Slot, QObject
 from enum import Enum
-import sys
+import constants
 import subprocess
 import timeit
 import logging
@@ -8,6 +8,7 @@ import logging
 # später mit success check and restore old version erweiterbar
 from pathlib import Path
 log = logging.getLogger(Path(__file__).name)
+
 
 class Updater(QThread):
     # Enum mit Objektzuständen
@@ -36,15 +37,15 @@ class Updater(QThread):
         self.repo_path = path
 
     def exec_git(self, args: []) -> (int, str):
-
         if self.repo_path and self.repo_path == "" or not self.repo_path:
             log.error("exec_git failed: args:{0}: REPO DIR NOT INITIALIZED".format(str(["git.exe"] + args)))
             return -1, ""
 
         try:
             # log.debug("exec_git: {0}".format(str(["git.exe"] + args)))
-            with subprocess.Popen(["git.exe"] + args, cwd=self.repo_path, stdout=subprocess.PIPE) as proc:
-                proc.wait(timeout=3000)
+            with subprocess.Popen(["git.exe"] + args, cwd=self.repo_path, stdout=subprocess.PIPE,
+                                  stderr=subprocess.STDOUT) as proc:
+                proc.wait(timeout=300)
                 out = str(proc.stdout.read().decode())
                 return proc.returncode, out
         except Exception as e:
@@ -96,7 +97,7 @@ class Updater(QThread):
                 self.state = self.STATES.UPDATING
                 self.start()
             elif event == "GET_STATUS":
-                return "Updating..."
+                return ""
             pass
 
         elif self.state == self.STATES.UPDATING:
@@ -104,17 +105,19 @@ class Updater(QThread):
                 if not self.isRunning():
                     self.state = self.STATES.UPDATE_FINISHED
                     return "Unknown Error!"
-                return "Updating..."
+                return "Updating... ( Laden sie die Seite 1 mal neu für neuere Infos )"
             pass
 
         elif self.state == self.STATES.UPDATE_FINISHED:
             if event == "GET_STATUS":
                 self.state = self.STATES.NONE
-                return self.status
+                tmp = self.status
+                self.status = ""
+                return tmp
             pass
 
         else:
-            pass
+            log.error(" UPDATER: UNKNOWN STATE: {0}".format(self.state))
 
     def startUpdate(self):
         return self.eventHandler("START_UPDATE")
@@ -146,17 +149,26 @@ class Updater(QThread):
         return self.eventHandler("GET_STATUS")
 
     def run(self) -> None:
-        #ret_v, rets = self.exec_git(["reset", "--hard", "origin/main"])
-        #if ret_v != 0:
-        #    self.status = "Update fehlgeschlagen! Reset failed: " + rets
-        #    self.exit_state = ret_v
-        if False:
-            pass
-        else:
-            ret_v, rets = self.exec_git(["pull", "-f"])
+
+        if constants.reset_before_update:
+            ret_v, rets = self.exec_git(["reset", "--hard", "origin/main"])
+            log.debug("     [GIT RETURN]:\n {0} -> Exitcode: ({1})".format(rets, ret_v))
             if ret_v != 0:
-                self.status = "Update fehlgeschlagen! Pull failed: " + rets
+                self.status = "Update fehlgeschlagen! Reset failed: " + rets
+                log.error("Update fehlgeschlagen! Reset failed: {0}".format(rets))
                 self.exit_state = ret_v
+                self.state = self.STATES.UPDATE_FINISHED
+                self.current_version = "-1"  # generate new next time
+                return
+
+        ret_v, rets = self.exec_git(["pull", "-f"])
+        log.debug("     [GIT RETURN]:\n {0} -> Exitcode: ({1})".format(rets, ret_v))
+        if ret_v != 0:
+            self.status = "Update fehlgeschlagen! Pull failed: " + rets
+            log.error("Update fehlgeschlagen! Pull failed: {0}".format(rets))
+            self.exit_state = ret_v
+        else:
+            self.status = "Erfolgreich Update ausgeführt!"
         self.state = self.STATES.UPDATE_FINISHED
         self.current_version = "-1"  # generate new next time
         return

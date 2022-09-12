@@ -29,6 +29,7 @@ web_admin_init_pw: str = "pass"
 # rename or delete logFile: ( RENAME | DELETE ):
 log_file_delete_mode: str = "RENAME"
 
+reset_before_update: bool = False
 
 # Pfad zur Logdatei
 log_file_path: str = './../doc/Logs/feinkostBarcodeScannerLog.log'
