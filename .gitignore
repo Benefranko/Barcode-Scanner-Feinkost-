@@ -132,3 +132,4 @@ dmypy.json
 db/*
 doc/Log/*
 ./db/*.db
+*.db
