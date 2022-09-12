@@ -11,6 +11,7 @@ import constants as consts
 import localdatabasemanager
 
 import logging
+import logger
 from pathlib import Path
 
 from PySide2.QtWidgets import QApplication
@@ -790,8 +791,16 @@ class RequestHandler(BaseHTTPRequestHandler):
                             str(self.loc_db_mngr.getMS_SQL_LoginData()[0]).encode())
 
         html = html.replace("%programmVersion%".encode(),
-                            str(consts.PROGRAMM_VERSION).encode())
+                            str(logger.glob_updater.getCurrentVersion()).encode())
 
         html = html.replace("%mandant_name%".encode(),
                             str(self.loc_db_mngr.getMS_SQL_Mandant()).encode())
+
+        status = "Es ist eine neuere Version( " + str(logger.glob_updater.getNewestVersion()) + ") verfügbar. " \
+                 "Derzeitige Version: " + str(logger.glob_updater.getCurrentVersion())
+        if not logger.glob_updater.isUpdateAvailable():
+            status = "Sie verwenden bereits die neuste Version( " + str(logger.glob_updater.getCurrentVersion()) + ")."
+
+        html = html.replace("<!--%MSG1%-->".encode(), status.encode())
+
         return html

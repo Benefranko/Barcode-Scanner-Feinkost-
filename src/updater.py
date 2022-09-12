@@ -9,7 +9,6 @@ import logging
 from pathlib import Path
 log = logging.getLogger(Path(__file__).name)
 
-
 class Updater(QThread):
     # Enum mit Objektzuständen
     class STATES(Enum):
@@ -28,6 +27,7 @@ class Updater(QThread):
 
     update_available: bool = False
     newest_version: str = "-1"
+    current_version: str = "-1"
 
     def __init__(self):
         super().__init__()
@@ -127,14 +127,16 @@ class Updater(QThread):
                     self.wait(100)
 
     def getCurrentVersion(self):
-
-        ret, tgs = self.exec_git(["tag", "-l", "--sort=-v:refname"])
-        tags: [] = str(tgs).split("\n")
-        for ver in tags:
-            if not ver.startswith("v") or ver.count(".") != 2:
-                continue
-            return ver[1:]
-        return "-1"
+        if self.current_version == "-1":
+            ret, tgs = self.exec_git(["tag", "-l", "--sort=-v:refname"])
+            tags: [] = str(tgs).split("\n")
+            for ver in tags:
+                if not ver.startswith("v") or ver.count(".") != 2:
+                    continue
+                self.current_version = ver[1:]
+                return self.current_version
+            return "-1"
+        return self.current_version
 
     # Für Internet seite: wenn update gestartet → entweder nichts oder Updating... oder Success oder failed... anzeigen
     def getStatus(self):
@@ -152,4 +154,5 @@ class Updater(QThread):
                 self.status = "Update fehlgeschlagen! Pull failed: " + rets
                 self.exit_state = ret_v
         self.state = self.STATES.UPDATE_FINISHED
+        self.current_version = "-1"  # generate new next time
         return

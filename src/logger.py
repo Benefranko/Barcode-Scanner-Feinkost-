@@ -7,36 +7,41 @@ import logging
 import constants as consts
 import datetime
 
-import main
+import updater
 
 
 from pathlib import Path
 
 log = logging.getLogger(Path(__file__).name)
 
+# Global!!
+glob_updater = updater.Updater()
 
-def setup(log_file_path: str):
+
+def setup(log_file_path: str, dirPath: str):
     # Setup Logfile Path
     logging.basicConfig(filename=log_file_path, level=logging.DEBUG, format='%(asctime)s: ( Thread: %(thread)d | '
                         'File: %(name)s ): %(levelname)s: %(message)s', datefmt='%d-%b-%y %H:%M:%S')
 
     # Leite ganzen stderr output in Logger um
-    # sys.stderr.write = logger.error
     sys.stderr = LoggerWriter(logging.getLogger().error)
     logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
+
+    # init git path:
+    global glob_updater
+    glob_updater.setPath(dirPath)
 
 
 def cleanup():
     sys.stderr = sys.__stderr__
 
 
-def print_debug_versions(d_name):
+def print_debug_versions():
     # Log....
     log.info("-------------------Programm Start: {0}-------------------".format(datetime.datetime.now()))
 
-    if main.glob_updater:
-        main.glob_updater.setPath(d_name)
-        ver = main.glob_updater.getCurrentVersion()
+    if glob_updater:
+        ver = glob_updater.getCurrentVersion()
     else:
         ver = "UNKNOWN"
 
@@ -47,8 +52,8 @@ def print_debug_versions(d_name):
               format("", ver, sys.version, QtCore.qVersion(),
                      pyodbc.version, sqlite3.version, consts.SQL_DRIVER_USED_VERSION_MS_DRIVER,
                      consts.SQL_DRIVER_USED_VERSION_FreeTDS, consts.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION,
-                     os.path.abspath("./"), main.glob_updater.isUpdateAvailable(),
-                     main.glob_updater.getNewestVersion()))
+                     os.path.abspath("./"), glob_updater.isUpdateAvailable(),
+                     glob_updater.getNewestVersion()))
     # Infoausgabe
     # print("------------------------------------------------------------------")
     # print("Programm Start: ", datetime.datetime.now())

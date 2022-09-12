@@ -10,15 +10,12 @@ import sys
 import timeit
 
 from PySide2.QtWidgets import QApplication, QWidget
-
 import constants as consts
-import updater
 
 import logging
 from pathlib import Path
 log = logging.getLogger(Path(__file__).name)
 
-glob_updater = updater.Updater()
 
 if __name__ == "__main__":
     # Change Working Directory to the one this file is in
@@ -26,12 +23,9 @@ if __name__ == "__main__":
     d_name = os.path.dirname(abspath)
     os.chdir(d_name)
 
-    # Setup updater
-    glob_updater.setPath(d_name)
-
-    # Tee stderr to log and to console
+    # Tee stderr to log and to console && set git path
     try:
-        logger.setup(consts.log_file_path)
+        logger.setup(consts.log_file_path, d_name)
     except Exception as e:
         print("Failed to setup Logger: {0}".format(e))
         sys.exit(99)
@@ -46,7 +40,7 @@ if __name__ == "__main__":
             exit(0)
 
     # Print All Versions and write it also to log
-    logger.print_debug_versions(d_name)
+    logger.print_debug_versions()
 
     # MApplication
     m_app: mapplication = None
@@ -148,6 +142,6 @@ if __name__ == "__main__":
              .format(ret, datetime.datetime.now()))
 
     logger.cleanup()
-    if glob_updater.isRunning():
-        glob_updater.killThread()
+    if logger.glob_updater.isRunning():
+        logger.glob_updater.killThread()
     sys.exit(ret)

@@ -4,6 +4,8 @@ import contextlib
 
 import constants as consts
 
+import updater
+
 import logging
 from pathlib import Path
 
@@ -36,6 +38,7 @@ item_count_on_web_server_list: int = 150
 ms_sql_server_addr: () = ("home.obermui.de", 18769)
 #   SERVER NOTIFY UI -> GETS EDITED!!!!
 want_reload_advertise_var: bool = False
+
 
 
 # Der LocalDataBaseManager läd und speichert u.a. sämtliche Einstellungen.
