@@ -193,9 +193,9 @@ class MainWindow(QMainWindow):
     # Funktion (Slot), die mit dem Signal aus MApplication verbunden ist, und bei einem Scan aufgerufen wird
     @Slot(str)
     def new_scan(self, value):
-#        abspath = os.path.abspath(__file__)
-#        d_name = os.path.dirname(abspath)
-#        u = updater.Updater(None, d_name)
+        # abspath = os.path.abspath(__file__)
+        # d_name = os.path.dirname(abspath)
+        # u = updater.Updater(None, d_name)
 
         # Gib den Scan dem Event-Handler weiter...
         log.debug("Neuen Barcode Scan erhalten: {0}".format(value))

@@ -1,58 +1,102 @@
 from PySide2.QtCore import QThread, Slot, QObject
-import git
 from enum import Enum
-import subprocess
 import sys
-from subprocess import Popen, PIPE, STDOUT
+import subprocess
+import timeit
+import logging
 
-import signal
+# später mit success check and restore old version erweiterbar
+from pathlib import Path
+log = logging.getLogger(Path(__file__).name)
+
 
 class Updater(QThread):
     # Enum mit Objektzuständen
     class STATES(Enum):
         UNKNOWN = 0
-        WAITING = 1
-        CHECKING_FOR_UPDATE = 2
-        CHECKING_FINISHED = 3
+        NONE = 1
         UPDATING = 4
         UPDATE_FINISHED = 5
 
-    state: STATES = STATES.WAITING
-    exit_state: int = 0
-    repo: git.Repo = None
+    state: STATES = STATES.NONE
+    repo_path: str = ""
 
     status: str = ""
+    exit_state: int = 0
+
+    last_check: float = 0.0
 
     update_available: bool = False
-    newest_version: str = ""
+    newest_version: str = "-1"
 
-    def __init__(self, parent, path: str):
-        # super(QThread, self).__init__(parent)
-        self.repo = git.Repo(path, search_parent_directories=True)
-        print(self.repo.git.status())
-        print(self.getCurrentVersion())
-        print(self.getCurrentCommit())
-        self.updateAvailable()
-        self.startUpdate()
+    def __init__(self):
+        super().__init__()
 
-    def updateAvailable(self):
-        return self.update_available
+    def setPath(self, path):
+        self.repo_path = path
 
-    def checkForNewVersion(self):
-        # pull to branch
-        # check newest TAg
-        # compare to own one
-        # return (bool updateAvailable, own version, new version)
-        return
+    def exec_git(self, args: []) -> (int, str):
 
-    def eventHandler(self, event: str, value: str):
+        if self.repo_path and self.repo_path == "" or not self.repo_path:
+            log.error("exec_git failed: args:{0}: REPO DIR NOT INITIALIZED".format(str(["git.exe"] + args)))
+            return -1, ""
+
+        try:
+            # log.debug("exec_git: {0}".format(str(["git.exe"] + args)))
+            with subprocess.Popen(["git.exe"] + args, cwd=self.repo_path, stdout=subprocess.PIPE) as proc:
+                proc.wait(timeout=3000)
+                out = str(proc.stdout.read().decode())
+                return proc.returncode, out
+        except Exception as e:
+            log.error("exec_git failed: {0} args:{1}".format(e, ["git.exe"] + args))
+            return -1, str(e.args)
+
+    def isUpdateAvailable(self) -> bool:
+        n = self.getNewestVersion().split(".")
+        o = self.getCurrentVersion().split(".")
+        if len(n) != 3 or len(o) != 3:
+            log.warning("GOT INVALID VERSION FOR CHECK! {0}, {1}".format(str(n), str(o)))
+            return False
+        for i in range(0, 3):
+            if n[i].isdigit() and o[i].isdigit():
+                if int(n[i]) > int(o[i]):
+                    return True
+        return False
+
+    def getNewestVersion(self):
+        # check if last check was longer than 5min ago
+        # if true check
+        # else return old
+        if timeit.default_timer() - self.last_check > 300:
+            self.last_check = timeit.default_timer()
+            ret_v, rets = self.exec_git(["-c", "versionsort.suffix=-", "ls-remote", "--tags", "--sort=-v:refname", "origin"])
+            if ret_v == 0:
+                tags: [] = str(rets).split("\n")
+                for ver in tags:
+                    if "refs/tags/v" in ver:
+                        ver = ver[ver.index("refs/tags/v") + 10:]
+                    if not ver.startswith("v") or ver.count(".") != 2:
+                        continue
+                    self.newest_version = ver[1:]
+                    return ver[1:]
+                return "-1"
+            else:
+                log.warning("getNewestVersion failed: {0}".format(rets))
+                return "-1"
+        else:
+            return self.newest_version
+
+    def eventHandler(self, event: str, value: str = ""):
 
         if self.state == self.STATES.UNKNOWN:
             pass
 
-        elif self.state == self.STATES.WAITING:
+        elif self.state == self.STATES.NONE:
             if event == "START_UPDATE":
                 self.startUpdate()
+            elif event == "GET_STATUS":
+                return "Updating..."
+            pass
 
         elif self.state == self.STATES.UPDATING:
             if event == "GET_STATUS":
@@ -61,16 +105,7 @@ class Updater(QThread):
 
         elif self.state == self.STATES.UPDATE_FINISHED:
             if event == "GET_STATUS":
-                self.state = self.STATES.WAITING
-                return self.status
-            pass
-
-        elif self.state == self.STATES.CHECKING_FOR_UPDATE:
-            pass
-
-        elif self.state == self.STATES.CHECKING_FINISHED:
-            if event == "GET_STATUS":
-                self.state = self.STATES.WAITING
+                self.state = self.STATES.NONE
                 return self.status
             pass
 
@@ -79,39 +114,7 @@ class Updater(QThread):
 
     def startUpdate(self):
         self.state = self.STATES.UPDATING
-        self.exit_state = 0
-        old_version = self.getCurrentVersion()
-
-        try:
-            self.repo.remotes.origin.pull()
-#            print("TEST", [sys.executable, sys.argv[0]])
-#            p = Popen([sys.executable, sys.argv[0], '--help', '-platform off-screen'], stdout=PIPE, stdin=PIPE)
-#
-            # stdout_data = p.communicate(input='quit'.encode(), timeout=1)[0]
-#            print("p:", p.stdout.read(10))
-
-#            p.stdin.write("quit".encode())#
-#            p.send_signal(signal.SIGTERM)
-
-#           print("poll:", p.wait())
-
-        except Exception as e:
-            self.exit_state = -1
-            print("ERROR: ", e)
-            # Restore current Version
-            pass
-        if self.exit_state !=0:
-            self.restoreOldVersion(old_version)
-
-
-        self.state = self.STATES.UPDATE_FINISHED
-
-    def restoreOldVersion(self, hash):
-        try:
-            pass
-        except Exception as e:
-            return 1
-        return 0
+        self.start()
 
     def killThread(self):
         if self.isRunning():
@@ -123,42 +126,30 @@ class Updater(QThread):
                     self.terminate()
                     self.wait(100)
 
-    def getCurrentCommit(self):
-        return self.repo.head.object.hexsha
-
     def getCurrentVersion(self):
-        tags: [] = sorted(self.repo.tags, key=lambda t: t.commit.committed_datetime)
-        for ver in reversed(tags):
-            if not ver.name.startswith("v") or ver.name.count(".") != 2:
+
+        ret, tgs = self.exec_git(["tag", "-l", "--sort=-v:refname"])
+        tags: [] = str(tgs).split("\n")
+        for ver in tags:
+            if not ver.startswith("v") or ver.count(".") != 2:
                 continue
-            return ver.name[1:]
+            return ver[1:]
         return "-1"
 
     # Für Internet seite: wenn update gestartet → entweder nichts oder Updating... oder Success oder failed... anzeigen
-    @staticmethod
-    def getStatus():
-        print("No Update done")
-        print("Update failed:")
-        print("Update successful")
-
-    # Für Internet seite und start → aus db
-    @staticmethod
-    def getLastUpdate():
-        print("date: (z.b. from loc db)")
-        return
+    def getStatus(self):
+        return self.eventHandler("GET_STATUS")
 
     def run(self) -> None:
-        # save current version
-        # git pull
-        # if git pull fails -> reset to old version
-        return
+        ret_v, rets = self.exec_git(["reset", "--hard", "origin/main"])
+        if ret_v != 0:
+            self.status = "Update fehlgeschlagen! Reset failed: " + rets
+            self.exit_state = ret_v
 
-    @Slot()
-    def updateThreadStarted(self):
-        # change status
-        return
-
-    @Slot()
-    def updateThreadFinished(self):
-        # change status
+        else:
+            ret_v, rets = self.exec_git(["pull", "-f"])
+            if ret_v != 0:
+                self.status = "Update fehlgeschlagen! Pull failed: " + rets
+                self.exit_state = ret_v
+        self.state = self.STATES.UPDATE_FINISHED
         return

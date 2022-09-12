@@ -2,9 +2,6 @@
 # Einstellungen - Konstanten, die nicht in Laufzeit verändert werden
 ####
 
-# Programm Version
-PROGRAMM_VERSION: str = "2.1.0"
-
 ####
 # MS SQL Server
 ####

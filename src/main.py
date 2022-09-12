@@ -12,18 +12,22 @@ import timeit
 from PySide2.QtWidgets import QApplication, QWidget
 
 import constants as consts
-
+import updater
 
 import logging
 from pathlib import Path
 log = logging.getLogger(Path(__file__).name)
 
+glob_updater = updater.Updater()
 
 if __name__ == "__main__":
     # Change Working Directory to the one this file is in
     abspath = os.path.abspath(__file__)
     d_name = os.path.dirname(abspath)
     os.chdir(d_name)
+
+    # Setup updater
+    glob_updater.setPath(d_name)
 
     # Tee stderr to log and to console
     try:
@@ -42,7 +46,7 @@ if __name__ == "__main__":
             exit(0)
 
     # Print All Versions and write it also to log
-    logger.print_debug_versions()
+    logger.print_debug_versions(d_name)
 
     # MApplication
     m_app: mapplication = None
@@ -144,4 +148,6 @@ if __name__ == "__main__":
              .format(ret, datetime.datetime.now()))
 
     logger.cleanup()
+    if glob_updater.isRunning():
+        glob_updater.killThread()
     sys.exit(ret)

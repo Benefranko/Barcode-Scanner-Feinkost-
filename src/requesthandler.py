@@ -1,6 +1,8 @@
 import calendar
 import shutil
 import random
+import os
+
 
 from http.server import BaseHTTPRequestHandler
 from datetime import datetime, timedelta
@@ -14,7 +16,6 @@ from pathlib import Path
 from PySide2.QtWidgets import QApplication
 
 log = logging.getLogger(Path(__file__).name)
-
 
 
 # Klasse, die eine TCP Verbindung managed
@@ -158,9 +159,6 @@ class RequestHandler(BaseHTTPRequestHandler):
 
                 elif sub_paths[2] == "log.html":
                     html_bytes = self.getLogPage()
-                elif sub_paths[2] == "shutdown.html":
-                    self.settingsShutDown()
-                    return self.getSettingsPage()
 
                 else:
                     html_status, html_bytes = self.getPageNotFound()
@@ -764,17 +762,11 @@ class RequestHandler(BaseHTTPRequestHandler):
 
     @staticmethod
     def settingsShutDown():
-        bus = SystemBus()
-        proxy = bus.get('org.freedesktop.login1', '/org/freedesktop/login1')
-        if proxy.CanPowerOff() == 'yes':
-            proxy.PowerOff(False)  # False for 'NOT interactive'
+        os.system('sudo shutdown now')
 
     @staticmethod
     def settingsReboot():
-        bus = SystemBus()
-        proxy = bus.get('org.freedesktop.login1', '/org/freedesktop/login1')
-        if proxy.CanReboot() == 'yes':
-            proxy.Reboot(False)  # False for 'NOT interactive'
+        os.system('sudo reboot')
 
     def replaceVarsInSettingsHtml(self, html: bytes) -> bytes:
         html = html.replace("%anzeigezeit_Hersteller_value%".encode(),

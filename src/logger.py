@@ -7,6 +7,9 @@ import logging
 import constants as consts
 import datetime
 
+import main
+
+
 from pathlib import Path
 
 log = logging.getLogger(Path(__file__).name)
@@ -27,17 +30,25 @@ def cleanup():
     sys.stderr = sys.__stderr__
 
 
-def print_debug_versions():
+def print_debug_versions(d_name):
     # Log....
     log.info("-------------------Programm Start: {0}-------------------".format(datetime.datetime.now()))
 
+    if main.glob_updater:
+        main.glob_updater.setPath(d_name)
+        ver = main.glob_updater.getCurrentVersion()
+    else:
+        ver = "UNKNOWN"
+
     log.debug("{0}[ Programm Version: {1} ] [ Python Version: {2} ] [ Qt Version: {3} ]\n"
               "[ PyODBC Version: {4} ] [ SQL Lite3 Version: {5} ] [ Unterstützte MS ODBC Driver Version: {6} ]\n"
-              "[ Unterstützte FreeTDS Driver Version: {7} {8} ] [ Arbeitsverzeichnis: {9} ]".
-              format("", consts.PROGRAMM_VERSION, sys.version, QtCore.qVersion(),
+              "[ Unterstützte FreeTDS Driver Version: {7} {8} ] [ Arbeitsverzeichnis: {9} ] \n"
+              "[UPDATE VERFÜGBAR: {10}] [NEUSTE VERSION: {11}]".
+              format("", ver, sys.version, QtCore.qVersion(),
                      pyodbc.version, sqlite3.version, consts.SQL_DRIVER_USED_VERSION_MS_DRIVER,
                      consts.SQL_DRIVER_USED_VERSION_FreeTDS, consts.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION,
-                     os.path.abspath("./")))
+                     os.path.abspath("./"), main.glob_updater.isUpdateAvailable(),
+                     main.glob_updater.getNewestVersion()))
     # Infoausgabe
     # print("------------------------------------------------------------------")
     # print("Programm Start: ", datetime.datetime.now())
