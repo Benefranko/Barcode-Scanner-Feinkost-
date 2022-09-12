@@ -12,10 +12,9 @@ import logging
 from pathlib import Path
 
 from PySide2.QtWidgets import QApplication
-from pydbus import SystemBus
-
 
 log = logging.getLogger(Path(__file__).name)
+
 
 
 # Klasse, die eine TCP Verbindung managed
