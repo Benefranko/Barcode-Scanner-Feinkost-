@@ -128,8 +128,9 @@
 				<form action="" method="post">
 					<label for="changePasswordNewPW"><strong>&#8675; Programm Aktualisieren:</strong></label><br>
 					<!--%MSG1%--><br>
-					Admin Passwort: <input class="textInputField" type="password" name="adminPW" disabled value="">
-					<input class="small-btn m-btn-gray" type="submit" value="Update starten" disabled="disabled"> <!--%STATUS12%-->
+					<label for="changePasswordNewPW"><!--%disabled_update%--> Admin Passwort:</label>
+					<input class="textInputField" type="password" name="adminPW" value="" ><!--%disabled_update%-->
+					<input class="small-btn m-btn-gray" name="update_button" type="submit" value="Update starten" ><!--%disabled_update%--> <!--%STATUS12%-->
 				</form>
 			</li>
 		</ul>

@@ -93,13 +93,17 @@ class Updater(QThread):
 
         elif self.state == self.STATES.NONE:
             if event == "START_UPDATE":
-                self.startUpdate()
+                self.state = self.STATES.UPDATING
+                self.start()
             elif event == "GET_STATUS":
                 return "Updating..."
             pass
 
         elif self.state == self.STATES.UPDATING:
             if event == "GET_STATUS":
+                if not self.isRunning():
+                    self.state = self.STATES.UPDATE_FINISHED
+                    return "Unknown Error!"
                 return "Updating..."
             pass
 
@@ -113,8 +117,7 @@ class Updater(QThread):
             pass
 
     def startUpdate(self):
-        self.state = self.STATES.UPDATING
-        self.start()
+        return self.eventHandler("START_UPDATE")
 
     def killThread(self):
         if self.isRunning():
@@ -143,11 +146,12 @@ class Updater(QThread):
         return self.eventHandler("GET_STATUS")
 
     def run(self) -> None:
-        ret_v, rets = self.exec_git(["reset", "--hard", "origin/main"])
-        if ret_v != 0:
-            self.status = "Update fehlgeschlagen! Reset failed: " + rets
-            self.exit_state = ret_v
-
+        #ret_v, rets = self.exec_git(["reset", "--hard", "origin/main"])
+        #if ret_v != 0:
+        #    self.status = "Update fehlgeschlagen! Reset failed: " + rets
+        #    self.exit_state = ret_v
+        if False:
+            pass
         else:
             ret_v, rets = self.exec_git(["pull", "-f"])
             if ret_v != 0:

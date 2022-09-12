@@ -499,6 +499,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                 elif "mandant_name" in data:
                     html_bytes = self.settingsUpdateMandant(data, html)
 
+                elif "update_button" in data:
+                    html_bytes = self.settingsUpdate(data, html)
+
                 else:
                     html_status, html_bytes = self.getPageNotFound()
 
@@ -761,6 +764,17 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS4%-->".encode(), status.encode()))
 
+    def settingsUpdate(self, data, html: bytes) -> bytes:
+        status = ""
+        if not self.adminPasswordIsCorrect(data, "adminPW"):
+            status = "<font color='red'>Aktualisierung fehlgeschlagen! Falsches Passwort</font>"
+            log.debug("Aktualisierung fehlgeschlagen! Falsches Passwort")
+        else:
+            logger.glob_updater.startUpdate()
+            status = logger.glob_updater.getStatus()
+
+        return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS12%-->".encode(), status.encode()))
+
     @staticmethod
     def settingsShutDown():
         os.system('sudo shutdown now')
@@ -796,11 +810,13 @@ class RequestHandler(BaseHTTPRequestHandler):
         html = html.replace("%mandant_name%".encode(),
                             str(self.loc_db_mngr.getMS_SQL_Mandant()).encode())
 
-        status = "Es ist eine neuere Version( " + str(logger.glob_updater.getNewestVersion()) + ") verfügbar. " \
+        status = "Es ist eine neuere Version ( " + str(logger.glob_updater.getNewestVersion()) + " ) verfügbar. " \
                  "Derzeitige Version: " + str(logger.glob_updater.getCurrentVersion())
         if not logger.glob_updater.isUpdateAvailable():
-            status = "Sie verwenden bereits die neuste Version( " + str(logger.glob_updater.getCurrentVersion()) + ")."
+            status = "Sie verwenden bereits die neuste Version: " + str(logger.glob_updater.getCurrentVersion())
+            html = html.replace("><!--%disabled_update%-->".encode(), "hidden=\"true\">".encode())
 
         html = html.replace("<!--%MSG1%-->".encode(), status.encode())
-
+        #
+        #
         return html
