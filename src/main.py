@@ -12,7 +12,6 @@ import timeit
 from PySide2.QtWidgets import QApplication, QWidget
 
 import constants as consts
-import updater
 
 
 import logging
@@ -25,12 +24,6 @@ if __name__ == "__main__":
     abspath = os.path.abspath(__file__)
     d_name = os.path.dirname(abspath)
     os.chdir(d_name)
-
-    u = updater.Updater(None, d_name)
-
-
-    # u.get_most_recent_git_tag()
-    sys.exit(0)
 
     # Tee stderr to log and to console
     try:
@@ -46,7 +39,7 @@ if __name__ == "__main__":
             print("Mit diesem Programm sollen Kunden durch das Scannen eines Produkt Bar Codes zusätzliche "
                   "Informationen zu diesem über die JTL-Wawi MS SQL Datenbank bekommen.")
             print("Mit '", sys.argv[0], " -platform off-screen' können sie das Programm ohne Fenster starten")
-            exit()
+            exit(0)
 
     # Print All Versions and write it also to log
     logger.print_debug_versions()

@@ -11,9 +11,11 @@ import localdatabasemanager
 import logging
 from pathlib import Path
 
-log = logging.getLogger(Path(__file__).name)
-
 from PySide2.QtWidgets import QApplication
+from pydbus import SystemBus
+
+
+log = logging.getLogger(Path(__file__).name)
 
 
 # Klasse, die eine TCP Verbindung managed
@@ -757,6 +759,13 @@ class RequestHandler(BaseHTTPRequestHandler):
                 status = "<font color='red'>Ein unerwartetes Problem ist aufgetreten!</font>"
 
         return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS4%-->".encode(), status.encode()))
+
+    @staticmethod
+    def settingsShutDown():
+        bus = SystemBus()
+        proxy = bus.get('org.freedesktop.login1', '/org/freedesktop/login1')
+        if proxy.CanPowerOff() == 'yes':
+            proxy.PowerOff(False)  # False for 'NOT interactive'
 
     def replaceVarsInSettingsHtml(self, html: bytes) -> bytes:
         html = html.replace("%anzeigezeit_Hersteller_value%".encode(),
