@@ -43,6 +43,17 @@ Aktiviert wird der Autostart durch den Befehl:
 ``sudo systemctl enable feinkostBarcodeScanner``,\
 deaktiviert mit: ``sudo systemctl disable feinkostBarcodeScanner``
 
+# Aktiviere Herunterfahren & Neustarten über Web
+````
+sudo visudo
+````
+Und füge folgende Zeile hinzu:
+````
+user_name ALL=(ALL) NOPASSWD: /sbin/reboot, /sbin/shutdown
+````
+
+
+
 # Abhängigkeiten Installation zusammengefasst:
 Durch folgenden Bash-Code sollten alle benötigten Abhängigkeiten installiert werden. Sollten dabei Probleme auftreten,
 werden darauffolgend noch einmal alle Schritte detaillierter aufgeführt.

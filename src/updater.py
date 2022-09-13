@@ -43,7 +43,7 @@ class Updater(QThread):
 
         try:
             # log.debug("exec_git: {0}".format(str(["git.exe"] + args)))
-            with subprocess.Popen(["git.exe"] + args, cwd=self.repo_path, stdout=subprocess.PIPE,
+            with subprocess.Popen([constants.git_programm_path] + args, cwd=self.repo_path, stdout=subprocess.PIPE,
                                   stderr=subprocess.STDOUT) as proc:
                 proc.wait(timeout=300)
                 out = str(proc.stdout.read().decode())
@@ -104,16 +104,16 @@ class Updater(QThread):
             if event == "GET_STATUS":
                 if not self.isRunning():
                     self.state = self.STATES.UPDATE_FINISHED
-                    return "Unknown Error!"
+                    return "Unknown Error! (" + self.status + ")"
                 return "Updating... ( Laden sie die Seite 1 mal neu für neuere Infos )"
             pass
 
         elif self.state == self.STATES.UPDATE_FINISHED:
             if event == "GET_STATUS":
-                self.state = self.STATES.NONE
-                tmp = self.status
-                self.status = ""
-                return tmp
+                # self.state = self.STATES.NONE
+                # tmp = self.status
+                # self.status = ""
+                return self.status + "\nBitte starten sie das Programm neu!"
             pass
 
         else:
@@ -169,6 +169,7 @@ class Updater(QThread):
             self.exit_state = ret_v
         else:
             self.status = "Erfolgreich Update ausgeführt!"
+            # reset to exact version has????
         self.state = self.STATES.UPDATE_FINISHED
         self.current_version = "-1"  # generate new next time
         return

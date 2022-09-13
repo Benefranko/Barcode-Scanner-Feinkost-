@@ -49,3 +49,18 @@ PRODUCT_MAX_FONT_SIZE: int = 40
 # Maximale Kurzbeschreibungszeichenlänge, wenn größer, dann zeig nur noch "Produkt Informationen:"
 # -> Layout sonst nicht mehr schön (Bild wird zu klein, bzw Textfeld zu breit)
 MAX_SHORT_DESCRIPTION_LENGTH: int = 50
+
+
+# programm paths:
+# Git:
+git_programm_path: str = "git.exe"  # /usr/bin/git (in linux!!)
+
+# commands:
+shutdown_command: str = "sudo shutdown now"  # Windows: shutdown –s
+
+reboot_command: str = "sudo reboot"  # Windows: shutdown –r
+
+
+
+
+
