@@ -166,6 +166,10 @@ class RequestHandler(BaseHTTPRequestHandler):
                 elif sub_paths[2] == "test.html":
                     html_bytes = self.getFileText("../web/html/test.html")
 
+                elif sub_paths[2] == "about.html":
+                    html_bytes = self.getFileText("../web/html/about.html")
+                    html_bytes = html_bytes.replace("%version%".encode(), logger.glob_updater.getCurrentVersion().encode())
+
                 else:
                     html_status, html_bytes = self.getPageNotFound()
 

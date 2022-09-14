@@ -12,11 +12,11 @@
 				width: 95%;
 				line-height: 1.5;
 			}
-			ul {
+			.m-ul {
 				font-size: 22px;
 				font-family: 'Source Sans Pro', sans-serif;
 			}
-			li {
+			.m-li {
 				margin-top:30px;
 			}
 			.textInputField {
@@ -51,8 +51,8 @@
 
 		<div class="spacer"></div>
 
-		<ul>
-			<li class="bordered-orange">
+		<ul class="m-ul">
+			<li class="bordered-orange m-li">
 				<form action="" method="post">
 					<strong>&#x21bb; Lade Liste mit Werbung neu:</strong>
 					<input class="small-btn m-btn-gray" style="margin-left: 54px" type="submit" value="Neu laden" name="ReloadAdvertiseListButton"> <!--%STATUS10%-->
@@ -60,7 +60,7 @@
 				<div> &#9733; F&uuml;gen sie ein Artikelmerkmal in JTL-Wawi (mit den Meta-Keywords: ANZEIGEN=TRUE) hinzu <br>
 				und kennzeichnen sie ihre Werbungsartikel Artikel um sie anzeigen zu lassen! </div>
 			</li>
-			<li class="bordered">
+			<li class="bordered m-li">
 				<form action="" method="post">
 					<label for="showArticleTime"><strong>&#128337; Anzeigezeit der Artikelinformationen:</strong></label><br>
 					Admin Passwort: <input class="textInputField" type="password" name="adminPW" value=""><br>
@@ -68,7 +68,7 @@
 					<input class="small-btn m-btn-gray" type="submit" value="Anwenden"> <!--%STATUS1%-->
 				</form>
 			</li>
-			<li class="bordered">
+			<li class="bordered m-li">
 				<form action="" method="post">
 					<label for="showHerstellerTime"><strong>&#128337; Anzeigezeit der Herstellerinformationen:</strong></label><br>
 					Admin Passwort:  <input class="textInputField" type="password" name="adminPW" value=""><br>
@@ -76,7 +76,7 @@
 					<input class="small-btn m-btn-gray" type="submit" value="Anwenden"> <!--%STATUS2%-->
 				</form>
 			</li>
-			<li class="bordered">
+			<li class="bordered m-li">
 				<form action="" method="post">
 					<label for="changeAdvertiseTime"><strong>&#128337; Zeit zwischen Wechsel der Werbungsseite und Startseite:</strong></label><br>
 					Admin Passwort:  <input class="textInputField" type="password" name="adminPW" value=""><br>
@@ -84,7 +84,7 @@
 					<input class="small-btn m-btn-gray" type="submit" value="Anwenden"> <!--%STATUS3%-->
 				</form>
 			</li>
-			<li class="bordered">
+			<li class="bordered m-li">
 				<form action="" method="post">
 					<label for="changeNothingFoundTime"><strong>&#128337; Anzeigezeit der Nichts-gefunden-Seite:</strong></label><br>
 					Admin Passwort:  <input class="textInputField" type="password" name="adminPW" value=""><br>
@@ -93,7 +93,7 @@
 				</form>
 			</li>
 
-			<li class="bordered-orange">
+			<li class="bordered-orange m-li">
 				<form action="" method="post">
 					<label for="table_row_count"><strong>&#9016; Anzahl der Eintr&auml;ge der Tabelle pro Seite:</strong></label><br>
 					Admin Passwort:  <input class="textInputField" type="password" name="adminPW" value=""><br>
@@ -102,7 +102,7 @@
 				</form>
 			</li>
 
-			<li class="bordered-blue">
+			<li class="bordered-blue m-li">
 				<form action="" method="post">
 					<label for="server_ip"><strong>&#128187; Microsoft SQL Server Address:</strong></label><br>
 					Admin Passwort: <input class="textInputField" type="password" name="adminPW" value=""><br>
@@ -112,7 +112,7 @@
 				</form>
 			</li>
 
-			<li class="bordered-blue">
+			<li class="bordered-blue m-li">
 				<form action="" method="post">
 					<label for="server_ip"><strong>&#128273; Microsoft SQL Server Login Daten:</strong></label><br>
 					Admin Passwort: <input class="textInputField" type="password" name="adminPW" value=""><br>
@@ -123,7 +123,7 @@
 			</li>
 
 
-			<li class="bordered-blue">
+			<li class="bordered-blue m-li">
 				<form action="" method="post">
 					<label for="table_row_count"><strong>&#128100; Microsoft SQL Server Mandant:</strong></label><br>
 					Admin Passwort:  <input class="textInputField" type="password" name="adminPW" value=""><br>
@@ -133,7 +133,7 @@
 			</li>
 
 
-			<li class="bordered-black" >
+			<li class="bordered-black m-li" >
 				<form action="" method="post">
 					<label for="pw-field"><strong>&#8675; Programm Aktualisieren:</strong></label><br>
 					<!--%MSG1%--><br>
@@ -146,7 +146,7 @@
 					, bzw zu den einzelnen Versionen unter <a href="https://github.com/Benefranko/Barcode-Scanner-Feinkost-/tags">[Versionen]</a>!</div>
 			</li>
 
-			<li class="bordered-gray" >
+			<li class="bordered-gray m-li" >
 				<form action="" method="post">
 					<label for="neustarten"><strong>&#8634; Barcodescanner neustarten:</strong></label><br>
 					<label for="neustarten"> Admin Passwort:</label>
@@ -155,7 +155,7 @@
 				</form>
 			</li>
 
-			<li class="bordered-gray" >
+			<li class="bordered-gray m-li" >
 				<form action="" method="post">
 					<label for="shutdown_btn"><strong>&#9212; Barcodescanner herunterfahren:</strong></label><br>
 					<label for="shutdown_btn"> Admin Passwort:</label>
@@ -164,7 +164,7 @@
 				</form>
 			</li>
 
-			<li class="bordered-orange" >
+			<li class="bordered-orange m-li" >
 				<form action="" method="post">
 					<label for="auto_shutdown"><strong>&#128337; Automatisches Herunterfahren:</strong></label><br>
 					<label for="auto_shutdown"> Admin Passwort:</label>
@@ -178,7 +178,7 @@
 					durch die Zeitschaltuhr wieder automatisch hochfahren lassen.)</div>
 			</li>
 
-			<li class="bordered">
+			<li class="bordered m-li">
 				<form action="" method="post">
 					<label for="changePasswordNewPW"><strong>&#128273;Admin Passwort &auml;ndern:</strong></label><br>
 					Admin Passwort: <input class="textInputField" type="password" name="adminPW" value=""><br>
@@ -211,6 +211,7 @@
 				<li><a href="/html/tabelle/0">Tabelle</a></li>
 				<li><a href="/html/log.html">Ereignislog</a></li>
 				<li><a href="/html/settings.html">Einstellungen</a></li>
+				<li><a href="/html/about.html">&Uuml;ber</a></li>
 			</ul>
 		</nav>
 
