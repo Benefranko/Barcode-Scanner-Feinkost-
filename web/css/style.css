@@ -130,6 +130,10 @@ body {
     font-size:40px;
 }
 
+.small-font {
+    font-size:18px;
+}
+
 .row {
     width: 100%;
     display: flex;

@@ -39,6 +39,8 @@ ms_sql_server_addr: () = ("home.obermui.de", 18769)
 #   SERVER NOTIFY UI -> GETS EDITED!!!!
 want_reload_advertise_var: bool = False
 
+# auto shutdown time
+auto_shutdown_time: (str, str) = ("-1", "-1")
 
 
 # Der LocalDataBaseManager läd und speichert u.a. sämtliche Einstellungen.
@@ -238,6 +240,7 @@ class LocalDataBaseManager:
         global item_count_on_web_server_list
         global ms_sql_server_addr
         global want_reload_advertise_var
+        global auto_shutdown_time
 
         admin_pw = self.loadLogin("ADMIN", ("", admin_pw))[1]
         ms_sql_server_login_data = self.loadLogin("MS-SQL-SERVER-LOGIN", ms_sql_server_login_data)
@@ -249,11 +252,12 @@ class LocalDataBaseManager:
         show_producer_infos_time = self.loadNumber("HERSTELLER",  1, show_producer_infos_time)
         show_nothing_found_time = self.loadNumber("NOTHING-FOUND", 1, show_nothing_found_time)
 
-        # IDK
+        # Else
         item_count_on_web_server_list = self.loadNumber("WEB-TABLE-LENGTH", 1, item_count_on_web_server_list)
         ms_sql_server_addr = self.loadLogin("SERVER-ADDRESS", ms_sql_server_addr)
         want_reload_advertise_var = bool(self.loadNumber("WANT-RELOAD-ADVERTISE-LIST", -1,
                                                          int(want_reload_advertise_var)))
+        auto_shutdown_time = self.loadLogin("AUTO_SHUTDOWN_TIME", auto_shutdown_time)
 
     def setAdminPw(self, new_value):
         global admin_pw
@@ -325,6 +329,17 @@ class LocalDataBaseManager:
             return "SUCCESS"
         return None
 
+    def setAutoShutdownTime(self, hour: str, minutes: str):
+        global auto_shutdown_time
+        if len(hour) == 1:
+            hour = "0" + hour
+        if len(minutes) == 1:
+            minutes = "0" + minutes
+        if self.storeLogin("AUTO_SHUTDOWN_TIME", hour, minutes):
+            auto_shutdown_time = (hour, minutes)
+            return "SUCCESS"
+        return None
+
     ####
     # Getter
     ####
@@ -368,3 +383,7 @@ class LocalDataBaseManager:
     @staticmethod
     def checkWantReloadAdvertiseList() -> bool:
         return want_reload_advertise_var
+
+    @staticmethod
+    def getAutoShutdownTime() -> (str, str):
+        return auto_shutdown_time

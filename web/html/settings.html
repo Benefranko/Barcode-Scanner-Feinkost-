@@ -5,6 +5,8 @@
 		<title>Feinkost Barcode Scanner Webserver</title>
 		<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 		<link rel="stylesheet" href="/css/style.css">
+		<link rel="stylesheet" href="/css/sidebar-style.css">
+
 		<style>
 			body {
 				width: 95%;
@@ -28,6 +30,7 @@
 				vertical-align:middle;
 				margin-left: 15px;
 			}
+
 		</style>
 
 	</head>
@@ -54,8 +57,8 @@
 					<strong>&#x21bb; Lade Liste mit Werbung neu:</strong>
 					<input class="small-btn m-btn-gray" style="margin-left: 54px" type="submit" value="Neu laden" name="ReloadAdvertiseListButton"> <!--%STATUS10%-->
 				</form>
-				F&uuml;gen sie ein Artikelmerkmal in JTL-Wawi (mit den Meta-Keywords: ANZEIGEN=TRUE) hinzu<br>
-				und kennzeichnen sie ihre Werbungsartikel Artikel!
+				<div> &#9733; F&uuml;gen sie ein Artikelmerkmal in JTL-Wawi (mit den Meta-Keywords: ANZEIGEN=TRUE) hinzu <br>
+				und kennzeichnen sie ihre Werbungsartikel Artikel um sie anzeigen zu lassen! </div>
 			</li>
 			<li class="bordered">
 				<form action="" method="post">
@@ -129,26 +132,18 @@
 				</form>
 			</li>
 
-			<li class="bordered">
-				<form action="" method="post">
-					<label for="changePasswordNewPW"><strong>&#128273;Admin Passwort &auml;ndern:</strong></label><br>
-					Admin Passwort: <input class="textInputField" type="password" name="adminPW" value=""><br>
-					Neues Passwort: <input class="textInputField" type="password" id="changePasswordNewPW" name="changePasswordNewPW_value" value="">
-					<input class="small-btn m-btn-gray" type="submit" value="Anwenden"> <!--%STATUS4%-->
-				</form>
-			</li>
 
 			<li class="bordered-black" >
 				<form action="" method="post">
-					<label for="changePasswordNewPW"><strong>&#8675; Programm Aktualisieren:</strong></label><br>
+					<label for="pw-field"><strong>&#8675; Programm Aktualisieren:</strong></label><br>
 					<!--%MSG1%--><br>
 					<label for="pw-field"><!--%disabled_update%--> Admin Passwort:</label>
 					<input class="textInputField" type="password" name="adminPW" id="pw-field" value="" ><!--%disabled_update%-->
 					<input class="small-btn m-btn-gray" name="update_button" type="submit" value="Update starten" ><!--%disabled_update%--> <!--%STATUS12%-->
 				</form>
-					<br>Vergewissern sie sich, nur vertrauensw&uuml;rdigen Programmcode auszuf&uuml;hren!<br>
-					Weitere Informationen zum Programmcode auf <a href="https://github.com/Benefranko/Barcode-Scanner-Feinkost-">Github</a>
-					, bzw zu den einzelnen Versionen unter <a href="https://github.com/Benefranko/Barcode-Scanner-Feinkost-/tags">[Versionen]</a>!
+				<div> &#9733; Vergewissern sie sich, nur vertrauensw&uuml;rdigen Programmcode auszuf&uuml;hren!</div>
+				<div> &#9733; Weitere Informationen zum Programmcode auf <a href="https://github.com/Benefranko/Barcode-Scanner-Feinkost-">Github</a>
+					, bzw zu den einzelnen Versionen unter <a href="https://github.com/Benefranko/Barcode-Scanner-Feinkost-/tags">[Versionen]</a>!</div>
 			</li>
 
 			<li class="bordered-gray" >
@@ -171,12 +166,24 @@
 
 			<li class="bordered-orange" >
 				<form action="" method="post">
-					<label for="changePasswordNewPW3"><strong>&#128337; Barcodescanner Power-management:</strong></label><br>
-					Automatisches Einschalten um: uhrzeit:<br>
-					Automatisches Herunterfahren um: uhrzeit:<br>
-					<label for="changePasswordNewPW3"> Admin Passwort:</label>
-					<input class="textInputField" type="password" name="adminPW" id="changePasswordNewPW3" value="" disabled>
-					<input class="small-btn m-btn-gray" name="update_button" type="submit" value="Update starten" disabled>
+					<label for="auto_shutdown"><strong>&#128337; Automatisches Herunterfahren:</strong></label><br>
+					<label for="auto_shutdown"> Admin Passwort:</label>
+					<input class="textInputField" type="password" name="adminPW" id="auto_shutdown" value=""><br>
+					<label for="auto_shutdown_tim"> Uhrzeit:</label>
+					<input class="textInputField" type="text" id="auto_shutdown_tim" name="shutdownTime" value="%shutdownTime%">
+					<input class="small-btn m-btn-gray" name="auto_shutdown_time_btn" type="submit" value="Anwenden"> <!--%STATUS15%-->
+				</form>
+				<div> &#9733; Gut kombinierbar mit zus&auml;tzlicher Zeitschaltuhr f&uuml;r den Raspberrypi und Bildschirm, um Strom zu sparen.</div>
+				<div class="small-font"> (Den Raspberrypi kurz vor Zeitschaltuhr sicher herunterfahren lassen und am n&auml;chsten Tag
+					durch die Zeitschaltuhr wieder automatisch hochfahren lassen.)</div>
+			</li>
+
+			<li class="bordered">
+				<form action="" method="post">
+					<label for="changePasswordNewPW"><strong>&#128273;Admin Passwort &auml;ndern:</strong></label><br>
+					Admin Passwort: <input class="textInputField" type="password" name="adminPW" value=""><br>
+					Neues Passwort: <input class="textInputField" type="password" id="changePasswordNewPW" name="changePasswordNewPW_value" value="">
+					<input class="small-btn m-btn-gray" type="submit" value="Anwenden"> <!--%STATUS4%-->
 				</form>
 			</li>
 		</ul>
@@ -189,6 +196,23 @@
 			<a class="m-btn m-btn-green row-block-distance-40" href="/html/log.html"> &#128712; Ereignis Log</a>
 		</div>
 		<div class="pageEnd"></div>
+
+	<!-- Navigation-Element -->
+		<nav style="font-family: Arial, sans-serif; font-size: 18px;">
+			<ul>
+				<li><a href="/">Startseite</a></li>
+				<li><a>Diagramme</a>
+			    	<ul>
+						<li><a href="/html/wochenstatus.html">Wochenstatistik</a></li>
+				  		<li><a href="/html/monatsstatus.html">Monatsstatistik</a></li>
+						<li><a href="/html/jahresstatus.html">Jahresstatistik</a></li>
+					</ul>
+				</li>
+				<li><a href="/html/tabelle/0">Tabelle</a></li>
+				<li><a href="/html/log.html">Ereignislog</a></li>
+				<li><a href="/html/settings.html">Einstellungen</a></li>
+			</ul>
+		</nav>
 
 	</body>
 </html>

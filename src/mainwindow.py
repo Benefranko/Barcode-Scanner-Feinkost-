@@ -13,8 +13,7 @@ from databasemanager import DataBaseManager
 import localdatabasemanager
 import constants as consts
 
-import updater
-
+from datetime import datetime
 import logging
 from pathlib import Path
 
@@ -616,7 +615,16 @@ class MainWindow(QMainWindow):
                     self.window.stackedWidget.setCurrentIndex(2)
                     self.showTimeTimer = self.loc_db_mngr.getNothingFoundPageShowTime()
                     return
-
+                elif action == "TIMER":
+                    ast = self.loc_db_mngr.getAutoShutdownTime()
+                    now = datetime.now()
+                    ch = now.strftime("%H")
+                    cm = now.strftime("%M")
+                    if ast[0] == str(ch) and ast[1] == str(cm):
+                        log.info(">>>>AUTO SHUTDOWN<<<<: {0}:{1}".format(ch, cm))
+                        os.system(consts.shutdown_command)
+                        QApplication.quit()
+                        return
             # Zustands spezifische Aktionen:
             # Zustand: Warte für Barcode Scan:
             if self.state == self.STATES.WAIT_FOR_SCAN:

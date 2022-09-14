@@ -57,6 +57,8 @@ class RequestHandler(BaseHTTPRequestHandler):
 
                 elif sub_paths[2] == "style.css":
                     html_bytes = self.getFileText("../web/css/style.css")
+                elif sub_paths[2] == "sidebar-style.css":
+                    html_bytes = self.getFileText("../web/css/sidebar.css")
 
                 else:
                     html_status, html_bytes = self.getPageNotFound()
@@ -161,6 +163,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                 elif sub_paths[2] == "log.html":
                     html_bytes = self.getLogPage()
 
+                elif sub_paths[2] == "test.html":
+                    html_bytes = self.getFileText("../web/html/test.html")
+
                 else:
                     html_status, html_bytes = self.getPageNotFound()
 
@@ -220,7 +225,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         return bts.encode("utf-8")
 
     def getPageNotFound(self) -> (int, bytes):
-        log.debug("> WARNUNG: (POST) Seite nicht gefunden: {0}".format(self.path))
+        log.debug("> WARNUNG: Seite nicht gefunden: {0}".format(self.path))
         return 404, open("../web/html/404.html", "r").read().encode()
 
     @staticmethod
@@ -515,6 +520,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                 elif "shutdown_button" in data:
                     html_bytes = self.settings_shutdown(data, html)
 
+                elif "shutdownTime" in data:
+                    html_bytes = self.settings_auto_shutdown(data, html)
+
                 else:
                     html_status, html_bytes = self.getPageNotFound()
 
@@ -794,6 +802,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         else:
             if os.system(consts.shutdown_command) == 0:
                 status = "Fahre Computer herunter..."
+                QApplication.quit()
             else:
                 status = "Herunterfahren fehlgeschlagen!"
                 log.debug("Herunterfahren fehlgeschlagen!")
@@ -807,11 +816,33 @@ class RequestHandler(BaseHTTPRequestHandler):
         else:
             if os.system(consts.reboot_command) == 0:
                 status = "Starte Computer neu..."
+                QApplication.quit()
             else:
                 status = "Neustarten fehlgeschlagen!"
                 log.debug("Neustarten fehlgeschlagen!")
 
         return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS13%-->".encode(), ("<font color='red'>" + status + "</font>").encode()))
+
+    def settings_auto_shutdown(self, data, html: bytes) -> bytes:
+        status: str = "<font color='green'>Erfolgreich aktualisiert!</font>"
+        value: [] = str(data[data.index("shutdownTime") + 1]).split("%3A")
+
+        if not self.adminPasswordIsCorrect(data, "adminPW"):
+            status = "<font color='red'>Aktualisierung fehlgeschlagen! Falsches Passwort</font>"
+            log.debug("Aktualisierung fehlgeschlagen! Falsches Passwort")
+
+        elif len(value) == 2 and value[0].isdigit() and int(value[0]) < 25 \
+                and value[1].isdigit() and int(value[1]) < 60:
+            if self.loc_db_mngr.setAutoShutdownTime(value[0], value[1]):
+                log.info("> Aktualisiere shutdownTime zu: {0}.".
+                         format(str(self.loc_db_mngr.getAutoShutdownTime())))
+            else:
+                status = "<font color='red'>Ein unerwartetes Problem ist aufgetreten!</font>"
+        else:
+            status = "<font color='red'>Aktualisierung fehlgeschlagen! Ungültige Eingabe!</font>"
+            log.debug("Aktualisierung fehlgeschlagen! Ungültige Eingabe!")
+
+        return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS15%-->".encode(), status.encode()))
 
     @staticmethod
     def settingsShutDown():
@@ -847,6 +878,9 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         html = html.replace("%mandant_name%".encode(),
                             str(self.loc_db_mngr.getMS_SQL_Mandant()).encode())
+        html = html.replace("%shutdownTime%".encode(),
+                            str(self.loc_db_mngr.getAutoShutdownTime()[0] + ":" +
+                                self.loc_db_mngr.getAutoShutdownTime()[1]).encode())
 
         msg = ""
         if not logger.glob_updater.isUpdateAvailable():
