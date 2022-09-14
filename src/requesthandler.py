@@ -509,6 +509,12 @@ class RequestHandler(BaseHTTPRequestHandler):
                 elif "update_button" in data:
                     html_bytes = self.settingsUpdate(data, html)
 
+                elif "neustarten_button" in data:
+                    html_bytes = self.settings_reboot(data, html)
+
+                elif "shutdown_button" in data:
+                    html_bytes = self.settings_shutdown(data, html)
+
                 else:
                     html_status, html_bytes = self.getPageNotFound()
 
@@ -780,6 +786,32 @@ class RequestHandler(BaseHTTPRequestHandler):
             logger.glob_updater.startUpdate()
 
         return self.replaceVarsInSettingsHtml(html)
+
+    def settings_shutdown(self, data, html: bytes) -> bytes:
+        if not self.adminPasswordIsCorrect(data, "adminPW"):
+            status = "Aktualisierung fehlgeschlagen! Falsches Passwort"
+            log.debug("Aktualisierung fehlgeschlagen! Falsches Passwort")
+        else:
+            if os.system(consts.shutdown_command) == 0:
+                status = "Fahre Computer herunter..."
+            else:
+                status = "Herunterfahren fehlgeschlagen!"
+                log.debug("Herunterfahren fehlgeschlagen!")
+
+        return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS14%-->".encode(), ("<font color='red'>" + status + "</font>").encode()))
+
+    def settings_reboot(self, data, html: bytes) -> bytes:
+        if not self.adminPasswordIsCorrect(data, "adminPW"):
+            status = "Aktualisierung fehlgeschlagen! Falsches Passwort"
+            log.debug("Aktualisierung fehlgeschlagen! Falsches Passwort")
+        else:
+            if os.system(consts.reboot_command) == 0:
+                status = "Starte Computer neu..."
+            else:
+                status = "Neustarten fehlgeschlagen!"
+                log.debug("Neustarten fehlgeschlagen!")
+
+        return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS13%-->".encode(), ("<font color='red'>" + status + "</font>").encode()))
 
     @staticmethod
     def settingsShutDown():
