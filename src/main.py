@@ -73,7 +73,7 @@ if __name__ == "__main__":
         log.critical("\nError: Critical: failed to Start Webserver! {0}".format(exc))
         sys.exit(1212)
 
-    for index in range(1, 10):
+    for index in range(1, 11):
         start = timeit.default_timer()
 
         try:
