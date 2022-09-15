@@ -128,11 +128,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# ignore data base.
-db/
-doc/Log/
-./db/*.db
-*.db
+# ignore data base. needed bec. of updates!!!!!
+db/*.db
 
 # ignore constants == settings file ... needed bec. of updates!!!!!
 src/constants.py
