@@ -617,14 +617,15 @@ class MainWindow(QMainWindow):
                     return
                 elif action == "TIMER":
                     ast = self.loc_db_mngr.getAutoShutdownTime()
-                    now = datetime.now()
-                    ch = now.strftime("%H")
-                    cm = now.strftime("%M")
-                    if ast[0] == str(ch) and ast[1] == str(cm):
-                        log.info(">>>>AUTO SHUTDOWN<<<<: {0}:{1}".format(ch, cm))
-                        os.system(consts.shutdown_command)
-                        QApplication.quit()
-                        return
+                    if ast[0] is not "-1" or ast[1] is not "-1":
+                        now = datetime.now()
+                        ch = now.strftime("%H")
+                        cm = now.strftime("%M")
+                        if ast[0] == str(ch) and ast[1] == str(cm):
+                            log.info(">>>>AUTO SHUTDOWN<<<<: {0}:{1}".format(ch, cm))
+                            os.system(consts.shutdown_command)
+                            QApplication.quit()
+                            return
             # Zustands spezifische Aktionen:
             # Zustand: Warte für Barcode Scan:
             if self.state == self.STATES.WAIT_FOR_SCAN:
