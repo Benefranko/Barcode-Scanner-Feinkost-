@@ -20,7 +20,7 @@ SQL_DRIVER_USED_VERSION_FreeTDS_VERSION: str = "7.4"
 wawi_advertise_aktive_meta_keyword: str = 'ANZEIGEN=TRUE'
 
 # Pfad zu lokaler Datenbank, die zum Speichern der Statistiken der Nutzung, sowie der Bewertung dient
-local_db_path: str = "../db/sqlLiteDB.db"
+local_db_path: str = "../fkbcs_data.db"
 
 ####
 # HTTP Server
@@ -42,7 +42,7 @@ reset_before_update: bool = False
 ####
 
 # Pfad zur Logdatei
-log_file_path: str = './../doc/Logs/feinkostBarcodeScannerLog.log'
+log_file_path: str = './../doc/feinkostBarcodeScannerLog.log'
 
 # Pfad zu Qt-Designer Formulardatei: Die Grafik wurde nämlich mithilfe des Qt Creators erstellt.
 ui_file_path: str = "../designer-ui/form.ui"

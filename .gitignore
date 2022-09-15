@@ -132,7 +132,7 @@ dmypy.json
 .idea/
 
 # ignore data base. needed bec. of updates!!!!!
-db/*.db
+fkbcs_data.db
 
 # ignore constants == settings file ... needed bec. of updates!!!!!
 src/constants.py
