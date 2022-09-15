@@ -836,7 +836,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             log.debug("Aktualisierung fehlgeschlagen! Falsches Passwort")
         elif str(data[data.index("shutdownTime") + 1]) == "-1":
             if self.loc_db_mngr.setAutoShutdownTime("-1", "-1"):
-                status = "<font color='red'>Automatisches Herunterfahren deaktiviert.</font>"
+                status = "<font color='green'>Automatisches Herunterfahren deaktiviert.</font>"
                 log.debug("Automatisches Herunterfahren deaktiviert.")
             else:
                 status = "<font color='red'>Ein unerwartetes Problem ist aufgetreten!</font>"

@@ -617,7 +617,7 @@ class MainWindow(QMainWindow):
                     return
                 elif action == "TIMER":
                     ast = self.loc_db_mngr.getAutoShutdownTime()
-                    if ast[0] is not "-1" or ast[1] is not "-1":
+                    if ast[0] != "-1" or ast[1] != "-1":
                         now = datetime.now()
                         ch = now.strftime("%H")
                         cm = now.strftime("%M")
