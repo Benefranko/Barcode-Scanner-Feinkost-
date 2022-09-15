@@ -133,3 +133,5 @@ db/
 doc/Log/
 ./db/*.db
 *.db
+
+# ignore constants == settings file ... needed bec. of updates!!!!!
