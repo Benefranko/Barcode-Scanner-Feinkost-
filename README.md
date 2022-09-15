@@ -52,6 +52,15 @@ Und füge folgende Zeile hinzu:
 user_name ALL=(ALL) NOPASSWD: /sbin/reboot, /sbin/shutdown
 ````
 
+# Installation
+
+Neben der Installation der Abhängigkeiten muss zu dem die Datei
+``src/constants.py-template.txt`` zu ``src/constants.py`` umbenannt werden. In dieser Datei können
+grundlegende Einstellungen wie z.B. der Webserverport festgelegt werden.
+### WICHTIG:
+Diese Datei wird bei Updates ignoriert! Sollte ein Hauptupdate (erste Stelle einer Version verändert sich) vorliegen,
+so muss die Datei ``src/constants.py-template.txt`` eigenständig von Github heruntergeladen werden und erneut umbenannt
+und die Einstallungen übertragen werden!
 
 
 # Abhängigkeiten Installation zusammengefasst:
@@ -72,8 +81,10 @@ Setup=/usr/lib/arm-linux-gnueabihf/odbc/libtdsS.so"
 sudo apt install python3-pyodbc python3-PySide2.* python-enum34
 ````
 
-
-# Dependencies installieren:
+# 
+#
+#
+# Abhängigkeiten Schritt für Schritt installieren:
 Da es viele Pakete nur in älteren Version gibt, wird Python 3.7 empfohlen
 
 
