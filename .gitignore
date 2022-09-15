@@ -129,7 +129,7 @@ dmypy.json
 .pyre/
 
 # ignore data base.
-db/*
-doc/Log/*
+db/
+doc/Log/
 ./db/*.db
 *.db
