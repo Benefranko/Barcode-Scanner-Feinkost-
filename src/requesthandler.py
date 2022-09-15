@@ -136,10 +136,10 @@ class RequestHandler(BaseHTTPRequestHandler):
                     html_bytes = self.getMonatsStatusPage([["Alle Artikel"]], None)
 
                 elif sub_paths[2] == "monatsstatus-hersteller.html":
-                    html_bytes = self.getMonatsStatusPage(self.loc_db_mngr.getKategorieList(), "kategorie")
+                    html_bytes = self.getMonatsStatusPage(self.loc_db_mngr.getHerstellerList(), "hersteller")
 
                 elif sub_paths[2] == "monatsstatus-kategorie.html":
-                    html_bytes = self.getMonatsStatusPage(self.loc_db_mngr.getHerstellerList(), "hersteller")
+                    html_bytes = self.getMonatsStatusPage(self.loc_db_mngr.getKategorieList(), "kategorie")
 
                 elif sub_paths[2] == "jahresstatus.html":
                     html_bytes = self.getJahresStatusPage([["Alle Artikel"]], -1)
@@ -242,7 +242,11 @@ class RequestHandler(BaseHTTPRequestHandler):
         return str(x) + ", " + str(y) + ", " + str(z)
 
     def getWochenStatusPage(self, group_list, name) -> bytes:
-        html_bytes: bytes = self.getFileText("../web/html/wochenstatus-template.html")
+        html_bytes: bytes = self.getFileText("../web/html/statistik-template.html")
+        html_bytes = html_bytes.replace("%smalstatistikname%".encode(), "wochenstatus".encode()).\
+            replace("%BIGSTATISTIKNAME%".encode(), "Wochenstatistik".encode())\
+            .replace("%DATA_LABEL_SET%".encode(), str("weekdaysList").encode())
+
         replace_str: str = ""
         weekday = datetime.today().weekday()
         for i in range(0, len(group_list)):
@@ -277,7 +281,10 @@ class RequestHandler(BaseHTTPRequestHandler):
         return html_bytes.replace("%DATA_DATA_SETS%".encode(), replace_str.encode())
 
     def getMonatsStatusPage(self, group_list, name) -> bytes:
-        html_bytes: bytes = self.getFileText("../web/html/monatsstatus-template.html")
+        html_bytes: bytes = self.getFileText("../web/html/statistik-template.html")
+        html_bytes = html_bytes.replace("%smalstatistikname%".encode(), "monatsstatus".encode())\
+            .replace("%BIGSTATISTIKNAME%".encode(), "Monatsstatistik".encode())
+
         now = datetime.now()
         days_of_month = calendar.monthrange(now.year, now.month)[1]
         day_of_month = int(now.strftime("%d")) - 1
@@ -318,7 +325,11 @@ class RequestHandler(BaseHTTPRequestHandler):
         return html_bytes.replace("%DATA_LABEL_SET%".encode(), str(label_list).encode())
 
     def getJahresStatusPage(self, group_list, array_index) -> bytes:
-        html_bytes: bytes = self.getFileText("../web/html/jahresstatus-template.html")
+        html_bytes: bytes = self.getFileText("../web/html/statistik-template.html")
+        html_bytes = html_bytes.replace("%smalstatistikname%".encode(), "jahresstatus".encode()) \
+            .replace("%BIGSTATISTIKNAME%".encode(), "Jahresstatistik".encode())\
+            .replace("%DATA_LABEL_SET%".encode(), str("monthsList").encode())
+
         replace_str: str = ""
         current_year = datetime.now().year
         s_list = self.loc_db_mngr.get_all_scans()

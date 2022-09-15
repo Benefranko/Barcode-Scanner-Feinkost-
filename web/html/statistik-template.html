@@ -13,7 +13,7 @@
 	</head>
 	<body>
 		<div class="titel">
-			<h1 class="titel-font">Wochenstatistik:</h1>
+			<h1 class="titel-font">%BIGSTATISTIKNAME%:</h1>
 		</div>
 		<div class="spacer"></div>
 		<div class="chart-container">
@@ -22,9 +22,9 @@
 		<div class="spacer"></div>
 
 		<div class="row">
-			<a class="m-btn auswahlLink m-btn-green" id="auswahlBtn1" href="/html/wochenstatus.html">Alle Artikel</a>
-			<a class="m-btn auswahlLink m-btn-green" id="auswahlBtn2" href="/html/wochenstatus-kategorie.html">Nach Kategorie</a>
-			<a class="m-btn auswahlLink m-btn-green" id="auswahlBtn3" href="/html/wochenstatus-hersteller.html">Nach Hersteller</a>
+			<a class="m-btn auswahlLink m-btn-green" id="auswahlBtn1" href="/html/%smalstatistikname%.html">Alle Artikel</a>
+			<a class="m-btn auswahlLink m-btn-green" id="auswahlBtn2" href="/html/%smalstatistikname%-kategorie.html">Nach Kategorie</a>
+			<a class="m-btn auswahlLink m-btn-green" id="auswahlBtn3" href="/html/%smalstatistikname%-hersteller.html">Nach Hersteller</a>
 		</div>
 
 		<div class="spacer"></div>
@@ -57,7 +57,7 @@
 		<script >
 			const ctx = document.getElementById('myChart').getContext('2d');
 			const data = {
-					labels: weekdaysList,
+					labels: %DATA_LABEL_SET%,
 					datasets: [ %DATA_DATA_SETS% ]
 				};
 			const myChart = createBarChart(ctx, data);
