@@ -128,6 +128,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+### ignore pychar...
+.idea/
+
 # ignore data base. needed bec. of updates!!!!!
 db/*.db
 
