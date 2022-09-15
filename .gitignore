@@ -137,4 +137,3 @@ doc/Log/
 # ignore constants == settings file ... needed bec. of updates!!!!!
 src/constants.py
 
-
