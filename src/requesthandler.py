@@ -834,7 +834,8 @@ class RequestHandler(BaseHTTPRequestHandler):
         if not self.adminPasswordIsCorrect(data, "adminPW"):
             status = "<font color='red'>Aktualisierung fehlgeschlagen! Falsches Passwort!</font>"
             log.debug("Aktualisierung fehlgeschlagen! Falsches Passwort")
-        elif str(data[data.index("shutdownTime") + 1]) == "-1":
+        elif str(data[data.index("shutdownTime") + 1]) == "-1"\
+                or str(data[data.index("shutdownTime") + 1]) == "-1%3A-1":
             if self.loc_db_mngr.setAutoShutdownTime("-1", "-1"):
                 status = "<font color='green'>Automatisches Herunterfahren deaktiviert.</font>"
                 log.debug("Automatisches Herunterfahren deaktiviert.")
