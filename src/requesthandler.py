@@ -906,12 +906,15 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         msg = ""
         if not logger.glob_updater.isUpdateAvailable():
-            msg = "Sie verwenden bereits die neuste Version: " + str(logger.glob_updater.getCurrentVersion())
+            msg = "Sie verwenden die neuste Version: " + str(logger.glob_updater.getCurrentVersion())
             html = html.replace("><!--%disabled_update%-->".encode(), "hidden=\"true\">".encode())
         else:
             msg = "Es ist eine neuere Version ( " + str(logger.glob_updater.getNewestVersion()) + " ) verfügbar. " \
                                                                                                   "Derzeitige Version: " + str(
                 logger.glob_updater.getCurrentVersion())
+        if logger.glob_updater.state == logger.glob_updater.STATES.UPDATING:
+            msg = "[ v" + str(logger.glob_updater.getCurrentVersion()) + " ] --> [ " + str(logger.glob_updater.getNewestVersion()) + " ]..."
+            html = html.replace("><!--%disabled_update%-->".encode(), "hidden=\"true\">".encode())
 
         status = "<font color='orange'>" + logger.glob_updater.getStatus() + "</font>"
 
