@@ -100,7 +100,16 @@
 					Zeilenanzahl: <input class="textInputField" type="text" id="table_row_count" name="table_row_count_value" value="%table_row_count_value%">
 					<input class="small-btn m-btn-gray" type="submit" value="Anwenden"> <!--%STATUS6%-->
 				</form>
+
+			<li class="bordered-blue m-li">
+				<form action="" method="post">
+					<label for="server_ip"><strong>&#128187; Microsoft SQL Server:</strong></label><br>
+					<!--%MSG2%--><br>
+					Admin Passwort: <input class="textInputField" type="password" name="adminPW" value="">
+					<input class="small-btn m-btn-gray" type="submit" name="reconnect-mssql" value="(Neu-) Verbinden"> <!--%STATUS16%-->
+				</form>
 			</li>
+
 
 			<li class="bordered-blue m-li">
 				<form action="" method="post">
@@ -142,8 +151,8 @@
 					<input class="small-btn m-btn-gray" name="update_button" type="submit" value="Update starten" ><!--%disabled_update%--> <!--%STATUS12%-->
 				</form>
 				<div> &#9733; Vergewissern sie sich, nur vertrauensw&uuml;rdigen Programmcode auszuf&uuml;hren!</div>
-				<div> &#9733; Nach einem großen Update (x.0.0 -> Wenn x sich verändert) sollten sie die Datei<br>
-					'src/constants.py' manuell aktualisieren. Die passende Datei finden sie auf Github!</div>
+				<div> &#9733; Nach einem Haupt-Update (x.0.0 -> Wenn x sich ver&auml;ndert) sollten sie die Datei<br>
+					'src/constants.py' manuell aktualisieren. Die passende Datei finden sie auf Github oder verwenden sie das aktualisierte Template!</div>
 				<div> &#9733; Weitere Informationen zum Programmcode und constants.py-Datei auf <a href="https://github.com/Benefranko/Barcode-Scanner-Feinkost-">Github</a>
 					, bzw zu den einzelnen Versionen unter <a href="https://github.com/Benefranko/Barcode-Scanner-Feinkost-/tags">[Versionen]</a>!</div>
 			</li>

@@ -538,6 +538,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                 elif "shutdownTime" in data:
                     html_bytes = self.settings_auto_shutdown(data, html)
 
+                elif "reconnect-mssql" in data:
+                    html_bytes = self.settingsReConnectMSSQLDB(data, html)
+
                 else:
                     html_status, html_bytes = self.getPageNotFound()
 
@@ -866,6 +869,17 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS15%-->".encode(), status.encode()))
 
+    def settingsReConnectMSSQLDB(self, data, html: bytes) -> bytes:
+        status: str = "<font color='green'>Versuche die Verbindung (neu) herzustellen...</font>"
+        if not self.adminPasswordIsCorrect(data, "adminPW"):
+            status = "<font color='red'>(Neu) verbinden fehlgeschlagen! Falsches Passwort</font>"
+            log.debug("Want reconnect ms sqldb fehlgeschlagen! Falsches Passwort")
+        elif self.loc_db_mngr.setWanReConnectMSSQL(True) is None:
+            status = "<font color='red'>Verbindung (neu) herzustellen fehlgeschlagen!</font>"
+        else:
+            log.info("> Want reconnect ms sqldb...")
+        return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS16%-->".encode(), status.encode()))
+
     @staticmethod
     def settingsShutDown():
         os.system('sudo shutdown now')
@@ -920,6 +934,6 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         html = html.replace("<!--%MSG1%-->".encode(), msg.encode())
         html = html.replace("<!--%STATUS12%-->".encode(), status.encode())
-        #
-        #
+        # ms sql connection state
+        html = html.replace("<!--%MSG2%-->".encode(), self.loc_db_mngr.getMSSqlConnectionState().encode())
         return html

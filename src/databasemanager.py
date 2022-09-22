@@ -34,13 +34,14 @@ class DataBaseManager:
         else:
             return "0.00"
 
-    def disconnect(self):
+    def disconnectIfConnected(self):
         if self.conn:
             self.conn.close()
+            self.conn = None
 
     def connect(self, ip: str = "PC-MARKUS", port: int = 1433, pw: str = "altinsystems",
                 usr: str = "test", db: str = "Mandant_1"):
-        for i in range(0, 10):
+        for i in range(1, 4):
             try:
                 ###
                 # trusted_connection="yes", :
@@ -54,9 +55,10 @@ class DataBaseManager:
                 ###
 
                 # Verbinde mit MS SQl server unter verwendung des extern installierten ODBC Driver 18
+
                 driver_names = pyodbc.drivers()
                 if "ODBC Driver 18 for SQL Server" in driver_names:
-                    log.debug("Verwende Driver: ODBC Driver 18 for SQL Server...")
+                    log.debug("  Verwende Driver: ODBC Driver 18 for SQL Server...")
 
                     self.conn = pyodbc.connect(driver=consts.SQL_DRIVER_USED_VERSION_MS_DRIVER,
                                                server=ip + "," + str(port),
@@ -69,14 +71,14 @@ class DataBaseManager:
                     break
 
                 elif "FreeTDS" in driver_names:
-                    log.debug("Verwende Driver: FreeTDS {0} ...".format(consts.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION))
+                    log.debug("  Verwende Driver: FreeTDS {0} ...".format(consts.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION))
 
                     self.conn = pyodbc.connect('DRIVER={0}; SERVER={1}; PORT={2}; DATABASE={3}; UID={4}; PWD={5}; '
                                                'TDS_Version={6};'.format(consts.SQL_DRIVER_USED_VERSION_FreeTDS,
                                                                          ip, port, db, usr, pw,
                                                                          consts.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION)
                                                )
-                    log.info("Erfolgreich mit MS SQL Server verbunden über FreeTDS Driver {0} ".format(
+                    log.info("  -> Erfolgreich mit MS SQL Server verbunden über FreeTDS Driver {0} ".format(
                         consts.SQL_DRIVER_USED_VERSION_FreeTDS_VERSION))
                     break
                 else:
@@ -85,7 +87,7 @@ class DataBaseManager:
                     self.conn = None
                     break
             except Exception as exc:
-                log.warning('Connect to Database failed. ( Try: {0}/10 ) Error: {1} - Warte 1 Sekunde...'
+                log.warning('Connect to Database failed. ( Try: {0}/3 ) Error: {1} - Warte 1 Sekunde...'
                             .format(i + 1, exc))
 
                 time.sleep(1)

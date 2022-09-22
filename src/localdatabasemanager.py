@@ -36,11 +36,16 @@ show_nothing_found_time: int = 8
 # IDK
 item_count_on_web_server_list: int = 150
 ms_sql_server_addr: () = ("home.obermui.de", 18769)
+# auto shutdown time
+auto_shutdown_time: (str, str) = ("-1", "-1")
+
+
 #   SERVER NOTIFY UI -> GETS EDITED!!!!
 want_reload_advertise_var: bool = False
 
-# auto shutdown time
-auto_shutdown_time: (str, str) = ("-1", "-1")
+want_reconnect_mssql: bool = False
+
+sql_connection_state: (str, str) = "-1"
 
 
 # Der LocalDataBaseManager läd und speichert u.a. sämtliche Einstellungen.
@@ -242,6 +247,9 @@ class LocalDataBaseManager:
         global want_reload_advertise_var
         global auto_shutdown_time
 
+        global want_reconnect_mssql
+        global sql_connection_state
+
         admin_pw = self.loadLogin("ADMIN", ("", admin_pw))[1]
         ms_sql_server_login_data = self.loadLogin("MS-SQL-SERVER-LOGIN", ms_sql_server_login_data)
         ms_sql_database_mandant = self.loadLogin("MANDANT", (ms_sql_database_mandant, ""))[0]
@@ -258,6 +266,9 @@ class LocalDataBaseManager:
         want_reload_advertise_var = bool(self.loadNumber("WANT-RELOAD-ADVERTISE-LIST", -1,
                                                          int(want_reload_advertise_var)))
         auto_shutdown_time = self.loadLogin("AUTO_SHUTDOWN_TIME", auto_shutdown_time)
+
+        sql_connection_state = self.loadLogin("MS_SQL_CONNECTION_STATE", sql_connection_state)
+        want_reconnect_mssql = self.loadNumber("WANT-RECONNECT-MSSQL", -1, int(want_reconnect_mssql))
 
     def setAdminPw(self, new_value):
         global admin_pw
@@ -340,6 +351,19 @@ class LocalDataBaseManager:
             return "SUCCESS"
         return None
 
+    def setWanReConnectMSSQL(self, value: bool):
+        global want_reconnect_mssql
+        if self.storeNumber("WANT-RECONNECT-MSSQL", int(value)):
+            want_reconnect_mssql = value
+            return "SUCCESS"
+        return None
+
+    def setMSSQLConnectionState(self, new_value):
+        global sql_connection_state
+        if self.storeLogin("MS_SQL_CONNECTION_STATE", new_value, ""):
+            sql_connection_state = new_value
+            return "SUCCESS"
+        return None
     ####
     # Getter
     ####
@@ -387,3 +411,11 @@ class LocalDataBaseManager:
     @staticmethod
     def getAutoShutdownTime() -> (str, str):
         return auto_shutdown_time
+
+    @staticmethod
+    def checkWanReConnectMSSQL():
+        return want_reconnect_mssql
+
+    @staticmethod
+    def getMSSqlConnectionState():
+        return sql_connection_state

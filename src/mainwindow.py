@@ -3,7 +3,7 @@ from logging import Logger
 import os
 import sys
 from PySide2.QtCore import QFile, QTimerEvent, Qt, QIODevice, QRect
-from PySide2.QtCore import Slot
+from PySide2.QtCore import Slot, QEventLoop
 from PySide2.QtGui import QImage, QPixmap, QFontMetrics, QFont
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QLabel, QFrame, QWidget  # , QLayout, QLayoutItem
@@ -58,8 +58,9 @@ class MainWindow(QMainWindow):
         WAIT_FOR_SCAN = 2
         SHOW_PRODUCER_INFOS = 3
         NOT_CONNECTED = 4
+        CONNECTING = 5
 
-    state = STATES.SHOW_PRODUCT_DESCRIPTION
+    state = STATES.NOT_CONNECTED
 
     def __init__(self, sql_lite_path, ui_file_path, parent=None):
         # Falls Fenster ein übergeordnetes Objekt erhält, übergib dieses der Basisklasse QMainWindow
@@ -112,7 +113,10 @@ class MainWindow(QMainWindow):
 
         # Stelle Verbindung mit MS SQL Datenbank her
         self.databasemanager = DataBaseManager()
-        self.tryConnectToMS_SQL_DB_and_load_advertise_list()
+        # Setzte want connect to true => no connecting in constructor => no freezing window at start
+        self.loc_db_mngr.setWanReConnectMSSQL(True)
+        self.state = self.STATES.NOT_CONNECTED
+        self.window.stackedWidget.setCurrentIndex(6)
 
         # Starte Sekunden Event Timer
         self.timerID = self.startTimer(1000)
@@ -122,7 +126,7 @@ class MainWindow(QMainWindow):
         # Stop Timer
         self.killTimer(self.timerID)
         # Trenne Verbindungen zu Datenbanken
-        self.databasemanager.disconnect()
+        self.disconnectMsSqlServerIfConnected()
         self.loc_db_mngr.disconnect()
         # Unbekannter Objektzustand
         self.state = self.STATES.UNKNOWN
@@ -388,7 +392,6 @@ class MainWindow(QMainWindow):
         return h_infos.cName
 
     def newScanHandling(self, scan_article_ean: str):
-
         # Barcodescanner hat neues Scan registriert...
         # Setzte Anzeige Timer zurück und ändere Objektzustand
         self.showTimeTimer = self.loc_db_mngr.getArticleShowTime()
@@ -575,21 +578,34 @@ class MainWindow(QMainWindow):
             log.error("    Error: Das speichern des Scans für Statistiken ist fehlgeschlagen:")
         return
 
+    def disconnectMsSqlServerIfConnected(self):
+        if self.databasemanager.conn:
+            log.debug(" ~ Try Disconnect from MS SQL DB...")
+        self.databasemanager.disconnectIfConnected()
+        self.state = self.STATES.NOT_CONNECTED
+        self.window.stackedWidget.setCurrentIndex(4)
+
     def tryConnectToMS_SQL_DB_and_load_advertise_list(self):
+        self.loc_db_mngr.setMSSQLConnectionState("<font color='orange'>Verbinde...</font>")
+        log.info("Verbinde mit MS SQL Server...")
+        self.state = self.STATES.CONNECTING
+        self.window.stackedWidget.setCurrentIndex(6)
         if self.databasemanager.connect(ip=self.loc_db_mngr.getMS_SQL_ServerAddr()[0],
                                         port=int(self.loc_db_mngr.getMS_SQL_ServerAddr()[1]),
                                         pw=self.loc_db_mngr.getMS_SQL_LoginData()[1],
                                         usr=self.loc_db_mngr.getMS_SQL_LoginData()[0],
                                         db=self.loc_db_mngr.getMS_SQL_Mandant()) is None:
             log.error("Konnte Verbindung mit dem MS SQL Server nicht herstellen")
+            self.loc_db_mngr.setMSSQLConnectionState("<font color='red'>Konnte Verbindung mit dem MS SQL Server nicht herstellen!</font>")
             self.state = self.STATES.NOT_CONNECTED
             self.window.stackedWidget.setCurrentIndex(4)
         else:
+            self.loc_db_mngr.setMSSQLConnectionState("<font color='green'>Verbunden!</font>")
+            # Lege Startzustand Fest und zeige dementsprechende Seite an
+            self.state = self.STATES.WAIT_FOR_SCAN
             # ### Lade init Data aus dem SQL Server...
             # Lade Liste mit Artikeln, zu denen die Vorschau angezeigt werden soll...
             self.loadAdvertiseList()
-            # Lege Startzustand Fest und zeige dementsprechende Seite an
-            self.state = self.STATES.WAIT_FOR_SCAN
             self.window.stackedWidget.setCurrentIndex(0)
             self.window.stackedWidget_advertise.setCurrentIndex(1)
         return
@@ -597,7 +613,7 @@ class MainWindow(QMainWindow):
     # Eventhandler: Je nach Objektzustand führe die übergebenen Aktionen aus
     def event_handler(self, action, value=None):
         if action != "TIMER" and action != "CHANGE_ADVERTISE":
-            log.debug("-> [NEW EVENT] ( EXCEPT TIMER AND CHANGE_ADVERTISE ): {0} VALUE: {1}; STATE: {2}".
+            log.debug("-> [NEW EVENT ]!(Timer|ChangeAdvt.): '{0}' VALUE: ({1}); STATE: *{2}*".
                       format(action, value, self.state))
 
         try:
@@ -607,25 +623,43 @@ class MainWindow(QMainWindow):
             handled: bool = False
 
             # Zustands unabhängige Aktionen:
-            if self.state != self.STATES.UNKNOWN and self.state != self.STATES.NOT_CONNECTED:
-                # Es wurde ein Barcode gescannt-> Ermittle Informationen und zeige diese an
-                if action == "NEW_SCAN":
-                    return self.newScanHandling(value)
-                elif action == "LOAD_ARTICLE_FAILED":
-                    self.window.stackedWidget.setCurrentIndex(2)
-                    self.showTimeTimer = self.loc_db_mngr.getNothingFoundPageShowTime()
-                    return
-                elif action == "TIMER":
-                    ast = self.loc_db_mngr.getAutoShutdownTime()
-                    if ast[0] != "-1" or ast[1] != "-1":
-                        now = datetime.now()
-                        ch = now.strftime("%H")
-                        cm = now.strftime("%M")
-                        if ast[0] == str(ch) and ast[1] == str(cm):
-                            log.info(">>>>AUTO SHUTDOWN<<<<: {0}:{1}".format(ch, cm))
-                            os.system(consts.shutdown_command)
-                            QApplication.quit()
-                            return
+            if self.state != self.STATES.UNKNOWN and self.state != self.STATES.CONNECTING:
+                # TIMER EVENT FÜR ALLE ZUSTÄNDE außer UNKNOWN und CONNECTING
+                if action == "TIMER":
+                    # Wenn über webserver neu verbinden geklickt wird
+                    if self.loc_db_mngr.checkWanReConnectMSSQL():
+                        log.debug("checkWanReConnectMSSQL")
+                        self.loc_db_mngr.setWanReConnectMSSQL(False)
+                        # wenn verbunden, trenne verbindung
+                        self.disconnectMsSqlServerIfConnected()
+                        # Show not connected if connecting takes more time
+                        QApplication.processEvents(QEventLoop.AllEvents, 100)
+                        # versuche neu zu verbinden
+                        return self.event_handler("TRY_CONNECT_TO_MS_SQL_DB")
+
+                # EVENT FÜR ALLE ZUSTÄNDE außer UNKNOWN und CONNECTING und NOT_CONNECTED
+                if self.state != self.STATES.NOT_CONNECTED:
+                    # Es wurde ein Barcode gescannt-> Ermittle Informationen und zeige diese an
+                    if action == "NEW_SCAN":
+                        # self.window.stackedWidget.setCurrentIndex(5)
+                        # QApplication.processEvents(QEventLoop.AllEvents, 100)
+                        return self.newScanHandling(value)
+                    elif action == "LOAD_ARTICLE_FAILED":
+                        self.window.stackedWidget.setCurrentIndex(2)
+                        self.showTimeTimer = self.loc_db_mngr.getNothingFoundPageShowTime()
+                        return
+                    elif action == "TIMER":
+                        ast = self.loc_db_mngr.getAutoShutdownTime()
+                        if ast[0] != "-1" or ast[1] != "-1":
+                            now = datetime.now()
+                            ch = now.strftime("%H")
+                            cm = now.strftime("%M")
+                            if ast[0] == str(ch) and ast[1] == str(cm):
+                                log.info(">>>>AUTO SHUTDOWN<<<<: {0}:{1}".format(ch, cm))
+                                os.system(consts.shutdown_command)
+                                QApplication.quit()
+                                return
+
             # Zustands spezifische Aktionen:
             # Zustand: Warte für Barcode Scan:
             if self.state == self.STATES.WAIT_FOR_SCAN:
@@ -700,11 +734,15 @@ class MainWindow(QMainWindow):
 
             elif self.state == self.STATES.NOT_CONNECTED:
                 if action == "TRY_CONNECT_TO_MS_SQL_DB":
+                    self.window.stackedWidget.setCurrentIndex(6)
+                    QApplication.processEvents(QEventLoop.AllEvents, 100)
                     return self.tryConnectToMS_SQL_DB_and_load_advertise_list()
                 elif action == "TIMER":
                     handled: bool = True
                 elif action == "NEW_SCAN":
                     handled: bool = True
+            elif self.state == self.STATES.CONNECTING:
+                pass
 
             # Wenn ein Unbekannter Objektzustand vorliegt, wirf Exception
             else:

@@ -73,7 +73,7 @@ if __name__ == "__main__":
         log.critical("\nError: Critical: failed to Start Webserver! {0}".format(exc))
         sys.exit(1212)
 
-    for index in range(1, 11):
+    for index in range(1, 4):
         start = timeit.default_timer()
 
         try:
@@ -105,7 +105,7 @@ if __name__ == "__main__":
             if end - start > 360:
                 index = 1
             log.critical("Die GUI ist zum {0}. mal abgestürzt. Fehlercode: {1}".format(index, ret))
-            if index < 10:
+            if index < 3:
                 log.critical("Versuche die GUI neu zu starten....")
             else:
                 log.critical("Maximale Anzahl an Neustartversuchen erreicht! Zeige Black-Screen!")
