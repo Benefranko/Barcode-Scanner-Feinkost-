@@ -88,7 +88,7 @@ class DataBaseManager:
                     break
             except Exception as exc:
                 log.warning('Connect to Database failed. ( Try: {0}/3 ) Error: {1} - Warte 1 Sekunde...'
-                            .format(i + 1, exc))
+                            .format(i, exc))
 
                 time.sleep(1)
                 self.conn = None

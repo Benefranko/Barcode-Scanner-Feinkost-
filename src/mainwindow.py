@@ -628,7 +628,6 @@ class MainWindow(QMainWindow):
                 if action == "TIMER":
                     # Wenn über webserver neu verbinden geklickt wird
                     if self.loc_db_mngr.checkWanReConnectMSSQL():
-                        log.debug("checkWanReConnectMSSQL")
                         self.loc_db_mngr.setWanReConnectMSSQL(False)
                         # wenn verbunden, trenne verbindung
                         self.disconnectMsSqlServerIfConnected()
