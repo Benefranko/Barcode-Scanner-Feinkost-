@@ -65,10 +65,10 @@ fi
 echo "Erstelle Driver File..."
 # Save driver Location for Driver Loader
 
-if sudo tee "/etc/odbcinst.ini" "[FreeTDS]
+if sudo tee "[FreeTDS]
 Description=FreeTDS Driver
 Driver=/usr/lib/arm-linux-gnueabihf/odbc/libtdsodbc.so
-Setup=/usr/lib/arm-linux-gnueabihf/odbc/libtdsS.so"
+Setup=/usr/lib/arm-linux-gnueabihf/odbc/libtdsS.so" "/etc/odbcinst.ini"
 then
   echo -e "    -> OK\n"
 else
