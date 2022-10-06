@@ -122,12 +122,13 @@ fi
 
 # Autostart:
 echo "Aktiviere Autostart..."
+[ -d "/home/${SUDO_USER}/.config/autostart/" ] || mkdir "/home/${SUDO_USER}/.config/autostart/" || exit
 
 if echo "[Desktop Entry]
 Name=FeinkostBarcodeScanner
 Type=Application
 Exec=/usr/bin/python /home/${SUDO_USER}/FeinkostBarcodeScanner/src/main.py
-Terminal=false" | tee "/home/${SUDO_USER}/.config/autostart/feinkostbarcodescanner.desktop"
+Terminal=false" | tee "/home/${SUDO_USER}/.config/autostart/FeinkostBarcodeScanner.desktop"
 then
   echo -e "    -> OK\n"
 else
