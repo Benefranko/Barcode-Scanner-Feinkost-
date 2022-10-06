@@ -7,11 +7,11 @@ fi
 
 echo "Benutzer: $SUDO_USER"
 echo " -> $SUDO_USER sollte kein Admin sein! ( Ausführen dieses Skripts mit sudo )"
-for ((i=10; i>0; i--)); do echo "$i"; sleep 1; done
+for ((i=5; i>0; i--)); do echo "$i"; sleep 1; done
 
 
 
-if [ -d "/home/${USER}/Barcode-Scanner-Feinkost-" ]; then
+if [ -d "/home/$SUDO_USER/Barcode-Scanner-Feinkost-" ]; then
   echo -e "Es existiert bereits der Ordner '/home/${SUDO_USER}/Barcode-Scanner-Feinkost-' -> Bereits installiert? \n->Abbruch"
   exit
 fi
@@ -30,9 +30,9 @@ else
 fi
 
 
-echo "Kopiere die Constants-Datei (/home/${USER}/Barcode-Scanner-Feinkost-/src/constants.py-template.txt --> /home/${USER}/Barcode-Scanner-Feinkost-/src/constants.py)..."
+echo "Kopiere die Constants-Datei (/home/${SUDO_USER}/Barcode-Scanner-Feinkost-/src/constants.py-template.txt --> /home/${SUDO_USER}/Barcode-Scanner-Feinkost-/src/constants.py)..."
 
-if [ "$(cp "/home/${USER}/Barcode-Scanner-Feinkost-/src/constants.py-template.txt" "/home/${USER}/Barcode-Scanner-Feinkost-/src/constants.py")" -eq 0 ]; then
+if [ "$(cp "/home/${USER}/Barcode-Scanner-Feinkost-/src/constants.py-template.txt" "/home/${SUDO_USER}/Barcode-Scanner-Feinkost-/src/constants.py")" -eq 0 ]; then
    echo "Öffne die Starteinstellungsdatei für Änderungen..."
    for ((i=10; i>0; i--)); do echo "$i"; sleep 1; done
 else
@@ -40,7 +40,7 @@ else
 fi
 
 
-nano "/home/${USER}/Barcode-Scanner-Feinkost-/src/constants.py"
+nano "/home/${SUDO_USER}/Barcode-Scanner-Feinkost-/src/constants.py"
 
 echo "Installiere die Abhängigkeiten..."
 
@@ -126,11 +126,11 @@ fi
 # Autostart:
 echo "Aktiviere Autostart..."
 
-tee /home/${USER}/.config/autostart/feinkostbarcodescanner.desktop"
+tee /home/${SUDO_USER}/.config/autostart/feinkostbarcodescanner.desktop"
 [Desktop Entry]
 Name=FeinkostBarcodeScanner
 Type=Application
-Exec=/usr/bin/python /home/${USER}/FeinkostBarcodeScanner/src/main.py
+Exec=/usr/bin/python /home/${SUDO_USER}/FeinkostBarcodeScanner/src/main.py
 Terminal=false"
 echo "    -> OK\n"
 
