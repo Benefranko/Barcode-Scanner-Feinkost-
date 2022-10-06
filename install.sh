@@ -27,7 +27,6 @@ else
     # exit
 fi
 
-
 echo "Kopiere die Constants-Datei (/home/${SUDO_USER}/Barcode-Scanner-Feinkost-/src/constants.py-template.txt --> /home/${SUDO_USER}/Barcode-Scanner-Feinkost-/src/constants.py)..."
 
 if cp "/home/${SUDO_USER}/Barcode-Scanner-Feinkost-/src/constants.py-template.txt" "/home/${SUDO_USER}/Barcode-Scanner-Feinkost-/src/constants.py"; then
