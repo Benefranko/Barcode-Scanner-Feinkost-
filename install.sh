@@ -7,8 +7,8 @@ fi
 
 echo "Benutzer: $SUDO_USER"
 echo " -> $SUDO_USER sollte kein Admin sein! ( Ausführen dieses Skripts mit sudo )"
-for ((i=5; i>0; i--)); do echo "$i"; sleep 1; done
-
+for ((i=5; i>0; i--)); do echo -ne "\r$i"; sleep 1; done
+echo -e "\n"
 
 
 if [ -d "/home/$SUDO_USER/Barcode-Scanner-Feinkost-" ]; then
@@ -20,19 +20,17 @@ echo "Wechsle das Verzeichnis zu: '/home/${SUDO_USER}/'..."
 cd "/home/${SUDO_USER}/" || exit
 
 echo "Lade das Projekt herunter..."
-
-# shellcheck disable=SC2046
-if [ $(git clone "https://github.com/Benefranko/Barcode-Scanner-Feinkost-.git") -eq 0 ]; then
-  echo -e "    -> OK\n"
+if [[ $(git clone "https://github.com/Benefranko/Barcode-Scanner-Feinkost-.git") ]]; then
+    echo -e "    -> OK\n"
 else
-  echo "    -> FAILED --> EXIT()"
-  exit
+    echo "    -> FAILED --> EXIT()"
+    exit
 fi
 
 
 echo "Kopiere die Constants-Datei (/home/${SUDO_USER}/Barcode-Scanner-Feinkost-/src/constants.py-template.txt --> /home/${SUDO_USER}/Barcode-Scanner-Feinkost-/src/constants.py)..."
 
-if [ "$(cp "/home/${USER}/Barcode-Scanner-Feinkost-/src/constants.py-template.txt" "/home/${SUDO_USER}/Barcode-Scanner-Feinkost-/src/constants.py")" -eq 0 ]; then
+if [[ $(cp "/home/${USER}/Barcode-Scanner-Feinkost-/src/constants.py-template.txt" "/home/${SUDO_USER}/Barcode-Scanner-Feinkost-/src/constants.py") ]]; then
    echo "Öffne die Starteinstellungsdatei für Änderungen..."
    for ((i=10; i>0; i--)); do echo "$i"; sleep 1; done
 else
@@ -46,9 +44,8 @@ echo "Installiere die Abhängigkeiten..."
 
 # Abhängigkeiten Installation:
 echo "Installiere Python3..."
-sudo apt install python3
-if [ $? -eq 0 ]; then
-  echo "    -> OK\n"
+if [[ $(sudo apt install python3) ]]; then
+  echo -e "    -> OK\n"
 else
   echo "    -> FAILED --> EXIT()"
   exit
@@ -56,9 +53,8 @@ fi
 
 
 echo "Installiere Driver..."
-sudo apt install tdsodbc freetds-dev freetds-bin unixodbc-dev
-if [ $? -eq 0 ]; then
-  echo "    -> OK\n"
+if [[ $(sudo apt install tdsodbc freetds-dev freetds-bin unixodbc-dev) ]]; then
+  echo -e "    -> OK\n"
 else
   echo "    -> FAILED --> EXIT()"
   exit
@@ -72,7 +68,7 @@ Description=FreeTDS Driver
 Driver=/usr/lib/arm-linux-gnueabihf/odbc/libtdsodbc.so
 Setup=/usr/lib/arm-linux-gnueabihf/odbc/libtdsS.so"
 if [ $? -eq 0 ]; then
-  echo "    -> OK\n"
+  echo -e "    -> OK\n"
 else
   echo "    -> FAILED --> EXIT()"
   exit
@@ -81,9 +77,8 @@ fi
 
 echo "Installiere Driver Loader..."
 # 2. Driver Loader, 3. Graphics, 4. Python-modules:
-sudo apt install python3-pyodbc
-if [ $? -eq 0 ]; then
-  echo "    -> OK\n"
+if [[ $(sudo apt install python3-pyodbc) ]]; then
+  echo -e "    -> OK\n"
 else
   echo "    -> FAILED --> EXIT()"
   exit
@@ -91,9 +86,8 @@ fi
 
 
 echo "Installiere Qt-Bibliotheken"
-sudo apt install python3-PySide2.*
-if [ $? -eq 0 ]; then
-  echo "    -> OK\n"
+if [[ $(sudo apt install python3-PySide2.*) ]]; then
+  echo -e "    -> OK\n"
 else
   echo "    -> FAILED --> EXIT()"
   exit
@@ -101,9 +95,8 @@ fi
 
 
 echo "Installiere Enum Bibliothek"
-sudo apt install python-enum34
-if [ $? -eq 0 ]; then
-    echo "    -> OK\n"
+if [[ $(sudo apt install python-enum34) ]]; then
+    echo -e "    -> OK\n"
 else
     echo "    -> FAILED --> EXIT()"
     exit
