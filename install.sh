@@ -5,11 +5,14 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
-echo "Wechsle das Verzeichnis zu: '/home/${USER}/'..."
-cd "/home/${USER}/"
+echo "Benutzer: $SUDO_USER"
+echo " -> $SUDO_USER sollte kein Admin sein! ( Ausführen dieses Skripts mit sudo )"
+
+echo "Wechsle das Verzeichnis zu: '/home/${SUDO_USER}/'..."
+cd "/home/${SUDO_USER}/"
 
 if [ -d "/home/${USER}/Barcode-Scanner-Feinkost-" ]; then
-  echo "Es existiert bereits der Ordner '/home/${USER}/Barcode-Scanner-Feinkost-' -> Bereits installiert? \n->Abbruch"
+  echo "Es existiert bereits der Ordner '/home/${SUDO_USER}/Barcode-Scanner-Feinkost-' -> Bereits installiert? \n->Abbruch"
   exit
 fi
 
