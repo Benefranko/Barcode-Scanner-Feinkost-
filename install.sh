@@ -7,41 +7,39 @@ fi
 
 echo "Benutzer: $SUDO_USER"
 echo " -> $SUDO_USER sollte kein Admin sein! ( Ausführen dieses Skripts mit sudo )"
+for ((i=10; i>0; i--)); do echo "$i"; sleep 1; done
+
+
+
+if [ -d "/home/${USER}/Barcode-Scanner-Feinkost-" ]; then
+  echo -e "Es existiert bereits der Ordner '/home/${SUDO_USER}/Barcode-Scanner-Feinkost-' -> Bereits installiert? \n->Abbruch"
+  exit
+fi
 
 echo "Wechsle das Verzeichnis zu: '/home/${SUDO_USER}/'..."
-cd "/home/${SUDO_USER}/"
-
-if [ -d "/home/${USER}/Barcode-Scanner-Feinkost-" ]; then
-  echo "Es existiert bereits der Ordner '/home/${SUDO_USER}/Barcode-Scanner-Feinkost-' -> Bereits installiert? \n->Abbruch"
-  exit
-fi
-
-if [ -d "/home/${USER}/Barcode-Scanner-Feinkost-" ]; then
-  echo "Es existiert bereits der Ordner '/home/${USER}/Barcode-Scanner-Feinkost-' -> Bereits installiert? \n->Abbruch"
-  exit
-fi
+cd "/home/${SUDO_USER}/" || exit
 
 echo "Lade das Projekt herunter..."
-git clone "https://github.com/Benefranko/Barcode-Scanner-Feinkost-.git"
-if [ $? -eq 0 ]; then
-  echo "    -> OK\n"
+
+# shellcheck disable=SC2046
+if [ $(git clone "https://github.com/Benefranko/Barcode-Scanner-Feinkost-.git") -eq 0 ]; then
+  echo -e "    -> OK\n"
 else
   echo "    -> FAILED --> EXIT()"
   exit
 fi
 
 
+echo "Kopiere die Constants-Datei (/home/${USER}/Barcode-Scanner-Feinkost-/src/constants.py-template.txt --> /home/${USER}/Barcode-Scanner-Feinkost-/src/constants.py)..."
 
-echo "Kopiere die Constants-Datei..."
-cp "/home/${USER}/Barcode-Scanner-Feinkost-/src/constants.py-template.txt" "/home/${USER}/Barcode-Scanner-Feinkost-/src/constants.py"
+if [ "$(cp "/home/${USER}/Barcode-Scanner-Feinkost-/src/constants.py-template.txt" "/home/${USER}/Barcode-Scanner-Feinkost-/src/constants.py")" -eq 0 ]; then
+   echo "Öffne die Starteinstellungsdatei für Änderungen..."
+   for ((i=10; i>0; i--)); do echo "$i"; sleep 1; done
+else
+  echo "    -> FAILED --> EXIT()"
+fi
 
-echo "Öffne die Starteinstellungsdatei für Änderungen..."
-echo "3"
-sleep 1
-echo "2"
-sleep 1
-echo "1"
-sleep 1
+
 nano "/home/${USER}/Barcode-Scanner-Feinkost-/src/constants.py"
 
 echo "Installiere die Abhängigkeiten..."
