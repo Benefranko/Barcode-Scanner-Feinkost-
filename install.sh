@@ -65,10 +65,10 @@ fi
 echo "Erstelle Driver File..."
 # Save driver Location for Driver Loader
 
-if sudo tee "[FreeTDS]
+if echo "[FreeTDS]
 Description=FreeTDS Driver
 Driver=/usr/lib/arm-linux-gnueabihf/odbc/libtdsodbc.so
-Setup=/usr/lib/arm-linux-gnueabihf/odbc/libtdsS.so" "/etc/odbcinst.ini"
+Setup=/usr/lib/arm-linux-gnueabihf/odbc/libtdsS.so" | sudo tee "/etc/odbcinst.ini"
 then
   echo -e "    -> OK\n"
 else
@@ -85,7 +85,6 @@ else
   echo "    -> FAILED --> EXIT()"
   exit
 fi
-
 
 
 echo "Installiere Qt-Bibliotheken"
@@ -112,7 +111,7 @@ sudo cat /etc/sudoers
 echo "Aktiviere Feature Herunterfahren und Neustarten über Webserver..."
 # Aktiviere Herunterfahren & Neustarten über Web
 if [[ "$(cat "/etc/sudoers")" != *"user_name ALL=(ALL) NOPASSWD: /sbin/reboot, /sbin/shutdown"* ]]; then
-  if sudo tee -a "user_name ALL=(ALL) NOPASSWD: /sbin/reboot, /sbin/shutdown" >> "/etc/sudoers"; then
+  if echo "user_name ALL=(ALL) NOPASSWD: /sbin/reboot, /sbin/shutdown" | sudo tee -a "/etc/sudoers"; then
     echo -e "    -> OK\n"
   else
     echo "    -> FAILED --> EXIT()"
@@ -128,12 +127,15 @@ sudo cat /etc/sudoers
 # Autostart:
 echo "Aktiviere Autostart..."
 
-tee /home/${SUDO_USER}/.config/autostart/feinkostbarcodescanner.desktop"
-[Desktop Entry]
+if echo "[Desktop Entry]
 Name=FeinkostBarcodeScanner
 Type=Application
 Exec=/usr/bin/python /home/${SUDO_USER}/FeinkostBarcodeScanner/src/main.py
-Terminal=false"
-echo -e "    -> OK\n"
+Terminal=false" | tee "/home/${SUDO_USER}/.config/autostart/FeinkostBarcodeScanner.desktop"; then
+  echo -e "    -> OK\n"
+else
+    echo "    -> FAILED --> EXIT()"
+    exit
+fi
 
 echo -e "\nFINISHED SUCCESSFULLY"
