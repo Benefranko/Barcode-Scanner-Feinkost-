@@ -16,6 +16,11 @@ if [ -d "/home/${USER}/Barcode-Scanner-Feinkost-" ]; then
   exit
 fi
 
+if [ -d "/home/${USER}/Barcode-Scanner-Feinkost-" ]; then
+  echo "Es existiert bereits der Ordner '/home/${USER}/Barcode-Scanner-Feinkost-' -> Bereits installiert? \n->Abbruch"
+  exit
+fi
+
 echo "Lade das Projekt herunter..."
 git clone "https://github.com/Benefranko/Barcode-Scanner-Feinkost-.git"
 if [ $? -eq 0 ]; then
