@@ -30,21 +30,20 @@ fi
 
 echo "Kopiere die Constants-Datei (/home/${SUDO_USER}/Barcode-Scanner-Feinkost-/src/constants.py-template.txt --> /home/${SUDO_USER}/Barcode-Scanner-Feinkost-/src/constants.py)..."
 
-if [[ $(cp "/home/${USER}/Barcode-Scanner-Feinkost-/src/constants.py-template.txt" "/home/${SUDO_USER}/Barcode-Scanner-Feinkost-/src/constants.py") ]]; then
+if cp "/home/${SUDO_USER}/Barcode-Scanner-Feinkost-/src/constants.py-template.txt" "/home/${SUDO_USER}/Barcode-Scanner-Feinkost-/src/constants.py"; then
    echo "Öffne die Starteinstellungsdatei für Änderungen..."
    for ((i=10; i>0; i--)); do echo "$i"; sleep 1; done
+   nano "/home/${SUDO_USER}/Barcode-Scanner-Feinkost-/src/constants.py"
 else
   echo "    -> FAILED --> EXIT()"
+  exit
 fi
-
-
-nano "/home/${SUDO_USER}/Barcode-Scanner-Feinkost-/src/constants.py"
 
 echo "Installiere die Abhängigkeiten..."
 
 # Abhängigkeiten Installation:
 echo "Installiere Python3..."
-if [[ $(sudo apt install python3) ]]; then
+if sudo apt install python3; then
   echo -e "    -> OK\n"
 else
   echo "    -> FAILED --> EXIT()"
@@ -53,7 +52,7 @@ fi
 
 
 echo "Installiere Driver..."
-if [[ $(sudo apt install tdsodbc freetds-dev freetds-bin unixodbc-dev) ]]; then
+if sudo apt install tdsodbc freetds-dev freetds-bin unixodbc-dev; then
   echo -e "    -> OK\n"
 else
   echo "    -> FAILED --> EXIT()"
@@ -63,11 +62,12 @@ fi
 
 echo "Erstelle Driver File..."
 # Save driver Location for Driver Loader
-sudo tee "/etc/odbcinst.ini" "[FreeTDS]
+
+if sudo tee "/etc/odbcinst.ini" "[FreeTDS]
 Description=FreeTDS Driver
 Driver=/usr/lib/arm-linux-gnueabihf/odbc/libtdsodbc.so
 Setup=/usr/lib/arm-linux-gnueabihf/odbc/libtdsS.so"
-if [ $? -eq 0 ]; then
+then
   echo -e "    -> OK\n"
 else
   echo "    -> FAILED --> EXIT()"
@@ -77,7 +77,7 @@ fi
 
 echo "Installiere Driver Loader..."
 # 2. Driver Loader, 3. Graphics, 4. Python-modules:
-if [[ $(sudo apt install python3-pyodbc) ]]; then
+if sudo apt install python3-pyodbc; then
   echo -e "    -> OK\n"
 else
   echo "    -> FAILED --> EXIT()"
@@ -86,7 +86,7 @@ fi
 
 
 echo "Installiere Qt-Bibliotheken"
-if [[ $(sudo apt install python3-PySide2.*) ]]; then
+if sudo apt install python3-PySide2.*; then
   echo -e "    -> OK\n"
 else
   echo "    -> FAILED --> EXIT()"
@@ -95,24 +95,32 @@ fi
 
 
 echo "Installiere Enum Bibliothek"
-if [[ $(sudo apt install python-enum34) ]]; then
+if sudo apt install python-enum34; then
     echo -e "    -> OK\n"
 else
     echo "    -> FAILED --> EXIT()"
     exit
 fi
 
+print "sudo cat /etc/sudoers"
+sudo cat /etc/sudoers
+
 
 echo "Aktiviere Feature Herunterfahren und Neustarten über Webserver..."
 # Aktiviere Herunterfahren & Neustarten über Web
 if [[ "$(cat "/etc/sudoers")" != *"user_name ALL=(ALL) NOPASSWD: /sbin/reboot, /sbin/shutdown"* ]]; then
-  if [[ $(sudo echo "user_name ALL=(ALL) NOPASSWD: /sbin/reboot, /sbin/shutdown" >> "/etc/sudoers") ]]; then
+  if sudo tee -a "user_name ALL=(ALL) NOPASSWD: /sbin/reboot, /sbin/shutdown" >> "/etc/sudoers"; then
     echo -e "    -> OK\n"
   else
     echo "    -> FAILED --> EXIT()"
     exit
   fi
 fi
+
+
+print "sudo cat /etc/sudoers"
+sudo cat /etc/sudoers
+
 
 # Autostart:
 echo "Aktiviere Autostart..."
