@@ -268,6 +268,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             color = self.getRandomColor(i)
 
             replace_str += "{\r\n" \
+                           + "borderRadius: 5,\r\n" \
                            + "                    label: '" + group + "',\r\n" \
                            + "                   data: " + str(scan_list) + ",\r\n" \
                            + "                   backgroundColor: [\r\n" \
@@ -308,6 +309,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             color = self.getRandomColor(i)
 
             replace_str += "{\r\n" \
+                           + "borderRadius: 5,\r\n" \
                            + "                    label: '" + group + "',\r\n" \
                            + "                   data: " + str(scan_list) + ",\r\n" \
                            + "                   backgroundColor: [\r\n" \
@@ -358,6 +360,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 replace_str += ","
             color = self.getRandomColor(i)
             replace_str += "{\r\n" \
+                           + "borderRadius: 5,\r\n" \
                            + "                    label: '" + group + "',\r\n" \
                            + "                   data: " + str(scan_list) + ",\r\n" \
                            + "                   backgroundColor: [\r\n" \

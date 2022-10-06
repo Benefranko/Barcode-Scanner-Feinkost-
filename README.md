@@ -2,47 +2,15 @@
 
 Mit diesem Programm sollen Kunden durch das Scannen eines Produkt Bar Codes zusätzliche Informationen zu diesem bekommen.
 
-# Autostart mit Cronjobs:
-Grundsätzlich gibt es für den Autostart (hier angeführt) zwei Möglichkeiten zur Umsetzung in Linux. Die erste ist der Autostart mit Cronjobs.
-Für die erste muss das Paket cron installiert werden:
-
-``sudo apt install cron``
-
-Als nächstes kann man das Programm der Autostartliste mit: ``crontab -e`` hinzufügen:
+# Autostart:
 ````
-@reboot python3.7 /path/to/the/project/main.py
+tee /home/pi/.config/autostart/feinkostbarcodescanner.desktop "
+[Desktop Entry]
+Name=FeinkostBarcodeScanner
+Type=Application
+Exec=/usr/bin/python /home/pi/FeinkostBarcodeScanner/src/main.py
+Terminal=false"
 ````
-
-# Autostart mit Systemd:
-Die andere Möglichkeit funktioniert nur auf Systemd basierenden Systemen, bietet aber zudem die Möglichkeit,
-das Programm erst nach der Netzwerkverbindung zu starten, die für die DB Anbindung vonnöten ist.
-
-Dazu muss man die Datei ``/etc/systemd/system/feinkostBarcodeScanner.service`` mit dem Text erstellen:
-````
-[Unit]
-Description=Feinkost Barcode Scanner
-After=network.target
-
-[Service]
-Type=oneshot
-ExecStart=/full/path/to/the/project/main.py
-User=pi
-
-[Install]
-WantedBy=multi-user.target
-
-````
-
-``User=pi`` muss dabei noch zu dem Benutzer, der das Programm ausführt, geändert werden,
-und sollte kein sudo Benutzer sein.
-``ExecStart=/full/path/to/the/project/main.py`` zu dem Programmpfad.
-
-
-Aktiviert wird der Autostart durch den Befehl:
-``sudo systemctl daemon-reload`` und
-``sudo systemctl enable feinkostBarcodeScanner``,\
-deaktiviert mit: ``sudo systemctl disable feinkostBarcodeScanner``
-
 # Aktiviere Herunterfahren & Neustarten über Web
 ````
 sudo visudo
