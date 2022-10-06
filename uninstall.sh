@@ -4,13 +4,32 @@ if [ "$EUID" -ne 0 ]
   then echo "Please run as root"
   exit
 fi
-echo "Deaktiviere Feature Herunterfahren und Neustarten über Webserver..."
-print "-------------------"
-print "Entfernen sie die Zeile '${SUDO_USER} ALL=(ALL) NOPASSWD: /sbin/reboot, /sbin/shutdown'!!"
-print "-------------------"
-for ((i=6; i>=0; i--)); do echo -ne "\rÖffnen in $i Sekunden"; sleep 1; done
-echo -e "r                              \n\n"
-sudo nano "/etc/sudoers"
+
+
+#echo "Deaktiviere Feature Herunterfahren und Neustarten über Webserver..."
+
+#if text="$(sudo cat "/etc/sudoers" | grep -v "${SUDO_USER} ALL=(ALL) NOPASSWD: /sbin/reboot, /sbin/shutdown" )"; then
+
+#  [ -e "/etc/sudoers.bak" ] && sudo rm "/etc/sudoers.bak" && echo "Lösche altes Backup"
+#  if sudo mv "/etc/sudoers" "/etc/sudoers.bak"; then
+#      if echo "$text" | sudo tee "/etc/sudoers"; then
+#        echo -e "    -> OK\n"
+#      else
+#            echo "    -> FAILED to write new file -> restore..."
+#            [ -e "/etc/sudoers" ] && sudo rm "/etc/sudoers"
+#            sudo mv "/etc/sudoers.bak" "/etc/sudoers"
+#      fi
+#  else
+#    echo "    -> FAILED to create backup -> restore..."
+#    [ -e "/etc/sudoers" ] && sudo rm "/etc/sudoers"
+#    sudo mv "/etc/sudoers.bak" "/etc/sudoers"
+#  fi#
+
+#else
+#  echo "    -> FAILED grep failed skipp"
+#fi
+
+exit
 
 
 # De-Autostart:
