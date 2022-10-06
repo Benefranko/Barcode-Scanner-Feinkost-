@@ -6,42 +6,38 @@ if [ "$EUID" -ne 0 ]
 fi
 
 
-
 # De-Autostart:
 echo "Entferne Autostart..."
 
-rm "/home/${USER}/.config/autostart/feinkostbarcodescanner.desktop"
-if [ $? -eq 0 ]; then
-  echo "    -> OK\n"
+if rm "/home/${SUDO_USER}/.config/autostart/FeinkostBarcodeScanner.desktop"; then
+  echo -e "    -> OK\n"
 else
   echo "    -> FAILED"
 fi
 
 
 echo "Entferne Programmdateien..."
-rm -r "/home/${USER}/Barcode-Scanner-Feinkost-/"
-if [ $? -eq 0 ]; then
-  echo "    -> OK\n"
+
+if rm -r "/home/${SUDO_USER}/Barcode-Scanner-Feinkost-/"; then
+  echo -e "    -> OK\n"
 else
-  echo "    -> FAILED"
+  echo "    -> WARNING: FAILED"
 fi
 
 echo "Entferne die Abhängigkeiten..."
 
 echo "Entferne Driver..."
-sudo apt remove tdsodbc freetds-dev freetds-bin unixodbc-dev
-if [ $? -eq 0 ]; then
-  echo "    -> OK\n"
+if sudo apt remove tdsodbc freetds-dev freetds-bin unixodbc-dev; then
+  echo -e "    -> OK\n"
 else
-  echo "    -> FAILED --> EXIT()"
-  exit
+  echo "    -> FAILED --> SKIPPING()"
 fi
 
 echo "Entferne Driver File..."
 # Save driver Location for Driver Loader
-sudo rm "/etc/odbcinst.ini"
-if [ $? -eq 0 ]; then
-  echo "    -> OK\n"
+
+if sudo rm "/etc/odbcinst.ini"; then
+  echo -e "    -> OK\n"
 else
   echo "    -> FAILED"
 fi
@@ -49,44 +45,37 @@ fi
 
 echo "Entferne Driver Loader..."
 # 2. Driver Loader, 3. Graphics, 4. Python-modules:
-sudo apt remove python3-pyodbc
-if [ $? -eq 0 ]; then
-  echo "    -> OK\n"
+
+if sudo apt remove python3-pyodbc; then
+  echo -e "    -> OK\n"
 else
-  echo "    -> FAILED --> EXIT()"
-  exit
+  echo "    -> FAILED --> SKIPPING()"
 fi
 
 
 echo "Entferne Qt-Bibliotheken"
-sudo apt remove python3-PySide2.*
-if [ $? -eq 0 ]; then
-  echo "    -> OK\n"
+if sudo apt remove python3-PySide2.*; then
+  echo -e "    -> OK\n"
 else
-  echo "    -> FAILED --> EXIT()"
-  exit
+  echo "    -> FAILED --> SKIPPING()"
 fi
 
 
 echo "Entferne Enum Bibliothek"
-sudo apt remove python-enum34
-if [ $? -eq 0 ]; then
-    echo "    -> OK\n"
+if sudo apt remove python-enum34; then
+    echo -e "    -> OK\n"
 else
-    echo "    -> FAILED --> EXIT()"
-    exit
+    echo "    -> FAILED --> SKIPPING()"
 fi
-
 
 echo "Deaktiviere Feature Herunterfahren und Neustarten über Webserver..."
-sed -i 'user_name ALL=(ALL) NOPASSWD: /sbin/reboot, /sbin/shutdown' "/etc/sudoers"
 
-if [ $? -eq 0 ]; then
-  echo "    -> OK\n"
+if sudo sed -i.bak "/${SUDO_USER} ALL=(ALL) NOPASSWD: /sbin/reboot, /sbin/shutdown/d" "/etc/sudoers"; then
+  echo -e "    -> OK\n"
 else
-  echo "    -> FAILED"
+  echo "    -> FAILED -> restore..."
+
 fi
 
-
-echo "\nFINISHED"
+echo -e "\nFINISHED"
 
