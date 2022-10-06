@@ -7,8 +7,8 @@ fi
 
 echo "Benutzer: $SUDO_USER"
 echo " -> $SUDO_USER sollte kein Admin sein! ( Ausführen dieses Skripts mit sudo )"
-for ((i=5; i>0; i--)); do echo -ne "\r$i"; sleep 1; done
-echo -e "\n"
+for ((i=5; i>=0; i--)); do echo -ne "\rFortfahren in $i Sekunden..."; sleep 1; done
+echo -e "\r                               \n\n"
 
 
 if [ -d "/home/$SUDO_USER/Barcode-Scanner-Feinkost-" ]; then
@@ -32,12 +32,15 @@ echo "Kopiere die Constants-Datei (/home/${SUDO_USER}/Barcode-Scanner-Feinkost-/
 
 if cp "/home/${SUDO_USER}/Barcode-Scanner-Feinkost-/src/constants.py-template.txt" "/home/${SUDO_USER}/Barcode-Scanner-Feinkost-/src/constants.py"; then
    echo "Öffne die Starteinstellungsdatei für Änderungen..."
-   for ((i=10; i>0; i--)); do echo "$i"; sleep 1; done
+   for ((i=6; i>=0; i--)); do echo -ne "\rÖffnen in $i Sekunden"; sleep 1; done
+   echo -e "r                              \n\n"
    nano "/home/${SUDO_USER}/Barcode-Scanner-Feinkost-/src/constants.py"
 else
   echo "    -> FAILED --> EXIT()"
   exit
 fi
+
+read -r -p "[Enter] zum Fortfahren"
 
 echo "Installiere die Abhängigkeiten..."
 
