@@ -24,7 +24,7 @@ if git clone "https://github.com/Benefranko/Barcode-Scanner-Feinkost-.git"; then
     echo -e "    -> OK\n"
 else
     echo "    -> FAILED --> EXIT()"
-    exit
+    # exit
 fi
 
 
