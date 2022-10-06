@@ -13,7 +13,7 @@ echo -e "\n"
 
 if [ -d "/home/$SUDO_USER/Barcode-Scanner-Feinkost-" ]; then
   echo -e "Es existiert bereits der Ordner '/home/${SUDO_USER}/Barcode-Scanner-Feinkost-' -> Bereits installiert? \n->Abbruch"
-  exit
+  # exit
 fi
 
 echo "Wechsle das Verzeichnis zu: '/home/${SUDO_USER}/'..."
