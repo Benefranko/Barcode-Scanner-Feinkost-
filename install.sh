@@ -27,7 +27,6 @@ fi
 
 
 
-
 echo "Kopiere die Constants-Datei..."
 cp "/home/${USER}/Barcode-Scanner-Feinkost-/src/constants.py-template.txt" "/home/${USER}/Barcode-Scanner-Feinkost-/src/constants.py"
 
