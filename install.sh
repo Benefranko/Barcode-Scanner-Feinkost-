@@ -20,7 +20,7 @@ echo "Wechsle das Verzeichnis zu: '/home/${SUDO_USER}/'..."
 cd "/home/${SUDO_USER}/" || exit
 
 echo "Lade das Projekt herunter..."
-if [[ $(git clone "https://github.com/Benefranko/Barcode-Scanner-Feinkost-.git") ]]; then
+if git clone "https://github.com/Benefranko/Barcode-Scanner-Feinkost-.git"; then
     echo -e "    -> OK\n"
 else
     echo "    -> FAILED --> EXIT()"
@@ -105,16 +105,14 @@ fi
 
 echo "Aktiviere Feature Herunterfahren und Neustarten über Webserver..."
 # Aktiviere Herunterfahren & Neustarten über Web
-if [ -z "$(cat "/etc/sudoers" | grep "user_name ALL=(ALL) NOPASSWD: /sbin/reboot, /sbin/shutdown")" ]; then
-    sudo echo "user_name ALL=(ALL) NOPASSWD: /sbin/reboot, /sbin/shutdown" >> "/etc/sudoers"
+if [[ "$(cat "/etc/sudoers")" != *"user_name ALL=(ALL) NOPASSWD: /sbin/reboot, /sbin/shutdown"* ]]; then
+  if [[ $(sudo echo "user_name ALL=(ALL) NOPASSWD: /sbin/reboot, /sbin/shutdown" >> "/etc/sudoers") ]]; then
+    echo -e "    -> OK\n"
+  else
+    echo "    -> FAILED --> EXIT()"
+    exit
+  fi
 fi
-if [ $? -eq 0 ]; then
-  echo "    -> OK\n"
-else
-  echo "    -> FAILED --> EXIT()"
-  exit
-fi
-
 
 # Autostart:
 echo "Aktiviere Autostart..."
@@ -125,6 +123,6 @@ Name=FeinkostBarcodeScanner
 Type=Application
 Exec=/usr/bin/python /home/${SUDO_USER}/FeinkostBarcodeScanner/src/main.py
 Terminal=false"
-echo "    -> OK\n"
+echo -e "    -> OK\n"
 
-echo "\nFINISHED SUCCESSFULLY"
+echo -e "\nFINISHED SUCCESSFULLY"
