@@ -22,8 +22,20 @@ else
   exit
 fi
 
-echo "Wechsle das Verzeichnis zu: '/home/${USER}/Barcode-Scanner-Feinkost-'..."
-cd "/home/${USER}/Barcode-Scanner-Feinkost-"
+
+
+
+echo "Kopiere die Constants-Datei..."
+cp "/home/${USER}/Barcode-Scanner-Feinkost-/src/constants.py-template.txt" "/home/${USER}/Barcode-Scanner-Feinkost-/src/constants.py"
+
+echo "Öffne die Starteinstellungsdatei für Änderungen..."
+echo "3"
+sleep 1
+echo "2"
+sleep 1
+echo "1"
+sleep 1
+nano "/home/${USER}/Barcode-Scanner-Feinkost-/src/constants.py"
 
 echo "Installiere die Abhängigkeiten..."
 
