@@ -119,7 +119,6 @@ else
   echo "Already added"
 fi
 
-
 # Autostart:
 echo "Aktiviere Autostart..."
 [ -d "/home/${SUDO_USER}/.config/autostart/" ] || mkdir "/home/${SUDO_USER}/.config/autostart/" || exit
