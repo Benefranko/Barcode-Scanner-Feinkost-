@@ -14,8 +14,7 @@ rm "/home/${USER}/.config/autostart/feinkostbarcodescanner.desktop"
 if [ $? -eq 0 ]; then
   echo "    -> OK\n"
 else
-  echo "    -> FAILED --> EXIT()"
-  exit
+  echo "    -> FAILED"
 fi
 
 
@@ -24,8 +23,7 @@ rm -r "/home/${USER}/Barcode-Scanner-Feinkost-/"
 if [ $? -eq 0 ]; then
   echo "    -> OK\n"
 else
-  echo "    -> FAILED --> EXIT()"
-  exit
+  echo "    -> FAILED"
 fi
 
 echo "Entferne die Abhängigkeiten..."
@@ -45,8 +43,7 @@ sudo rm "/etc/odbcinst.ini"
 if [ $? -eq 0 ]; then
   echo "    -> OK\n"
 else
-  echo "    -> FAILED --> EXIT()"
-  exit
+  echo "    -> FAILED"
 fi
 
 
@@ -87,10 +84,9 @@ sed -i 'user_name ALL=(ALL) NOPASSWD: /sbin/reboot, /sbin/shutdown' "/etc/sudoer
 if [ $? -eq 0 ]; then
   echo "    -> OK\n"
 else
-  echo "    -> FAILED --> EXIT()"
-  exit
+  echo "    -> FAILED"
 fi
 
 
-echo "\nFINISHED SUCCESSFULLY"
+echo "\nFINISHED"
 
