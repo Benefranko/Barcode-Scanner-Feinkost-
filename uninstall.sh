@@ -6,6 +6,33 @@ if [ "$EUID" -ne 0 ]
 fi
 
 
+echo "Deaktiviere Feature Herunterfahren und Neustarten über Webserver..."
+
+if text=$(sudo grep -v "${SUDO_USER}\ ALL=(ALL)\ NOPASSWD:\ /sbin/reboot,\ /sbin/shutdown" "/etc/sudoers"); then
+  print "$text"
+  sleep 10
+  [ -e "/etc/sudoers.bak" ] && sudo rm "/etc/sudoers.bak" && echo "Lösche altes Backup"
+  if mv "/etc/sudoers" "/etc/sudoers.bak"; then
+      if echo "$text" | sudo tee "/etc/sudoers"; then
+        echo -e "    -> OK\n"
+      else
+            echo "    -> FAILED to write new file -> restore..."
+            [ -e "/etc/sudoers" ] && sudo rm "/etc/sudoers"
+            mv "/etc/sudoers.bak" "/etc/sudoers"
+      fi
+  else
+    echo "    -> FAILED to create backup -> restore..."
+    [ -e "/etc/sudoers" ] && sudo rm "/etc/sudoers"
+    mv "/etc/sudoers.bak" "/etc/sudoers"
+  fi
+
+else
+  echo "    -> FAILED grep failed skipp"
+fi
+
+exit
+
+
 # De-Autostart:
 echo "Entferne Autostart..."
 
@@ -91,7 +118,6 @@ if text=$(sudo grep -v "${SUDO_USER}\ ALL=(ALL)\ NOPASSWD:\ /sbin/reboot,\ /sbin
 else
   echo "    -> FAILED grep failed skipp"
 fi
-grep -v "^${SUDO_USER} ALL=(ALL) NOPASSWD: /sbin/reboot, /sbin/shutdown$" "/etc/sudoers" > filename2; mv filename2 filename
 
 echo -e "\nFINISHED"
 
