@@ -6,6 +6,15 @@ Mit diesem Programm sollen Kunden durch das Scannen eines Produkt Bar Codes zus√
 # [INSTALLER DOWNLOAD](https://github.com/M4RKUS28/FeinkostBarcodeScannerInstaller)
 https://github.com/M4RKUS28/FeinkostBarcodeScannerInstaller
 
+Installation durch:
+````commandline
+wget -O /tmp/fkbc_install.sh https://raw.githubusercontent.com/M4RKUS28/FeinkostBarcodeScannerInstaller/main/install.sh; sudo chmod +x /tmp/fkbc_install.sh; sudo /tmp/fkbc_install.sh
+````
+
+Deinstallation mit:
+````commandline
+wget -O /tmp/fkbc_uninstall.sh https://raw.githubusercontent.com/M4RKUS28/FeinkostBarcodeScannerInstaller/main/uninstall.sh; sudo chmod +x /tmp/fkbc_uninstall.sh; sudo /tmp/fkbc_uninstall.sh
+````
 
 # Manuelle Installation
 

@@ -36,7 +36,8 @@ if __name__ == "__main__":
             log.debug(sys.argv)
             print("Mit diesem Programm sollen Kunden durch das Scannen eines Produkt Bar Codes zusätzliche "
                   "Informationen zu diesem über die JTL-Wawi MS SQL Datenbank bekommen.")
-            print("Mit '", sys.argv[0], " -platform off-screen' können sie das Programm ohne Fenster starten")
+            print("Mit '", sys.argv[0], " -platform off-screen' bzw '-platform offscreen' können sie das Programm"
+                                        " ohne Fenster starten")
             exit(0)
 
     # Print All Versions and write it also to log
