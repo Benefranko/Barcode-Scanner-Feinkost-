@@ -62,7 +62,7 @@ Driver=/usr/lib/arm-linux-gnueabihf/odbc/libtdsodbc.so
 Setup=/usr/lib/arm-linux-gnueabihf/odbc/libtdsS.so"
 
 # 2. Driver Loader, 3. Graphics, 4. Python-modules:
-sudo apt install python3-pyodbc python3-PySide2.* python-enum34
+sudo apt install python3-pyodbc python3-PySide2.*
 ````
 
 ##
@@ -115,9 +115,6 @@ Python3 module for ODBC database access
 ### 3. Für die Grafik: PyQt bzw. hier Pyside2 Bibliotheken:
 
 ``sudo apt install python3-PySide2.*``
-
-### 4. Weitere benötigte Python Module:
-``sudo apt install python-enum34``
 
 
 

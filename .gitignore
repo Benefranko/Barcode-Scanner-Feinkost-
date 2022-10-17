@@ -137,3 +137,8 @@ fkbcs_data.db
 # ignore constants == settings file ... needed bec. of updates!!!!!
 src/constants.py
 
+# ignore qt files
+testPy.pyproject
+testPy.pyproject.user
+
+
