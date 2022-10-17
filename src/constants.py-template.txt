@@ -35,7 +35,9 @@ web_admin_init_pw: str = "pass"
 # rename or delete logFile: ( RENAME | DELETE ):
 log_file_delete_mode: str = "RENAME"
 
-reset_before_update: bool = False
+# reset for update
+reset_before_update: bool = True
+
 
 ####
 # GUI
