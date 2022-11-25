@@ -2,8 +2,9 @@ import calendar
 import shutil
 import random
 import os
+import string
 
-
+from http.cookies import SimpleCookie
 from http.server import BaseHTTPRequestHandler
 from datetime import datetime, timedelta
 
@@ -17,6 +18,9 @@ from pathlib import Path
 from PySide2.QtWidgets import QApplication
 
 log = logging.getLogger(Path(__file__).name)
+
+# Liste aller angemeldeter User
+g_logged_in_clients = []
 
 
 # Klasse, die eine TCP Verbindung managed
@@ -35,7 +39,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         # Standard HTTP Sende-Status
         html_status: int = 200
-        html_bytes: bytes
+        html_bytes: bytes = "".encode()
         content_type: str = "text/html"
         sub_paths = self.path.split("/")
 
@@ -94,9 +98,11 @@ class RequestHandler(BaseHTTPRequestHandler):
                     content_type = 'image/x-icon'
                     html_bytes = self.getFileBytes("../images/favicon.ico")
 
-                elif sub_paths[2] == "background.png":
+                elif sub_paths[2] == "background.jpg":
                     html_bytes = self.getFileBytes("../images/background.jpg")
 
+                elif sub_paths[2] == "logo.jpg":
+                    html_bytes = self.getFileBytes("../images/logo.jpg")
                 else:
                     html_status, html_bytes = self.getPageNotFound()
 
@@ -122,6 +128,22 @@ class RequestHandler(BaseHTTPRequestHandler):
 
                 if self.checkPathIsNotValid(sub_paths, 2):
                     html_status, html_bytes = self.getPageNotFound()
+
+                elif not self.checkForLoggedIn():
+                    html_bytes = self.getFileText("../web/html/login.html")
+
+                elif sub_paths[2] == "logout.html":
+                    cookies = SimpleCookie(self.headers.get('Cookie'))
+                    login = cookies.get("LOGIN_ID")
+                    print("VALUE:", login)
+                    print("ALL:", g_logged_in_clients)
+                    if login is not None:
+                        for loginKey in g_logged_in_clients:
+                            if len(loginKey) == 2:
+                                if loginKey[0] == str(login.value):
+                                    log.debug("CLIENT '{0}' hat sich abgemeldet.".format(loginKey))
+                                    g_logged_in_clients.remove(loginKey)
+                    html_bytes = self.getFileText("../web/html/logout.html")
 
                 elif sub_paths[2] == "wochenstatus.html":
                     html_bytes = self.getWochenStatusPage([["Alle Artikel"]], None)
@@ -163,8 +185,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 elif sub_paths[2] == "log.html":
                     html_bytes = self.getLogPage()
 
-                elif sub_paths[2] == "test.html":
-                    html_bytes = self.getFileText("../web/html/test.html")
+                elif sub_paths[2] == "login.html":
+                    html_bytes = self.getFileText("../web/html/login.html")
 
                 elif sub_paths[2] == "about.html":
                     html_bytes = self.getFileText("../web/html/about.html")
@@ -213,6 +235,30 @@ class RequestHandler(BaseHTTPRequestHandler):
     @staticmethod
     def checkPathIsNotValid(subpaths, index) -> bool:
         return subpaths is None or len(subpaths) <= index or subpaths[index] is None or subpaths[index] == ""
+
+    def checkForLoggedIn(self) -> bool:
+        print("CHECK LOCKED IN...")
+        cookies = SimpleCookie(self.headers.get('Cookie'))
+        login = cookies.get("LOGIN_ID")
+        print("VALUE:", login)
+        print("ALL:", g_logged_in_clients)
+        if login is None:
+            return False
+        else:
+            for loginKey in g_logged_in_clients:
+                print("LGINKEY:", loginKey, "len", len(loginKey))
+                if len(loginKey) == 2:
+                    # Remove outdates keys:
+                    if (datetime.now() - loginKey[1]).total_seconds() / 60 > 20:
+                        print("OUTDATED: ", (datetime.now() - loginKey[1]).total_seconds() / 60)
+                        g_logged_in_clients.remove(loginKey)
+                    elif loginKey[0] == str(login.value):
+                        print("IS LOGGED IN")
+                        return True
+                    else:
+                        print(loginKey[0], "!=", login.value)
+        print("IS NOT LOGGED IN")
+        return False
 
     @staticmethod
     def getFileBytes(path) -> bytes:
@@ -469,10 +515,14 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         # Standard HTTP Sende-Status
         html_status: int = 200
-        html_bytes: bytes
+        html_bytes: bytes = "".encode()
         content_type: str = "text/html"
         sub_paths = self.path.split("/")
         content_length = int(self.headers['Content-Length'])  # <--- Gets the size of data
+        # Login Cookie data:
+        cookie = SimpleCookie()
+        do_send_cookie: bool = False
+
         if content_length <= 0:
             log.warning("POST without data!")
             self.trySendError(411, "Die Anfrage kann ohne ein „Content-Length“-Header-Feld nicht bearbeitet werden,"
@@ -490,8 +540,24 @@ class RequestHandler(BaseHTTPRequestHandler):
                     or self.checkPathIsNotValid(sub_paths, 2):
                 html_status, html_bytes = self.getPageNotFound()
 
+            elif sub_paths[2] == "login.html":
+                print(data)
+                if "uname" in data and "psw" in data and \
+                        self.loc_db_mngr.getAdminPw() == data[data.index("psw") + 1]:
+                    print("PASS IS OK")
+                    letters = string.ascii_lowercase
+                    result_str = ''.join(random.choice(letters) for i in range(12))
+                    id_str = (datetime.now().strftime("%m.%d.%Y-%H:%M:%S") + result_str)
+                    g_logged_in_clients.append((id_str, datetime.now()))
+                    cookie['LOGIN_ID'] = id_str
+                    do_send_cookie = True
+                    html_bytes = self.getFileText("../web/html/loged_successfull.html")
+                else:
+                    print("PASS IS WRONG")
+                    html_bytes = self.getFileText("../web/html/login_failed.html")
+
             elif sub_paths[2] == "log.html":
-                if "deleteLog" in data and "password" in data:
+                if "deleteLog" in data in data:
                     html_bytes = self.deleteLogPostRequest(data)
                 else:
                     html_status, html_bytes = self.getPageNotFound()
@@ -558,6 +624,11 @@ class RequestHandler(BaseHTTPRequestHandler):
             ####
             self.send_response(html_status)
             self.send_header('Content-type', content_type)
+
+            if do_send_cookie:
+                for morsel in cookie.values():
+                    self.send_header("Set-Cookie", morsel.OutputString())
+
             self.end_headers()
 
             ####
@@ -598,21 +669,16 @@ class RequestHandler(BaseHTTPRequestHandler):
 
     def deleteLogPostRequest(self, data) -> bytes:
         log.debug("> Try to clear/rename Logfile...")
-        # Check if Password is correct
-        if self.adminPasswordIsCorrect(data, "password"):
-            if consts.log_file_delete_mode == "RENAME":
-                shutil.copyfile(consts.log_file_path, consts.log_file_path.replace(".log", "") + "_backup_"
-                                + datetime.now().strftime("%m-%d-%Y_%H-%M-%S") + ".log")
-                log.info("    -> Logfile copied")
+        if consts.log_file_delete_mode == "RENAME":
+            shutil.copyfile(consts.log_file_path, consts.log_file_path.replace(".log", "") + "_backup_"
+                            + datetime.now().strftime("%m-%d-%Y_%H-%M-%S") + ".log")
+            log.info("    -> Logfile copied")
 
-            fo = open(consts.log_file_path, "w")
-            fo.truncate()
-            fo.close()
-            log.info("    -> (Old) Logfile deleted")
-            return self.getLogPage()
-        else:
-            log.warning("   -> Clear/Delete Logfile failed: Wrong password: ".format(str(data)))
-            return self.getFileText("../web/html/tabelle-falsches-pw.html")
+        fo = open(consts.log_file_path, "w")
+        fo.truncate()
+        fo.close()
+        log.info("    -> (Old) Logfile deleted")
+        return self.getLogPage()
 
     def adminPasswordIsCorrect(self, data, password_field: str):
         return password_field in data and data[data.index(password_field) + 1] == self.loc_db_mngr.getAdminPw()
@@ -628,11 +694,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         status: str = "<font color='green'>Erfolgreich aktualisiert!</font>"
         value: str = data[data.index("anzeigezeit_value") + 1]
 
-        if not self.adminPasswordIsCorrect(data, "adminPW"):
-            status = "<font color='red'>Aktualisierung fehlgeschlagen! Falsches Passwort</font>"
-            log.debug("Aktualisierung fehlgeschlagen! Falsches Passwort")
-
-        elif value.isdigit():
+        if value.isdigit():
             time = int(value)
             if self.loc_db_mngr.setArticleShowTime(time):
                 log.info("> Aktualisiere Artikel Information Anzeigezeit zu: {0} Sekunden."
@@ -649,11 +711,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         status: str = "<font color='green'>Erfolgreich aktualisiert!</font>"
         value: str = data[data.index("anzeigezeit_Hersteller_value") + 1]
 
-        if not self.adminPasswordIsCorrect(data, "adminPW"):
-            status = "<font color='red'>Aktualisierung fehlgeschlagen! Falsches Passwort</font>"
-            log.debug("Aktualisierung fehlgeschlagen! Falsches Passwort")
-
-        elif value.isdigit():
+        if value.isdigit():
             time = int(value)
             if self.loc_db_mngr.setProducerShowTime(time):
                 log.info("> Aktualisiere Hersteller Informationen Anzeigezeit zu: {0} Sekunden.".
@@ -670,11 +728,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         status: str = "<font color='green'>Erfolgreich aktualisiert!</font>"
         value: str = data[data.index("changeAdvertiseTime_value") + 1]
 
-        if not self.adminPasswordIsCorrect(data, "adminPW"):
-            status = "<font color='red'>Aktualisierung fehlgeschlagen! Falsches Passwort</font>"
-            log.debug("Aktualisierung fehlgeschlagen! Falsches Passwort")
-
-        elif value.isdigit():
+        if value.isdigit():
             time = int(value)
             if self.loc_db_mngr.setAdvertiseToggleTime(time):
                 log.info("> Aktualisiere Wechselzeit zwischen Startseite und Werbung Seite zu: {0} Sekunden.".
@@ -691,11 +745,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         status: str = "<font color='green'>Erfolgreich aktualisiert!</font>"
         value: str = data[data.index("changeNothingFoundTime_value") + 1]
 
-        if not self.adminPasswordIsCorrect(data, "adminPW"):
-            status = "<font color='red'>Aktualisierung fehlgeschlagen! Falsches Passwort</font>"
-            log.debug("Aktualisierung fehlgeschlagen! Falsches Passwort")
-
-        elif value.isdigit():
+        if value.isdigit():
             time = int(value)
             if self.loc_db_mngr.setNothingFoundPageShowTime(time):
                 log.info("> Aktualisiere NothingFoundPageShowTime zu: {0} Sekunden.".
@@ -712,11 +762,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         status: str = "<font color='green'>Erfolgreich aktualisiert!</font>"
         value: str = data[data.index("table_row_count_value") + 1]
 
-        if not self.adminPasswordIsCorrect(data, "adminPW"):
-            status = "<font color='red'>Aktualisierung fehlgeschlagen! Falsches Passwort</font>"
-            log.debug("Aktualisierung fehlgeschlagen! Falsches Passwort")
-
-        elif value.isdigit():
+        if value.isdigit():
             time = int(value)
             if self.loc_db_mngr.setItemCountOnWebtable(time):
                 log.info("> Aktualisiere ItemCountOnWebtable zu: {0}.".
@@ -734,11 +780,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         value_1: str = data[data.index("sql_server_ip_value") + 1]
         value_2: str = data[data.index("sql_server_port_value") + 1]
 
-        if not self.adminPasswordIsCorrect(data, "adminPW"):
-            status = "<font color='red'>Aktualisierung fehlgeschlagen! Falsches Passwort</font>"
-            log.debug("Aktualisierung fehlgeschlagen! Falsches Passwort")
-
-        elif value_1 != "" and value_2.isdigit():
+        if value_1 != "" and value_2.isdigit():
             if self.loc_db_mngr.setMS_SQL_ServerAddr(value_1, int(value_2)):
                 log.info("> Aktualisiere ItemCountOnWebtable zu: {0}.".
                          format(self.loc_db_mngr.getMS_SQL_ServerAddr()))
@@ -755,11 +797,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         username: str = data[data.index("sql_server_username_value") + 1]
         password: str = data[data.index("sql_server_password_value") + 1]
 
-        if not self.adminPasswordIsCorrect(data, "adminPW"):
-            status = "<font color='red'>Aktualisierung fehlgeschlagen! Falsches Passwort</font>"
-            log.debug("Aktualisierung fehlgeschlagen! Falsches Passwort")
-
-        elif username != "" and password != "":
+        if username != "" and password != "":
             if self.loc_db_mngr.setMS_SQL_LoginData(username, password):
                 log.info("> Aktualisiere MS_SQL_LoginData zu: {0}|{1}.".
                          format(self.loc_db_mngr.getMS_SQL_LoginData()[0], "*****"))
@@ -775,11 +813,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         status: str = "<font color='green'>Erfolgreich aktualisiert!</font>"
         value: str = data[data.index("mandant_name") + 1]
 
-        if not self.adminPasswordIsCorrect(data, "adminPW"):
-            status = "<font color='red'>Aktualisierung fehlgeschlagen! Falsches Passwort</font>"
-            log.debug("Aktualisierung fehlgeschlagen! Falsches Passwort")
-
-        elif value != "":
+        if value != "":
             if self.loc_db_mngr.setMS_SQL_Mandant(value):
                 log.info("> Aktualisiere mandant_name zu: {0}.".
                          format(self.loc_db_mngr.getMS_SQL_Mandant()))
@@ -807,40 +841,26 @@ class RequestHandler(BaseHTTPRequestHandler):
         return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS4%-->".encode(), status.encode()))
 
     def settingsUpdate(self, data, html: bytes) -> bytes:
-        status = ""
-        if not self.adminPasswordIsCorrect(data, "adminPW"):
-            status = "<font color='red'>Aktualisierung fehlgeschlagen! Falsches Passwort</font>"
-            log.debug("Aktualisierung fehlgeschlagen! Falsches Passwort")
-        else:
-            logger.glob_updater.startUpdate()
-
+        logger.glob_updater.startUpdate()
         return self.replaceVarsInSettingsHtml(html)
 
     def settings_shutdown(self, data, html: bytes) -> bytes:
-        if not self.adminPasswordIsCorrect(data, "adminPW"):
-            status = "Aktualisierung fehlgeschlagen! Falsches Passwort"
-            log.debug("Aktualisierung fehlgeschlagen! Falsches Passwort")
+        if os.system(consts.shutdown_command) == 0:
+            status = "Fahre Computer herunter..."
+            QApplication.quit()
         else:
-            if os.system(consts.shutdown_command) == 0:
-                status = "Fahre Computer herunter..."
-                QApplication.quit()
-            else:
-                status = "Herunterfahren fehlgeschlagen!"
-                log.debug("Herunterfahren fehlgeschlagen!")
+            status = "Herunterfahren fehlgeschlagen!"
+            log.debug("Herunterfahren fehlgeschlagen!")
 
         return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS14%-->".encode(), ("<font color='red'>" + status + "</font>").encode()))
 
     def settings_reboot(self, data, html: bytes) -> bytes:
-        if not self.adminPasswordIsCorrect(data, "adminPW"):
-            status = "Aktualisierung fehlgeschlagen! Falsches Passwort"
-            log.debug("Aktualisierung fehlgeschlagen! Falsches Passwort")
+        if os.system(consts.reboot_command) == 0:
+            status = "Starte Computer neu..."
+            QApplication.quit()
         else:
-            if os.system(consts.reboot_command) == 0:
-                status = "Starte Computer neu..."
-                QApplication.quit()
-            else:
-                status = "Neustarten fehlgeschlagen!"
-                log.debug("Neustarten fehlgeschlagen!")
+            status = "Neustarten fehlgeschlagen!"
+            log.debug("Neustarten fehlgeschlagen!")
 
         return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS13%-->".encode(), ("<font color='red'>" + status + "</font>").encode()))
 
@@ -848,10 +868,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         status: str = "<font color='green'>Erfolgreich aktualisiert!</font>"
         value: [] = str(data[data.index("shutdownTime") + 1]).split("%3A")
 
-        if not self.adminPasswordIsCorrect(data, "adminPW"):
-            status = "<font color='red'>Aktualisierung fehlgeschlagen! Falsches Passwort!</font>"
-            log.debug("Aktualisierung fehlgeschlagen! Falsches Passwort")
-        elif str(data[data.index("shutdownTime") + 1]) == "-1"\
+        if str(data[data.index("shutdownTime") + 1]) == "-1"\
                 or str(data[data.index("shutdownTime") + 1]) == "-1%3A-1":
             if self.loc_db_mngr.setAutoShutdownTime("-1", "-1"):
                 status = "<font color='green'>Automatisches Herunterfahren deaktiviert.</font>"
@@ -874,10 +891,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 
     def settingsReConnectMSSQLDB(self, data, html: bytes) -> bytes:
         status: str = "<font color='green'>Versuche die Verbindung (neu) herzustellen...</font>"
-        if not self.adminPasswordIsCorrect(data, "adminPW"):
-            status = "<font color='red'>(Neu) verbinden fehlgeschlagen! Falsches Passwort</font>"
-            log.debug("Want reconnect ms sqldb fehlgeschlagen! Falsches Passwort")
-        elif self.loc_db_mngr.setWanReConnectMSSQL(True) is None:
+        if self.loc_db_mngr.setWanReConnectMSSQL(True) is None:
             status = "<font color='red'>Verbindung (neu) herzustellen fehlgeschlagen!</font>"
         else:
             log.info("> Want reconnect ms sqldb...")

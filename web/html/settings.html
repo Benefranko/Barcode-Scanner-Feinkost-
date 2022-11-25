@@ -63,7 +63,6 @@
 			<li class="bordered m-li">
 				<form action="" method="post">
 					<label for="showArticleTime"><strong>&#128337; Anzeigezeit der Artikelinformationen:</strong></label><br>
-					Admin Passwort: <input class="textInputField" type="password" name="adminPW" value=""><br>
 					Zeit in Sekunden: <input class="textInputField" type="text" id="showArticleTime" name="anzeigezeit_value" value="%anzeigezeit_value%">
 					<input class="small-btn m-btn-gray" type="submit" value="Anwenden"> <!--%STATUS1%-->
 				</form>
@@ -71,7 +70,6 @@
 			<li class="bordered m-li">
 				<form action="" method="post">
 					<label for="showHerstellerTime"><strong>&#128337; Anzeigezeit der Herstellerinformationen:</strong></label><br>
-					Admin Passwort:  <input class="textInputField" type="password" name="adminPW" value=""><br>
 					Zeit in Sekunden: <input class="textInputField" type="text" id="showHerstellerTime" name="anzeigezeit_Hersteller_value" value="%anzeigezeit_Hersteller_value%">
 					<input class="small-btn m-btn-gray" type="submit" value="Anwenden"> <!--%STATUS2%-->
 				</form>
@@ -79,7 +77,6 @@
 			<li class="bordered m-li">
 				<form action="" method="post">
 					<label for="changeAdvertiseTime"><strong>&#128337; Zeit zwischen Wechsel der Werbungsseite und Startseite:</strong></label><br>
-					Admin Passwort:  <input class="textInputField" type="password" name="adminPW" value=""><br>
 					Zeit in Sekunden: <input class="textInputField" type="text" id="changeAdvertiseTime" name="changeAdvertiseTime_value" value="%changeAdvertiseTime_value%">
 					<input class="small-btn m-btn-gray" type="submit" value="Anwenden"> <!--%STATUS3%-->
 				</form>
@@ -87,7 +84,6 @@
 			<li class="bordered m-li">
 				<form action="" method="post">
 					<label for="changeNothingFoundTime"><strong>&#128337; Anzeigezeit der Nichts-gefunden-Seite:</strong></label><br>
-					Admin Passwort:  <input class="textInputField" type="password" name="adminPW" value=""><br>
 					Zeit in Sekunden: <input class="textInputField" type="text" id="changeNothingFoundTime" name="changeNothingFoundTime_value" value="%changeNothingFoundTime_value%">
 					<input class="small-btn m-btn-gray" type="submit" value="Anwenden"> <!--%STATUS5%-->
 				</form>
@@ -96,17 +92,14 @@
 			<li class="bordered-orange m-li">
 				<form action="" method="post">
 					<label for="table_row_count"><strong>&#9016; Anzahl der Eintr&auml;ge der Tabelle pro Seite:</strong></label><br>
-					Admin Passwort:  <input class="textInputField" type="password" name="adminPW" value=""><br>
 					Zeilenanzahl: <input class="textInputField" type="text" id="table_row_count" name="table_row_count_value" value="%table_row_count_value%">
 					<input class="small-btn m-btn-gray" type="submit" value="Anwenden"> <!--%STATUS6%-->
 				</form>
 
 			<li class="bordered-blue m-li">
 				<form action="" method="post">
-					<label for="server_ip"><strong>&#128187; Microsoft SQL Server:</strong></label><br>
-					<!--%MSG2%--><br>
-					Admin Passwort: <input class="textInputField" type="password" name="adminPW" value="">
-					<input class="small-btn m-btn-gray" type="submit" name="reconnect-mssql" value="(Neu-) Verbinden"> <!--%STATUS16%-->
+					<label for="server_ip"><strong>&#128187; Microsoft SQL Server:</strong></label>
+					<input class="small-btn m-btn-gray" type="submit" name="reconnect-mssql" value="(Neu-) Verbinden"> <!--%MSG2%--> <!--%STATUS16%-->
 				</form>
 			</li>
 
@@ -114,7 +107,6 @@
 			<li class="bordered-blue m-li">
 				<form action="" method="post">
 					<label for="server_ip"><strong>&#128187; Microsoft SQL Server Address:</strong></label><br>
-					Admin Passwort: <input class="textInputField" type="password" name="adminPW" value=""><br>
 					Server Ip Address: <input class="textInputField" type="text" id="server_ip" name="sql_server_ip_value" value="%sql_server_ip_value%">
 					Server Port: <input class="textInputField" type="text" id="server_port" name="sql_server_port_value" value="%sql_server_port_value%">
 					<input class="small-btn m-btn-gray" type="submit" value="Anwenden"> <!--%STATUS7%-->
@@ -124,7 +116,6 @@
 			<li class="bordered-blue m-li">
 				<form action="" method="post">
 					<label for="server_ip"><strong>&#128273; Microsoft SQL Server Login Daten:</strong></label><br>
-					Admin Passwort: <input class="textInputField" type="password" name="adminPW" value=""><br>
 					Server Benutzername: <input class="textInputField" type="text" id="server_username" name="sql_server_username_value" value="%sql_server_username_value%">
 					Server Passwort: <input class="textInputField" type="password" id="server_password" name="sql_server_password_value" value="">
 					<input class="small-btn m-btn-gray" type="submit" value="Anwenden"> <!--%STATUS8%-->
@@ -135,7 +126,6 @@
 			<li class="bordered-blue m-li">
 				<form action="" method="post">
 					<label for="table_row_count"><strong>&#128100; Microsoft SQL Server Mandant:</strong></label><br>
-					Admin Passwort:  <input class="textInputField" type="password" name="adminPW" value=""><br>
 					Mandant: <input class="textInputField" type="text" id="mandant_name" name="mandant_name" value="%mandant_name%">
 					<input class="small-btn m-btn-gray" type="submit" value="Anwenden"> <!--%STATUS9%-->
 				</form>
@@ -144,11 +134,10 @@
 
 			<li class="bordered-black m-li" >
 				<form action="" method="post">
-					<label for="pw-field"><strong>&#8675; Programm Aktualisieren:</strong></label><br>
+					<label for="start-field"><strong>&#8675; Programm Aktualisieren:</strong></label><br>
 					<!--%MSG1%--><br>
-					<label for="pw-field"><!--%disabled_update%--> Admin Passwort:</label>
-					<input class="textInputField" type="password" name="adminPW" id="pw-field" value="" ><!--%disabled_update%-->
-					<input class="small-btn m-btn-gray" name="update_button" type="submit" value="Update starten" ><!--%disabled_update%--> <!--%STATUS12%-->
+					<!--%disabled_update%-->
+					<input class="small-btn m-btn-gray" id="start-field" name="update_button" type="submit" value="Update starten" ><!--%disabled_update%--> <!--%STATUS12%-->
 				</form>
 				<div> &#9733; Vergewissern sie sich, nur vertrauensw&uuml;rdigen Programmcode auszuf&uuml;hren!</div>
 				<div> &#9733; Nach einem Haupt-Update (x.0.0 -> Wenn x sich ver&auml;ndert) sollten sie die Datei<br>
@@ -159,27 +148,21 @@
 
 			<li class="bordered-gray m-li" >
 				<form action="" method="post">
-					<label for="neustarten"><strong>&#8634; Barcodescanner neustarten:</strong></label><br>
-					<label for="neustarten"> Admin Passwort:</label>
-					<input class="textInputField" type="password" name="adminPW" id="neustarten" value="">
-					<input class="small-btn m-btn-gray" name="neustarten_button" type="submit" value="Neustarten" > <!--%STATUS13%-->
+					<label for="neustarten"><strong>&#8634; Barcodescanner neustarten:</strong></label>
+					<input class="small-btn m-btn-gray" id="neustarten" name="neustarten_button" type="submit" value="Neustarten" > <!--%STATUS13%-->
 				</form>
 			</li>
 
 			<li class="bordered-gray m-li" >
 				<form action="" method="post">
-					<label for="shutdown_btn"><strong>&#9212; Barcodescanner herunterfahren:</strong></label><br>
-					<label for="shutdown_btn"> Admin Passwort:</label>
-					<input class="textInputField" type="password" name="adminPW" id="shutdown_btn" value="" >
-					<input class="small-btn m-btn-gray" name="shutdown_button" type="submit" value="Herunterfahren"> <!--%STATUS14%-->
+					<label for="shutdown_btn"><strong>&#9212; Barcodescanner herunterfahren:</strong></label>
+					<input class="small-btn m-btn-gray" id="shutdown_btn" name="shutdown_button" type="submit" value="Herunterfahren"> <!--%STATUS14%-->
 				</form>
 			</li>
 
 			<li class="bordered-orange m-li" >
 				<form action="" method="post">
-					<label for="auto_shutdown"><strong>&#128337; Automatisches Herunterfahren:</strong></label><br>
-					<label for="auto_shutdown"> Admin Passwort:</label>
-					<input class="textInputField" type="password" name="adminPW" id="auto_shutdown" value=""><br>
+					<label for="auto_shutdown_tim"><strong>&#128337; Automatisches Herunterfahren:</strong></label><br>
 					<label for="auto_shutdown_tim"> Uhrzeit:</label>
 					<input class="textInputField" type="text" id="auto_shutdown_tim" name="shutdownTime" value="%shutdownTime%">
 					<input class="small-btn m-btn-gray" name="auto_shutdown_time_btn" type="submit" value="Anwenden"> <!--%STATUS15%-->
@@ -224,6 +207,7 @@
 				<li><a href="/html/log.html">Ereignislog</a></li>
 				<li><a href="/html/settings.html">Einstellungen</a></li>
 				<li><a href="/html/about.html">&Uuml;ber</a></li>
+				<li><a href="/html/logout.html">Abmelden</a></li>
 			</ul>
 		</nav>
 
