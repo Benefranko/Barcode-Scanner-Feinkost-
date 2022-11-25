@@ -41,12 +41,10 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         # Standard HTTP Sende-Status
         html_status: int = 200
-        html_bytes: bytes = "".encode()
         content_type: str = "text/html"
         sub_paths = self.path.split("/")
-
+        html_bytes: bytes = "".encode()
         try:
-
             ####
             # Homepage
             ####
@@ -134,7 +132,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 elif not self.checkForLoggedIn():
                     html_bytes = self.getFileText("../web/html/login.html")\
                         .replace("name=\"ziel-link\" value=\"/\"".encode(),
-                                 ("name=\"ziel-link\" value=\"/html/" + sub_paths[2] + "\"").encode())
+                                 ("name=\"ziel-link\" value=\"" + self.path + "\"").encode())
 
                 elif sub_paths[2] == "logout.html":
                     cookies = SimpleCookie(self.headers.get('Cookie'))
@@ -194,7 +192,8 @@ class RequestHandler(BaseHTTPRequestHandler):
 
                 elif sub_paths[2] == "about.html":
                     html_bytes = self.getFileText("../web/html/about.html")
-                    html_bytes = html_bytes.replace("%version%".encode(), logger.glob_updater.getCurrentVersion().encode())
+                    html_bytes = html_bytes.replace("%version%".encode(),
+                                                    logger.glob_updater.getCurrentVersion().encode())
 
                 else:
                     html_status, html_bytes = self.getPageNotFound()
@@ -241,27 +240,21 @@ class RequestHandler(BaseHTTPRequestHandler):
         return subpaths is None or len(subpaths) <= index or subpaths[index] is None or subpaths[index] == ""
 
     def checkForLoggedIn(self) -> bool:
-        print("CHECK LOCKED IN...")
         cookies = SimpleCookie(self.headers.get('Cookie'))
         login = cookies.get("LOGIN_ID")
-        print("VALUE:", login)
-        print("ALL:", g_logged_in_clients)
         if login is None:
             return False
         else:
             for loginKey in g_logged_in_clients:
-                print("LGINKEY:", loginKey, "len", len(loginKey))
                 if len(loginKey) == 2:
-                    # Remove outdates keys:
-                    if (datetime.now() - loginKey[1]).total_seconds() / 60 > 20:
-                        print("OUTDATED: ", (datetime.now() - loginKey[1]).total_seconds() / 60)
+                    # Remove outdated client logins:
+                    if (datetime.now() - loginKey[1]).total_seconds() / 60 > consts.auto_logout_time:
+                        log.debug("  rm outdated-login: {0}".format(loginKey))
                         g_logged_in_clients.remove(loginKey)
                     elif loginKey[0] == str(login.value):
-                        print("IS LOGGED IN")
                         return True
                     else:
                         print(loginKey[0], "!=", login.value)
-        print("IS NOT LOGGED IN")
         return False
 
     @staticmethod
@@ -283,7 +276,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         return 404, open("../web/html/404.html", "r").read().encode()
 
     @staticmethod
-    def getRandomColor(i) -> str:
+    def getRandomColor() -> str:
         x = random.randint(0, 255)
         y = random.randint(0, 255)
         z = random.randint(0, 255)
@@ -315,7 +308,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 
             if replace_str != "":
                 replace_str += ","
-            color = self.getRandomColor(i)
+            color = self.getRandomColor()
 
             replace_str += "{\r\n" \
                            + "borderRadius: 5,\r\n" \
@@ -356,7 +349,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 
             if replace_str != "":
                 replace_str += ","
-            color = self.getRandomColor(i)
+            color = self.getRandomColor()
 
             replace_str += "{\r\n" \
                            + "borderRadius: 5,\r\n" \
@@ -408,7 +401,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 
             if replace_str != "":
                 replace_str += ","
-            color = self.getRandomColor(i)
+            color = self.getRandomColor()
             replace_str += "{\r\n" \
                            + "borderRadius: 5,\r\n" \
                            + "                    label: '" + group + "',\r\n" \
@@ -545,28 +538,26 @@ class RequestHandler(BaseHTTPRequestHandler):
                 html_status, html_bytes = self.getPageNotFound()
 
             elif sub_paths[2] == "login.html":
-                print(data)
                 if "uname" in data and "psw" and "ziel-link" in data and \
                         self.loc_db_mngr.getAdminPw() == data[data.index("psw") + 1]:
-                    print("PASS IS OK")
+                    # Wenn Passwort richtig ist, erzeuge Login ID für Cookie
                     letters = string.ascii_lowercase
                     result_str = ''.join(random.choice(letters) for i in range(12))
                     id_str = (datetime.now().strftime("%m.%d.%Y-%H:%M:%S") + result_str)
                     g_logged_in_clients.append((id_str, datetime.now()))
                     cookie['LOGIN_ID'] = id_str
+                    # Aktiviere "Sende Cookie", damit Login Cookie später gesendet wird (Im "write header" Abschnitt)
                     do_send_cookie = True
-                    print("REDIRECT TO: ", str(urllib.parse.unquote(str(data[data.index("ziel-link") + 1]))))
+                    # Lade HTML Seite zu erfolgreicher Anmeldung
                     html_bytes = self.getFileText("../web/html/loged_successfull.html")
                     # Wenn nicht redirect zurück auf Login (falls wiederholtes aufrufen der login Seite)
                     # → umleitung zu letzter seite ändern ( statt zu "/" )
                     if "/html/login.html" not in urllib.parse.unquote(data[data.index("ziel-link") + 1]):
-                        print("SET REDIRECT", html_bytes)
-                        html_bytes = html_bytes.replace(";url=/\">".encode(),
-                                                     (";url=" + urllib.parse.unquote(data[data.index("ziel-link") + 1]) + "\">").encode())
-                        print("SET REDIRECT", html_bytes)
-
+                        html_bytes = html_bytes.replace(";url=/\">".encode(), (";url=" + urllib.parse.unquote(
+                            data[data.index("ziel-link") + 1]) + "\">").encode())
+                    log.debug("Login: {0}: Success".format(str((id_str, datetime.now()))))
                 else:
-                    print("PASS IS WRONG")
+                    log.debug("Login: Failed: Wrong Password")
                     html_bytes = self.getFileText("../web/html/login_failed.html")
 
             elif sub_paths[2] == "log.html":
@@ -865,7 +856,8 @@ class RequestHandler(BaseHTTPRequestHandler):
             status = "Herunterfahren fehlgeschlagen!"
             log.debug("Herunterfahren fehlgeschlagen!")
 
-        return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS14%-->".encode(), ("<font color='red'>" + status + "</font>").encode()))
+        return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS14%-->".encode(),
+                                                           ("<font color='red'>" + status + "</font>").encode()))
 
     def settings_reboot(self, data, html: bytes) -> bytes:
         if os.system(consts.reboot_command) == 0:
@@ -875,7 +867,8 @@ class RequestHandler(BaseHTTPRequestHandler):
             status = "Neustarten fehlgeschlagen!"
             log.debug("Neustarten fehlgeschlagen!")
 
-        return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS13%-->".encode(), ("<font color='red'>" + status + "</font>").encode()))
+        return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS13%-->".encode(),
+                                                           ("<font color='red'>" + status + "</font>").encode()))
 
     def settings_auto_shutdown(self, data, html: bytes) -> bytes:
         status: str = "<font color='green'>Erfolgreich aktualisiert!</font>"
@@ -954,10 +947,10 @@ class RequestHandler(BaseHTTPRequestHandler):
             html = html.replace("><!--%disabled_update%-->".encode(), "hidden=\"true\">".encode())
         else:
             msg = "Es ist eine neuere Version ( " + str(logger.glob_updater.getNewestVersion()) + " ) verfügbar. " \
-                                                                                                  "Derzeitige Version: " + str(
-                logger.glob_updater.getCurrentVersion())
+                                                "Derzeitige Version: " + str(logger.glob_updater.getCurrentVersion())
         if logger.glob_updater.state == logger.glob_updater.STATES.UPDATING:
-            msg = "[ v" + str(logger.glob_updater.getCurrentVersion()) + " ] --> [ " + str(logger.glob_updater.getNewestVersion()) + " ]..."
+            msg = "[ v" + str(logger.glob_updater.getCurrentVersion()) + " ] --> [ " + \
+                  str(logger.glob_updater.getNewestVersion()) + " ]..."
             html = html.replace("><!--%disabled_update%-->".encode(), "hidden=\"true\">".encode())
 
         status = "<font color='orange'>" + logger.glob_updater.getStatus() + "</font>"

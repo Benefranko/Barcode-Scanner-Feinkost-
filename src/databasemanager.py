@@ -66,7 +66,8 @@ class DataBaseManager:
                                                user=usr,
                                                password=pw,
                                                encrypt="no")
-                    log.info("  -> Erfolgreich mit MS SQL Server verbunden über ODBC Driver 18")
+                    log.info("  -> Erfolgreich mit MS SQL Server [server={0},{1}; database={2}; user={3}; password=***]"
+                             " verbunden über ODBC Driver 18".format(ip, port, db, usr))
 
                     break
 

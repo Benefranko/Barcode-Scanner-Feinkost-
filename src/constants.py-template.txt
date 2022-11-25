@@ -38,6 +38,14 @@ log_file_delete_mode: str = "RENAME"
 # reset for update
 reset_before_update: bool = True
 
+# HTTPS - SSL
+# Generate Certificate: "openssl req -new -x509 -keyout localhost.pem -out localhost.pem -days 365 -nodes"
+CERT_PATH: str = "../ssl/localhost.pem"
+# SSL enabled
+ENABLE_SSL: bool = True
+
+# Automatischer Logout nach [Minuten]
+auto_logout_time = 20
 
 ####
 # GUI
