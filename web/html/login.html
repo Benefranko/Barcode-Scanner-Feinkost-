@@ -66,6 +66,7 @@ span.psw {
 
 
 <form action="/html/login.html" method="post" style="background-color: white;">
+      <input type="hidden" name="ziel-link" value="/">
   <div class="imgcontainer">
     <img src="/images/logo.jpg" alt="Avatar" class="avatar">
   </div>
@@ -73,11 +74,11 @@ span.psw {
     <h2 style="text-align: center;">Anmeldung Feinkostbarcodescanner</h2>
 
   <div class="container">
-    <label for="uname"><b>Username</b></label>
-    <input type="text" placeholder="Enter Username" name="uname" required>
+    <label hidden="" for="uname"><b>Username</b></label>
+    <input type="hidden" placeholder="Enter Username" id="uname" name="uname" required>
 
     <label for="psw"><b>Password</b></label>
-    <input type="password" placeholder="Enter Password" name="psw" required>
+    <input type="password" placeholder="Enter Password" id="psw" name="psw" required>
 
     <button type="submit">Login</button>
 

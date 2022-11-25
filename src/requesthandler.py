@@ -4,6 +4,8 @@ import random
 import os
 import string
 
+import urllib.parse
+
 from http.cookies import SimpleCookie
 from http.server import BaseHTTPRequestHandler
 from datetime import datetime, timedelta
@@ -130,7 +132,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                     html_status, html_bytes = self.getPageNotFound()
 
                 elif not self.checkForLoggedIn():
-                    html_bytes = self.getFileText("../web/html/login.html")
+                    html_bytes = self.getFileText("../web/html/login.html")\
+                        .replace("name=\"ziel-link\" value=\"/\"".encode(),
+                                 ("name=\"ziel-link\" value=\"/html/" + sub_paths[2] + "\"").encode())
 
                 elif sub_paths[2] == "logout.html":
                     cookies = SimpleCookie(self.headers.get('Cookie'))
@@ -542,7 +546,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 
             elif sub_paths[2] == "login.html":
                 print(data)
-                if "uname" in data and "psw" in data and \
+                if "uname" in data and "psw" and "ziel-link" in data and \
                         self.loc_db_mngr.getAdminPw() == data[data.index("psw") + 1]:
                     print("PASS IS OK")
                     letters = string.ascii_lowercase
@@ -551,7 +555,16 @@ class RequestHandler(BaseHTTPRequestHandler):
                     g_logged_in_clients.append((id_str, datetime.now()))
                     cookie['LOGIN_ID'] = id_str
                     do_send_cookie = True
+                    print("REDIRECT TO: ", str(urllib.parse.unquote(str(data[data.index("ziel-link") + 1]))))
                     html_bytes = self.getFileText("../web/html/loged_successfull.html")
+                    # Wenn nicht redirect zurück auf Login (falls wiederholtes aufrufen der login Seite)
+                    # → umleitung zu letzter seite ändern ( statt zu "/" )
+                    if "/html/login.html" not in urllib.parse.unquote(data[data.index("ziel-link") + 1]):
+                        print("SET REDIRECT", html_bytes)
+                        html_bytes = html_bytes.replace(";url=/\">".encode(),
+                                                     (";url=" + urllib.parse.unquote(data[data.index("ziel-link") + 1]) + "\">").encode())
+                        print("SET REDIRECT", html_bytes)
+
                 else:
                     print("PASS IS WRONG")
                     html_bytes = self.getFileText("../web/html/login_failed.html")
