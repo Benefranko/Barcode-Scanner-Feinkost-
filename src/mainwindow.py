@@ -86,6 +86,8 @@ class MainWindow(QMainWindow):
             self.click_pushButton_back_from_hersteller_page)
 
         # ### Lade Grafiken...
+        # self.window.setStyleSheet("QWidget#Widget{background-image: url(../images/sunmi_scan.png) 0 0 0 0 stretch stretch;}")
+
         # "Kein Bild gefunden"-Grafik...
         self.window.frame.setPixmap(self.getImage("../images/no_picture_found.jpg"))
 
