@@ -4,8 +4,6 @@ import contextlib
 
 import constants as consts
 
-import updater
-
 import logging
 from pathlib import Path
 

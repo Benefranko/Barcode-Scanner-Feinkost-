@@ -1,4 +1,4 @@
-from PySide2.QtCore import QThread, Slot, QObject
+from PySide2.QtCore import QThread
 from enum import Enum
 import constants
 import subprocess
