@@ -21,14 +21,48 @@
 			}
 			.textInputField {
 				padding: 2px 2px;
-				height: 20px;
+				height: 22px;
 				margin-left: 5px;
+				font-size: 15px;
+				border: 3px solid gray;
+				border-radius: 6px;
+
 			}
 			.imageButton{
 				border: 1px solid #000;
 				width:40px;
 				vertical-align:middle;
 				margin-left: 15px;
+			}
+
+			.frame{
+				padding: 20px;
+				font-size: 20px;
+				border-radius: 8px;
+			}
+			.gray{
+				border: 3px solid #959595;
+				background-color: #c8c8c87d;
+			}
+			.orange{
+				border: 3px solid #ffbf0091;
+				background-color: #ffa5004d;
+			}
+			.blue{
+			    border: 3px solid #2196F3;
+				background-color: #00e7ff2e;
+			}
+			.green {
+			    border: 3px solid #078c07a3;
+				background-color: #75ec7540;
+			}
+
+			.mB{
+
+			}
+
+			.ms{
+				margin-bottom: 5px;
 			}
 
 		</style>
@@ -51,137 +85,189 @@
 
 		<div class="spacer"></div>
 
-		<ul class="m-ul">
-			<li class="bordered-orange m-li">
-				<form action="" method="post">
-					<strong>&#x21bb; Lade Liste mit Werbung neu:</strong>
-					<input class="small-btn m-btn-gray" style="margin-left: 54px" type="submit" value="Neu laden" name="ReloadAdvertiseListButton"> <!--%STATUS10%-->
-				</form>
-				<div> &#9733; F&uuml;gen sie ein Artikelmerkmal in JTL-Wawi (mit den Meta-Keywords: ANZEIGEN=TRUE) hinzu <br>
-				und kennzeichnen sie ihre Werbungsartikel Artikel um sie anzeigen zu lassen! </div>
-			</li>
-			<li class="bordered m-li">
-				<form action="" method="post">
-					<label for="showArticleTime"><strong>&#128337; Anzeigezeit der Artikelinformationen:</strong></label><br>
-					Zeit in Sekunden: <input class="textInputField" type="text" id="showArticleTime" name="anzeigezeit_value" value="%anzeigezeit_value%">
-					<input class="small-btn m-btn-gray" type="submit" value="Anwenden"> <!--%STATUS1%-->
-				</form>
-			</li>
-			<li class="bordered m-li">
-				<form action="" method="post">
-					<label for="showHerstellerTime"><strong>&#128337; Anzeigezeit der Herstellerinformationen:</strong></label><br>
-					Zeit in Sekunden: <input class="textInputField" type="text" id="showHerstellerTime" name="anzeigezeit_Hersteller_value" value="%anzeigezeit_Hersteller_value%">
-					<input class="small-btn m-btn-gray" type="submit" value="Anwenden"> <!--%STATUS2%-->
-				</form>
-			</li>
-			<li class="bordered m-li">
-				<form action="" method="post">
-					<label for="changeAdvertiseTime"><strong>&#128337; Zeit zwischen Wechsel der Werbungsseite und Startseite:</strong></label><br>
-					Zeit in Sekunden: <input class="textInputField" type="text" id="changeAdvertiseTime" name="changeAdvertiseTime_value" value="%changeAdvertiseTime_value%">
-					<input class="small-btn m-btn-gray" type="submit" value="Anwenden"> <!--%STATUS3%-->
-				</form>
-			</li>
-			<li class="bordered m-li">
-				<form action="" method="post">
-					<label for="changeNothingFoundTime"><strong>&#128337; Anzeigezeit der Nichts-gefunden-Seite:</strong></label><br>
-					Zeit in Sekunden: <input class="textInputField" type="text" id="changeNothingFoundTime" name="changeNothingFoundTime_value" value="%changeNothingFoundTime_value%">
-					<input class="small-btn m-btn-gray" type="submit" value="Anwenden"> <!--%STATUS5%-->
-				</form>
-			</li>
 
-			<li class="bordered-orange m-li">
-				<form action="" method="post">
-					<label for="table_row_count"><strong>&#9016; Anzahl der Eintr&auml;ge der Tabelle pro Seite:</strong></label><br>
-					Zeilenanzahl: <input class="textInputField" type="text" id="table_row_count" name="table_row_count_value" value="%table_row_count_value%">
-					<input class="small-btn m-btn-gray" type="submit" value="Anwenden"> <!--%STATUS6%-->
-				</form>
+		<div class="frame orange ">
+			<form action="" method="post">
+				<label> <strong>&#x21bb; Lade Liste mit Werbung neu</strong> </label> <br>
+				<div style="font-size: 17px"> &#9733; F&uuml;gen sie ein Artikelmerkmal in JTL-Wawi (mit den Meta-Keywords: ANZEIGEN=TRUE)
+					hinzu und kennzeichnen sie ihre Werbeartikel Artikel um sie anzeigen zu lassen! </div>
+				<input class="small-btn m-btn-gray" style="margin-top: 15px" type="submit" value="Neu laden" name="ReloadAdvertiseListButton"> <!--%STATUS10%-->
+			</form>
+		</div>
 
-			<li class="bordered-blue m-li">
-				<form action="" method="post">
-					<label for="server_ip"><strong>&#128187; Microsoft SQL Server:</strong></label>
-					<input class="small-btn m-btn-gray" type="submit" name="reconnect-mssql" value="(Neu-) Verbinden"> <!--%MSG2%--> <!--%STATUS16%-->
-				</form>
-			</li>
+		<div class="spacer"></div>
 
+		<div class="frame gray">
+			<form action="" method="post">
+				<label for="showArticleTime1"><strong>&#128337; Anzeigezeit der Artikelinformationen:</strong></label>
+				<br class="ms">
+				<label for="showArticleTime1" style="margin-left: 32px;">Zeit in Sekunden: </label>
+				<input class="textInputField"  type="text" id="showArticleTime1" name="anzeigezeit_value" value="%anzeigezeit_value%"> <!--%STATUS1%-->
+				<br>
 
-			<li class="bordered-blue m-li">
-				<form action="" method="post">
-					<label for="server_ip"><strong>&#128187; Microsoft SQL Server Address:</strong></label><br>
-					Server Ip Address: <input class="textInputField" type="text" id="server_ip" name="sql_server_ip_value" value="%sql_server_ip_value%">
-					Server Port: <input class="textInputField" type="text" id="server_port" name="sql_server_port_value" value="%sql_server_port_value%">
-					<input class="small-btn m-btn-gray" type="submit" value="Anwenden"> <!--%STATUS7%-->
-				</form>
-			</li>
+				<label for="showHerstellerTime2"><strong>&#128337; Anzeigezeit der Herstellerinformationen:</strong></label>
+				<br style="margin-top: 15px; margin-bottom: 5px;">
+				<label for="showHerstellerTime2" style="margin-left: 32px;">Zeit in Sekunden: </label>
+				<input class="textInputField" type="text" id="showHerstellerTime2" name="anzeigezeit_Hersteller_value" value="%anzeigezeit_Hersteller_value%"> <!--%STATUS2%-->
+				<br>
 
-			<li class="bordered-blue m-li">
-				<form action="" method="post">
-					<label for="server_ip"><strong>&#128273; Microsoft SQL Server Login Daten:</strong></label><br>
-					Server Benutzername: <input class="textInputField" type="text" id="server_username" name="sql_server_username_value" value="%sql_server_username_value%">
-					Server Passwort: <input class="textInputField" type="password" id="server_password" name="sql_server_password_value" value="">
-					<input class="small-btn m-btn-gray" type="submit" value="Anwenden"> <!--%STATUS8%-->
-				</form>
-			</li>
+				<label for="changeAdvertiseTime3" style="margin-top: 20px;"><strong>&#128337; Zeit zwischen Wechsel der Werbungsseite und Startseite:</strong></label>
+				<br style="margin-top: 15px; margin-bottom: 5px;">
+				<label for="changeAdvertiseTime3" style="margin-left: 32px">Zeit in Sekunden: </label>
+				<input class="textInputField" type="text" id="changeAdvertiseTime3" name="changeAdvertiseTime_value" value="%changeAdvertiseTime_value%"> <!--%STATUS3%-->
+				<br>
+
+				<label for="changeNothingFoundTime4"><strong>&#128337; Anzeigezeit der Nichts-gefunden-Seite:</strong></label>
+				<br style="margin-top: 15px; margin-bottom: 5px;">
+				<label for="changeNothingFoundTime4" style="margin-left: 32px;">Zeit in Sekunden:</label>
+				<input class="textInputField" type="text" id="changeNothingFoundTime4" name="changeNothingFoundTime_value" value="%changeNothingFoundTime_value%"> <!--%STATUS5%-->
+
+				<br style="margin-bottom: 15px;">
+				<input class="small-btn m-btn-green" type="submit" value="Anwenden">
+			</form>
+		</div>
+
+		<div class="spacer"></div>
+
+		<div class="frame green">
+			<form action="" method="post">
+				<label for="table_row_count"><strong>&#9016; Anzahl der Eintr&auml;ge der Tabelle pro Seite:</strong></label>
+				<br style=" margin-bottom: 5px;">
+				<label for="table_row_count" style="margin-left: 20px;">Zeilenanzahl: </label>
+				<input class="textInputField" type="text" id="table_row_count" name="table_row_count_value" value="%table_row_count_value%"><br>
+				<input class="small-btn m-btn-green" style="margin-top: 15px;" type="submit" value="Anwenden"> <!--%STATUS6%-->
+			</form>
+		</div>
+
+		<div class="spacer"></div>
+
+		<div class="frame blue">
+			<form action="" method="post">
+				<label for="server_ip"><strong>&#128187; Microsoft SQL Server:</strong></label>
+				<br style=" margin-bottom: 10px;">
+				<label style="margin-left: 33px;"> Status: </label> <!--%MSG2%--> <!--%STATUS16%-->
+				<br style=" margin-bottom: 15px;">
+				<input class="small-btn m-btn-gray" type="submit" name="reconnect-mssql" value="Neu Verbinden">
+			</form>
+		</div>
 
 
-			<li class="bordered-blue m-li">
-				<form action="" method="post">
-					<label for="table_row_count"><strong>&#128100; Microsoft SQL Server Mandant:</strong></label><br>
-					Mandant: <input class="textInputField" type="text" id="mandant_name" name="mandant_name" value="%mandant_name%">
-					<input class="small-btn m-btn-gray" type="submit" value="Anwenden"> <!--%STATUS9%-->
-				</form>
-			</li>
+		<div class="spacer"></div>
+
+		<div class="frame blue">
+			<form action="" method="post">
+				<label for="server_ip"><strong>&#128187; Microsoft SQL Server Address:</strong></label> <!--%STATUS7%-->
+				<br style="margin-bottom: 5px;">
+				<label for="server_ip" style="margin-left: 33px;">Server Ip Address: </label>
+				<input class="textInputField" type="text" id="server_ip" name="sql_server_ip_value" value="%sql_server_ip_value%">
+								<br style="margin-top: 5px; margin-bottom: 15px;">
+
+				<label for="server_port" style="margin-left: 33px; margin-right: 50px;">Server Port: </label>
+				<input class="textInputField" type="text" id="server_port" name="sql_server_port_value" value="%sql_server_port_value%">
+
+				<br style="margin-top: 5px; margin-bottom: 15px;">
+
+				<label for="server_username"><strong>&#128273; Microsoft SQL Server Login Daten:</strong></label>  <!--%STATUS8%-->
+				<br style="margin-bottom: 5px;">
+				<label for="server_username" style="margin-left: 33px;">Server Benutzername: </label>
+				<input class="textInputField" type="text" id="server_username" name="sql_server_username_value" value="%sql_server_username_value%">
+
+				<br style="margin-top: 5px; margin-bottom: 15px;">
+
+				<label for="server_password" style="margin-left: 33px; margin-right: 46px;">Server Passwort: </label>
+				<input class="textInputField" type="password" id="server_password" name="sql_server_password_value" value="">
+
+				<br style="margin-top: 5px; margin-bottom: 15px;">
+
+				<label for="mandant_name"><strong>&#128100; Microsoft SQL Server Mandant:</strong></label> <!--%STATUS9%-->
+				<br style="margin-bottom: 5px;">
+				<label for="mandant_name" style="margin-left: 33px;">Mandant: </label>
+				<input class="textInputField" type="text" id="mandant_name" name="mandant_name" value="%mandant_name%">
+				<br style="margin-top: 5px; margin-bottom: 15px;">
+
+				<input class="small-btn m-btn-green" type="submit" value="Anwenden">
+
+			</form>
+		</div>
 
 
-			<li class="bordered-black m-li" >
-				<form action="" method="post">
-					<label for="start-field"><strong>&#8675; Programm Aktualisieren:</strong></label><br>
-					<!--%MSG1%--><br>
-					<!--%disabled_update%-->
-					<input class="small-btn m-btn-gray" id="start-field" name="update_button" type="submit" value="Update starten" ><!--%disabled_update%--> <!--%STATUS12%-->
-				</form>
-				<div> &#9733; Vergewissern sie sich, nur vertrauensw&uuml;rdigen Programmcode auszuf&uuml;hren!</div>
-				<div> &#9733; Nach einem Haupt-Update (x.0.0 -> Wenn x sich ver&auml;ndert) sollten sie die Datei<br>
+		<div class="spacer"></div>
+
+		<div class="frame gray">
+			<form action="" method="post">
+				<label><strong>&#8675; Programm Aktualisieren:</strong></label><br>
+				<!--%MSG1%--><br>
+				<!--%disabled_update%-->
+				<input class="small-btn m-btn-gray" id="start-field" name="update_button" type="submit" value="Update starten" ><!--%disabled_update%--> <!--%STATUS12%-->
+			</form>
+			<div style="margin-left: 15px;">
+				<div style="font-size: 17px"> &#9733; Vergewissern sie sich, nur vertrauensw&uuml;rdigen Programmcode auszuf&uuml;hren!</div>
+				<div style="font-size: 17px"> &#9733; Nach einem Haupt-Update (x.0.0 -> Wenn x sich ver&auml;ndert) sollten sie die Datei<br>
 					'src/constants.py' manuell aktualisieren. Die passende Datei finden sie auf Github oder verwenden sie das aktualisierte Template!</div>
-				<div> &#9733; Weitere Informationen zum Programmcode und constants.py-Datei auf <a href="https://github.com/Benefranko/Barcode-Scanner-Feinkost-">Github</a>
+				<div style="font-size: 17px"> &#9733; Weitere Informationen zum Programmcode und constants.py-Datei auf <a href="https://github.com/Benefranko/Barcode-Scanner-Feinkost-">Github</a>
 					, bzw zu den einzelnen Versionen unter <a href="https://github.com/Benefranko/Barcode-Scanner-Feinkost-/tags">[Versionen]</a>!</div>
-			</li>
+			</div>
+		</div>
 
-			<li class="bordered-gray m-li" >
-				<form action="" method="post">
-					<label for="neustarten"><strong>&#8634; Barcodescanner neustarten:</strong></label>
-					<input class="small-btn m-btn-gray" id="neustarten" name="neustarten_button" type="submit" value="Neustarten" > <!--%STATUS13%-->
-				</form>
-			</li>
+		<div class="spacer"></div>
 
-			<li class="bordered-gray m-li" >
-				<form action="" method="post">
-					<label for="shutdown_btn"><strong>&#9212; Barcodescanner herunterfahren:</strong></label>
-					<input class="small-btn m-btn-gray" id="shutdown_btn" name="shutdown_button" type="submit" value="Herunterfahren"> <!--%STATUS14%-->
-				</form>
-			</li>
+		<div class="frame gray">
+			<div><strong>Raspberry Pi Fernsteuerung:</strong></div>
+			<form action="" method="post" style="margin-top: 5px">
+				<label for="neustarten" style="margin-left: 15px; margin-right: 45px;">&#8634; Barcodescanner neustarten:</label>
+				<input class="small-btn m-btn-gray" style="width: 150px;" id="neustarten" name="neustarten_button" type="submit" value="Neustarten" > <!--%STATUS13%-->
+			</form>
 
-			<li class="bordered-orange m-li" >
-				<form action="" method="post">
-					<label for="auto_shutdown_tim"><strong>&#128337; Automatisches Herunterfahren:</strong></label><br>
-					<label for="auto_shutdown_tim"> Uhrzeit:</label>
-					<input class="textInputField" type="text" id="auto_shutdown_tim" name="shutdownTime" value="%shutdownTime%">
-					<input class="small-btn m-btn-gray" name="auto_shutdown_time_btn" type="submit" value="Anwenden"> <!--%STATUS15%-->
-				</form>
+			<form action="" method="post" style="margin-top: 15px">
+				<label for="shutdown_btn" style="margin-left: 15px; margin-right: 5px;" ">&#9212; Barcodescanner herunterfahren:</label>
+				<input class="small-btn m-btn-gray" style="width: 150px;" id="shutdown_btn" name="shutdown_button" type="submit" value="Herunterfahren"> <!--%STATUS14%-->
+			</form>
+
+		</div>
+
+
+		<div class="spacer"></div>
+
+		<div class="frame orange">
+			<form action="" method="post">
+				<label for="auto_shutdown_tim"  ><strong>&#128337; Automatisches Herunterfahren:</strong></label>
+				<br style="margin-bottom: 5px">
+				<label for="auto_shutdown_tim"> Uhrzeit:</label>
+				<input class="textInputField" type="text" id="auto_shutdown_tim" name="shutdownTime" value="%shutdownTime%">
+				<input class="small-btn m-btn-gray" name="auto_shutdown_time_btn" type="submit" value="Anwenden"> <!--%STATUS15%-->
+			</form>
+			<div style="margin-left: 15px;">
 				<div> &#9733; Deaktivieren mit '-1'.</div>
 				<div> &#9733; Gut kombinierbar mit zus&auml;tzlicher Zeitschaltuhr f&uuml;r den Raspberrypi und Bildschirm, um Strom zu sparen.</div>
 				<div class="small-font"> (Den Raspberrypi kurz vor Zeitschaltuhr sicher herunterfahren lassen und am n&auml;chsten Tag
 					durch die Zeitschaltuhr wieder automatisch hochfahren lassen.)</div>
-			</li>
+			</div>
 
-			<li class="bordered m-li">
-				<form action="" method="post">
-					<label for="changePasswordNewPW"><strong>&#128273;Admin Passwort &auml;ndern:</strong></label><br>
-					Admin Passwort: <input class="textInputField" type="password" name="adminPW" value=""><br>
-					Neues Passwort: <input class="textInputField" type="password" id="changePasswordNewPW" name="changePasswordNewPW_value" value="">
-					<input class="small-btn m-btn-gray" type="submit" value="Anwenden"> <!--%STATUS4%-->
+		</div>
+
+		<div class="spacer"></div>
+
+		<div class="frame green">
+			<form action="" method="post">
+				<label for="oldPW"><strong>&#128273;Admin Passwort &auml;ndern:</strong></label><br>
+				<label for="oldPW">Admin Passwort: </label>
+				<input class="textInputField" type="password" name="adminPW" id="oldPW" value="">
+
+				<br style="margin-top: 5px; margin-bottom: 15px;">
+
+				<label for="changePasswordNewPW">Neues Passwort: </label>
+				<input class="textInputField" type="password" id="changePasswordNewPW" name="changePasswordNewPW_value" value="">
+
+				<br style="margin-top: 5px; margin-bottom: 15px;">
+				<label for="changePasswordNewPWCheck" style="margin-right: 44px"> Best&auml;tigen: </label>
+				<input class="textInputField" type="password" id="changePasswordNewPWCheck" name="changePasswordNewPW_CHECK_value" value="">
+
+				<br style="margin-top: 5px; margin-bottom: 15px;">
+
+				<input class="small-btn m-btn-green" type="submit" value="Anwenden"> <!--%STATUS4%-->
 				</form>
-			</li>
-		</ul>
+
+		</div>
 
 		<div class="spacer"></div>
 		<div class="row jc-left">

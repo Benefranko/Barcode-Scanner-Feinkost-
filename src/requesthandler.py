@@ -560,62 +560,64 @@ class RequestHandler(BaseHTTPRequestHandler):
                     log.debug("Login: Failed: Wrong Password")
                     html_bytes = self.getFileText("../web/html/login_failed.html")
 
+            elif not self.checkForLoggedIn():
+                html_bytes = self.getFileText("../web/html/login.html")
+
             elif sub_paths[2] == "log.html":
-                if "deleteLog" in data in data:
-                    html_bytes = self.deleteLogPostRequest(data)
+                if "deleteLog" in data:
+                    html_bytes = self.deleteLogPostRequest()
                 else:
                     html_status, html_bytes = self.getPageNotFound()
 
             elif sub_paths[2] == "settings.html":
-                html = self.getFileText("../web/html/settings.html")
+                html_bytes = self.getFileText("../web/html/settings.html")
 
                 if "ReloadAdvertiseListButton" in data:
-                    html_bytes = self.settingsReloadAdvertiseListPostRequest(html)
+                    html_bytes = self.settingsReloadAdvertiseListPostRequest(html_bytes)
 
-                elif "anzeigezeit_value" in data:
-                    html_bytes = self.settingsUpdateShowTime(data, html)
+                if "anzeigezeit_value" in data:
+                    html_bytes = self.settingsUpdateShowTime(data, html_bytes)
 
-                elif "anzeigezeit_Hersteller_value" in data:
-                    html_bytes = self.settingsUpdateProducerShowTime(data, html)
+                if "anzeigezeit_Hersteller_value" in data:
+                    html_bytes = self.settingsUpdateProducerShowTime(data, html_bytes)
 
-                elif "changeAdvertiseTime_value" in data:
-                    html_bytes = self.settingsUpdateAdvertiseToggleTime(data, html)
+                if "changeAdvertiseTime_value" in data:
+                    html_bytes = self.settingsUpdateAdvertiseToggleTime(data, html_bytes)
 
-                elif "changePasswordNewPW_value" in data:
-                    html_bytes = self.settingsChangePassword(data, html)
+                if "changePasswordNewPW_value" and "changePasswordNewPW_CHECK_value" in data:
+                    html_bytes = self.settingsChangePassword(data, html_bytes)
 
-                elif "changeNothingFoundTime_value" in data:
-                    html_bytes = self.settingsUpdateNothingFoundTime(data, html)
+                if "changeNothingFoundTime_value" in data:
+                    html_bytes = self.settingsUpdateNothingFoundTime(data, html_bytes)
 
-                elif "table_row_count_value" in data:
-                    html_bytes = self.settingsUpdateTableRowCount(data, html)
+                if "table_row_count_value" in data:
+                    html_bytes = self.settingsUpdateTableRowCount(data, html_bytes)
 
-                elif "sql_server_port_value" in data and "sql_server_ip_value" in data:
-                    html_bytes = self.settingsUpdateSQLServerAddress(data, html)
+                if "sql_server_port_value" in data and "sql_server_ip_value" in data:
+                    html_bytes = self.settingsUpdateSQLServerAddress(data, html_bytes)
 
-                elif "sql_server_username_value" in data and "sql_server_password_value" in data:
-                    html_bytes = self.settingsUpdateSQLServerLoginData(data, html)
+                if "sql_server_username_value" in data and "sql_server_password_value" in data:
+                    html_bytes = self.settingsUpdateSQLServerLoginData(data, html_bytes)
 
-                elif "mandant_name" in data:
-                    html_bytes = self.settingsUpdateMandant(data, html)
+                if "mandant_name" in data:
+                    html_bytes = self.settingsUpdateMandant(data, html_bytes)
 
-                elif "update_button" in data:
-                    html_bytes = self.settingsUpdate(data, html)
+                if "update_button" in data:
+                    html_bytes = self.settingsUpdate(data, html_bytes)
 
-                elif "neustarten_button" in data:
-                    html_bytes = self.settings_reboot(data, html)
+                if "neustarten_button" in data:
+                    html_bytes = self.settings_reboot(data, html_bytes)
 
-                elif "shutdown_button" in data:
-                    html_bytes = self.settings_shutdown(data, html)
+                if "shutdown_button" in data:
+                    html_bytes = self.settings_shutdown(data, html_bytes)
 
-                elif "shutdownTime" in data:
-                    html_bytes = self.settings_auto_shutdown(data, html)
+                if "shutdownTime" in data:
+                    html_bytes = self.settings_auto_shutdown(data, html_bytes)
 
-                elif "reconnect-mssql" in data:
-                    html_bytes = self.settingsReConnectMSSQLDB(data, html)
+                if "reconnect-mssql" in data:
+                    html_bytes = self.settingsReConnectMSSQLDB(data, html_bytes)
 
-                else:
-                    html_status, html_bytes = self.getPageNotFound()
+                html_bytes = self.replaceVarsInSettingsHtml(html_bytes)
 
             else:
                 html_status, html_bytes = self.getPageNotFound()
@@ -671,7 +673,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 data += tmp[:2]
         return data
 
-    def deleteLogPostRequest(self, data) -> bytes:
+    def deleteLogPostRequest(self) -> bytes:
         log.debug("> Try to clear/rename Logfile...")
         if consts.log_file_delete_mode == "RENAME":
             shutil.copyfile(consts.log_file_path, consts.log_file_path.replace(".log", "") + "_backup_"
@@ -692,7 +694,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         if self.loc_db_mngr.setWantReloadAdvertiseList(True) is None:
             status = "<font color='red'>Aktualisieren der Liste fehlgeschlagen!</font>"
         log.info("> Want reload Advertise List...")
-        return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS10%-->".encode(), status.encode()))
+        return html.replace("<!--%STATUS10%-->".encode(), status.encode())
 
     def settingsUpdateShowTime(self, data, html: bytes) -> bytes:
         status: str = "<font color='green'>Erfolgreich aktualisiert!</font>"
@@ -700,16 +702,19 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         if value.isdigit():
             time = int(value)
-            if self.loc_db_mngr.setArticleShowTime(time):
-                log.info("> Aktualisiere Artikel Information Anzeigezeit zu: {0} Sekunden."
-                         .format(self.loc_db_mngr.getArticleShowTime()))
+            if time != self.loc_db_mngr.getArticleShowTime():
+                if self.loc_db_mngr.setArticleShowTime(time):
+                    log.info("> Aktualisiere Artikel Information Anzeigezeit zu: {0} Sekunden."
+                             .format(self.loc_db_mngr.getArticleShowTime()))
+                else:
+                    status = "<font color='red'>Ein unerwartetes Problem ist aufgetreten!</font>"
             else:
-                status = "<font color='red'>Ein unerwartetes Problem ist aufgetreten!</font>"
+                status = ""
         else:
             status = "<font color='red'>Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!</font>"
             log.debug("Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!")
 
-        return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS1%-->".encode(), status.encode()))
+        return html.replace("<!--%STATUS1%-->".encode(), status.encode())
 
     def settingsUpdateProducerShowTime(self, data, html: bytes) -> bytes:
         status: str = "<font color='green'>Erfolgreich aktualisiert!</font>"
@@ -717,16 +722,19 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         if value.isdigit():
             time = int(value)
-            if self.loc_db_mngr.setProducerShowTime(time):
-                log.info("> Aktualisiere Hersteller Informationen Anzeigezeit zu: {0} Sekunden.".
-                         format(self.loc_db_mngr.getProducerShowTime()))
+            if time != self.loc_db_mngr.getProducerShowTime():
+                if self.loc_db_mngr.setProducerShowTime(time):
+                    log.info("> Aktualisiere Hersteller Informationen Anzeigezeit zu: {0} Sekunden.".
+                             format(self.loc_db_mngr.getProducerShowTime()))
+                else:
+                    status = "<font color='red'>Ein unerwartetes Problem ist aufgetreten!</font>"
             else:
-                status = "<font color='red'>Ein unerwartetes Problem ist aufgetreten!</font>"
+                status = ""
         else:
             status = "<font color='red'>Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!</font>"
             log.debug("Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!")
 
-        return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS2%-->".encode(), status.encode()))
+        return html.replace("<!--%STATUS2%-->".encode(), status.encode())
 
     def settingsUpdateAdvertiseToggleTime(self, data, html: bytes) -> bytes:
         status: str = "<font color='green'>Erfolgreich aktualisiert!</font>"
@@ -734,16 +742,19 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         if value.isdigit():
             time = int(value)
-            if self.loc_db_mngr.setAdvertiseToggleTime(time):
-                log.info("> Aktualisiere Wechselzeit zwischen Startseite und Werbung Seite zu: {0} Sekunden.".
-                         format(self.loc_db_mngr.getAdvertiseToggleTime()))
+            if time != self.loc_db_mngr.getAdvertiseToggleTime():
+                if self.loc_db_mngr.setAdvertiseToggleTime(time):
+                    log.info("> Aktualisiere Wechselzeit zwischen Startseite und Werbung Seite zu: {0} Sekunden.".
+                             format(self.loc_db_mngr.getAdvertiseToggleTime()))
+                else:
+                    status = "<font color='red'>Ein unerwartetes Problem ist aufgetreten!</font>"
             else:
-                status = "<font color='red'>Ein unerwartetes Problem ist aufgetreten!</font>"
+                status = ""
         else:
             status = "<font color='red'>Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!</font>"
             log.debug("Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!")
 
-        return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS3%-->".encode(), status.encode()))
+        return html.replace("<!--%STATUS3%-->".encode(), status.encode())
 
     def settingsUpdateNothingFoundTime(self, data, html: bytes) -> bytes:
         status: str = "<font color='green'>Erfolgreich aktualisiert!</font>"
@@ -751,33 +762,39 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         if value.isdigit():
             time = int(value)
-            if self.loc_db_mngr.setNothingFoundPageShowTime(time):
-                log.info("> Aktualisiere NothingFoundPageShowTime zu: {0} Sekunden.".
-                         format(self.loc_db_mngr.getNothingFoundPageShowTime()))
+            if time != self.loc_db_mngr.getNothingFoundPageShowTime():
+                if self.loc_db_mngr.setNothingFoundPageShowTime(time):
+                    log.info("> Aktualisiere NothingFoundPageShowTime zu: {0} Sekunden.".
+                             format(self.loc_db_mngr.getNothingFoundPageShowTime()))
+                else:
+                    status = "<font color='red'>Ein unerwartetes Problem ist aufgetreten!</font>"
             else:
-                status = "<font color='red'>Ein unerwartetes Problem ist aufgetreten!</font>"
+                status = ""
         else:
             status = "<font color='red'>Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!</font>"
             log.debug("Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!")
 
-        return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS5%-->".encode(), status.encode()))
+        return html.replace("<!--%STATUS5%-->".encode(), status.encode())
 
     def settingsUpdateTableRowCount(self, data, html: bytes) -> bytes:
         status: str = "<font color='green'>Erfolgreich aktualisiert!</font>"
         value: str = data[data.index("table_row_count_value") + 1]
 
         if value.isdigit():
-            time = int(value)
-            if self.loc_db_mngr.setItemCountOnWebtable(time):
-                log.info("> Aktualisiere ItemCountOnWebtable zu: {0}.".
-                         format(self.loc_db_mngr.getItemCountOnWebTable()))
+            count = int(value)
+            if count != self.loc_db_mngr.getItemCountOnWebTable():
+                if self.loc_db_mngr.setItemCountOnWebtable(count):
+                    log.info("> Aktualisiere ItemCountOnWebtable zu: {0}.".
+                             format(self.loc_db_mngr.getItemCountOnWebTable()))
+                else:
+                    status = "<font color='red'>Ein unerwartetes Problem ist aufgetreten!</font>"
             else:
-                status = "<font color='red'>Ein unerwartetes Problem ist aufgetreten!</font>"
+                status = ""
         else:
             status = "<font color='red'>Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!</font>"
             log.debug("Aktualisierung fehlgeschlagen! Nur ganzzahlige Werte!")
 
-        return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS6%-->".encode(), status.encode()))
+        return html.replace("<!--%STATUS6%-->".encode(), status.encode())
 
     def settingsUpdateSQLServerAddress(self, data, html: bytes) -> bytes:
         status: str = "<font color='green'>Erfolgreich aktualisiert!</font>"
@@ -785,70 +802,90 @@ class RequestHandler(BaseHTTPRequestHandler):
         value_2: str = data[data.index("sql_server_port_value") + 1]
 
         if value_1 != "" and value_2.isdigit():
-            if self.loc_db_mngr.setMS_SQL_ServerAddr(value_1, int(value_2)):
-                log.info("> Aktualisiere ItemCountOnWebtable zu: {0}.".
-                         format(self.loc_db_mngr.getMS_SQL_ServerAddr()))
+            if value_1 == self.loc_db_mngr.getMS_SQL_ServerAddr()[0] and int(value_2) == self.loc_db_mngr.getMS_SQL_ServerAddr()[1]:
+                status = ""
+
             else:
-                status = "<font color='red'>Ein unerwartetes Problem ist aufgetreten!</font>"
+                if self.loc_db_mngr.setMS_SQL_ServerAddr(value_1, int(value_2)):
+                    log.info("> Aktualisiere settingsUpdateSQLServerAddress zu: {0}.".
+                             format(self.loc_db_mngr.getMS_SQL_ServerAddr()))
+                else:
+                    status = "<font color='red'>Ein unerwartetes Problem ist aufgetreten!</font>"
         else:
             status = "<font color='red'>Aktualisierung fehlgeschlagen! Ungültige Eingabe!</font>"
             log.debug("Aktualisierung fehlgeschlagen! Ungültige Eingabe!")
 
-        return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS7%-->".encode(), status.encode()))
+        return html.replace("<!--%STATUS7%-->".encode(), status.encode())
 
     def settingsUpdateSQLServerLoginData(self, data, html: bytes) -> bytes:
         status: str = "<font color='green'>Erfolgreich aktualisiert!</font>"
         username: str = data[data.index("sql_server_username_value") + 1]
         password: str = data[data.index("sql_server_password_value") + 1]
 
+        # use old pw if not set
+        if password == "":
+            password = self.loc_db_mngr.getMS_SQL_LoginData()[1]
+
         if username != "" and password != "":
-            if self.loc_db_mngr.setMS_SQL_LoginData(username, password):
-                log.info("> Aktualisiere MS_SQL_LoginData zu: {0}|{1}.".
-                         format(self.loc_db_mngr.getMS_SQL_LoginData()[0], "*****"))
+
+            if username == self.loc_db_mngr.getMS_SQL_LoginData()[0] and password == self.loc_db_mngr.getMS_SQL_LoginData()[1]:
+                status = ""
             else:
-                status = "<font color='red'>Ein unerwartetes Problem ist aufgetreten!</font>"
+                if self.loc_db_mngr.setMS_SQL_LoginData(username, password):
+                    log.info("> Aktualisiere MS_SQL_LoginData zu: {0}|{1}.".
+                             format(self.loc_db_mngr.getMS_SQL_LoginData()[0], "*****"))
+                else:
+                    status = "<font color='red'>Ein unerwartetes Problem ist aufgetreten!</font>"
         else:
             status = "<font color='red'>Aktualisierung fehlgeschlagen! Ungültige Eingabe!</font>"
             log.debug("Aktualisierung fehlgeschlagen! Ungültige Eingabe!")
 
-        return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS8%-->".encode(), status.encode()))
+        return html.replace("<!--%STATUS8%-->".encode(), status.encode())
 
     def settingsUpdateMandant(self, data, html: bytes) -> bytes:
         status: str = "<font color='green'>Erfolgreich aktualisiert!</font>"
         value: str = data[data.index("mandant_name") + 1]
 
         if value != "":
-            if self.loc_db_mngr.setMS_SQL_Mandant(value):
-                log.info("> Aktualisiere mandant_name zu: {0}.".
-                         format(self.loc_db_mngr.getMS_SQL_Mandant()))
+            if value == self.loc_db_mngr.getMS_SQL_Mandant():
+                status = ""
             else:
-                status = "<font color='red'>Ein unerwartetes Problem ist aufgetreten!</font>"
+                if self.loc_db_mngr.setMS_SQL_Mandant(value):
+                    log.info("> Aktualisiere mandant_name zu: {0}.".
+                             format(self.loc_db_mngr.getMS_SQL_Mandant()))
+                else:
+                    status = "<font color='red'>Ein unerwartetes Problem ist aufgetreten!</font>"
         else:
             status = "<font color='red'>Aktualisierung fehlgeschlagen! Ungültige Eingabe!</font>"
             log.debug("Aktualisierung fehlgeschlagen! Ungültige Eingabe!")
 
-        return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS9%-->".encode(), status.encode()))
+        return html.replace("<!--%STATUS9%-->".encode(), status.encode())
 
     def settingsChangePassword(self, data, html: bytes) -> bytes:
         status: str = "<font color='green'>Erfolgreich aktualisiert!</font>"
         value: str = data[data.index("changePasswordNewPW_value") + 1]
+        value2: str = data[data.index("changePasswordNewPW_CHECK_value") + 1]
 
         if not self.adminPasswordIsCorrect(data, "adminPW"):
             status = "<font color='red'>Aktualisierung fehlgeschlagen! Falsches Passwort</font>"
             log.debug("Aktualisierung fehlgeschlagen! Falsches Passwort")
         else:
-            if self.loc_db_mngr.setAdminPw(value):
+            if value != value2:
+                status = "<font color='red'>Das neue Passwort stimmt nicht mit der Best&auml;tigung &uuml;berein!</font>"
+            elif self.loc_db_mngr.setAdminPw(value):
                 log.info("> Ändere das Admin Passwort")
             else:
                 status = "<font color='red'>Ein unerwartetes Problem ist aufgetreten!</font>"
 
-        return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS4%-->".encode(), status.encode()))
+        return html.replace("<!--%STATUS4%-->".encode(), status.encode())
 
-    def settingsUpdate(self, data, html: bytes) -> bytes:
+    @staticmethod
+    def settingsUpdate(data, html: bytes) -> bytes:
         logger.glob_updater.startUpdate()
-        return self.replaceVarsInSettingsHtml(html)
+        return html
 
-    def settings_shutdown(self, data, html: bytes) -> bytes:
+    @staticmethod
+    def settings_shutdown(data, html: bytes) -> bytes:
         if os.system(consts.shutdown_command) == 0:
             status = "Fahre Computer herunter..."
             QApplication.quit()
@@ -856,10 +893,10 @@ class RequestHandler(BaseHTTPRequestHandler):
             status = "Herunterfahren fehlgeschlagen!"
             log.debug("Herunterfahren fehlgeschlagen!")
 
-        return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS14%-->".encode(),
-                                                           ("<font color='red'>" + status + "</font>").encode()))
+        return html.replace("<!--%STATUS14%-->".encode(), ("<font color='red'>" + status + "</font>").encode())
 
-    def settings_reboot(self, data, html: bytes) -> bytes:
+    @staticmethod
+    def settings_reboot(data, html: bytes) -> bytes:
         if os.system(consts.reboot_command) == 0:
             status = "Starte Computer neu..."
             QApplication.quit()
@@ -867,8 +904,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             status = "Neustarten fehlgeschlagen!"
             log.debug("Neustarten fehlgeschlagen!")
 
-        return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS13%-->".encode(),
-                                                           ("<font color='red'>" + status + "</font>").encode()))
+        return html.replace("<!--%STATUS13%-->".encode(), ("<font color='red'>" + status + "</font>").encode())
 
     def settings_auto_shutdown(self, data, html: bytes) -> bytes:
         status: str = "<font color='green'>Erfolgreich aktualisiert!</font>"
@@ -893,7 +929,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             status = "<font color='red'>Aktualisierung fehlgeschlagen! Ungültige Eingabe!</font>"
             log.debug("Aktualisierung fehlgeschlagen! Ungültige Eingabe!")
 
-        return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS15%-->".encode(), status.encode()))
+        return html.replace("<!--%STATUS15%-->".encode(), status.encode())
 
     def settingsReConnectMSSQLDB(self, data, html: bytes) -> bytes:
         status: str = "<font color='green'>Versuche die Verbindung (neu) herzustellen...</font>"
@@ -901,7 +937,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             status = "<font color='red'>Verbindung (neu) herzustellen fehlgeschlagen!</font>"
         else:
             log.info("> Want reconnect ms sqldb...")
-        return self.replaceVarsInSettingsHtml(html.replace("<!--%STATUS16%-->".encode(), status.encode()))
+        return html.replace("<!--%STATUS16%-->".encode(), status.encode())
 
     @staticmethod
     def settingsShutDown():
