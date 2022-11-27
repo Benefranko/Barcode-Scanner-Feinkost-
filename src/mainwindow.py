@@ -393,6 +393,10 @@ class MainWindow(QMainWindow):
 
     def newScanHandling(self, scan_article_ean: str):
         # Barcodescanner hat neues Scan registriert...
+        # Zeige lade Seite...
+        self.window.stackedWidget.setCurrentIndex(5)
+        QApplication.processEvents()
+
         # Setzte Anzeige Timer zurück und ändere Objektzustand
         self.showTimeTimer = self.loc_db_mngr.getArticleShowTime()
         self.state = self.STATES.SHOW_PRODUCT_DESCRIPTION
