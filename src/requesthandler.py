@@ -870,7 +870,10 @@ class RequestHandler(BaseHTTPRequestHandler):
             status = "<font color='red'>Aktualisierung fehlgeschlagen! Falsches Passwort</font>"
             log.debug("Aktualisierung fehlgeschlagen! Falsches Passwort")
         else:
-            if value != value2:
+            if value == "" or value2 == "":
+                status = "<font color='red'>Aktualisierung des PWs fehlgeschlagen! Ungültige Eingabe!</font>"
+                log.debug("Aktualisierung des PWs fehlgeschlagen! Ungültige Eingabe!")
+            elif value != value2:
                 status = "<font color='red'>Das neue Passwort stimmt nicht mit der Best&auml;tigung &uuml;berein!</font>"
             elif self.loc_db_mngr.setAdminPw(value):
                 log.info("> Ändere das Admin Passwort")
