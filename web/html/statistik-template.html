@@ -12,9 +12,30 @@
 		</style>
 	</head>
 	<body>
+
 		<div class="titel">
-			<h1 class="titel-font">%BIGSTATISTIKNAME%:</h1>
+			<div style="width: 20%" class="titel-container">
+				<a class="h-logo-con" href="/">
+					<div style="margin: auto" class="header-logo"></div>
+					<div class="white-text">FKBCS</div>
+				</a>
+			</div>
+			<div style="width: 60%" class="titel-container">
+				<h1 class="titel-font">%BIGSTATISTIKNAME%:</h1>
+			</div>
+			<div style="width: 20%;" class="titel-container">
+				<!--%ANMELDE_ABMELDE_BTN-->
+				<a id="login-btn" hidden href="/html/login.html" class="login-button">Anmelden</a>
+				<div id="log-out-menu" style="display: flex; align-items: center;">
+					<div class="loged-in-img"></div>
+					<a href="/html/logout.html"  class="logout-btn">Abmelden</a>
+				</div >
+			</div>
 		</div>
+
+
+		<div class="main-con">
+
 		<div class="spacer"></div>
 		<div class="chart-container">
 			<canvas id="myChart"></canvas>
@@ -52,6 +73,7 @@
 				<li><a href="/html/logout.html">Abmelden</a></li>
 			</ul>
 		</nav>
+		</div>
 
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 		<script src="/js/script.js"></script>

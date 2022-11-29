@@ -8,10 +8,6 @@
 		<link rel="stylesheet" href="/css/sidebar-style.css">
 
 		<style>
-			body {
-				width: 95%;
-				line-height: 1.5;
-			}
 			.m-ul {
 				font-size: 22px;
 				font-family: 'Source Sans Pro', sans-serif;
@@ -70,9 +66,28 @@
 	</head>
 
 	<body>
+
 		<div class="titel">
-			<h1 class="titel-font">&#9881; Einstellungen: </h1>
+			<div style="width: 20%" class="titel-container">
+				<a class="h-logo-con" href="/">
+					<div style="margin: auto" class="header-logo"></div>
+					<div class="white-text">FKBCS</div>
+				</a>
+			</div>
+			<div style="width: 60%" class="titel-container">
+				<h1 class="titel-font">&#9881; Einstellungen: </h1>
+			</div>
+			<div style="width: 20%;" class="titel-container">
+				<!--%ANMELDE_ABMELDE_BTN-->
+				<a id="login-btn" hidden href="/html/login.html" class="login-button">Anmelden</a>
+				<div id="log-out-menu" style="display: flex; align-items: center;">
+					<div class="loged-in-img"></div>
+					<a href="/html/logout.html"  class="logout-btn">Abmelden</a>
+				</div >
+			</div>
 		</div>
+
+		<div style="width: 95%; line-height: 1.5; margin: auto;">
 
 		<div class="spacer"></div>
 		<div class="spacer"></div>
@@ -87,7 +102,7 @@
 
 
 		<div class="frame orange ">
-			<form action="" method="post">
+			<form action="" method="post"  accept-charset="utf-8">
 				<label> <strong>&#x21bb; Lade Liste mit Werbung neu</strong> </label> <br>
 				<div style="font-size: 17px"> &#9733; F&uuml;gen sie ein Artikelmerkmal in JTL-Wawi (mit den Meta-Keywords: ANZEIGEN=TRUE)
 					hinzu und kennzeichnen sie ihre Werbeartikel Artikel um sie anzeigen zu lassen! </div>
@@ -98,7 +113,7 @@
 		<div class="spacer"></div>
 
 		<div class="frame gray">
-			<form action="" method="post">
+			<form action="" method="post"  accept-charset="utf-8">
 				<label for="showArticleTime1"><strong>&#128337; Anzeigezeit der Artikelinformationen:</strong></label>
 				<br class="ms">
 				<label for="showArticleTime1" style="margin-left: 32px;">Zeit in Sekunden: </label>
@@ -130,7 +145,7 @@
 		<div class="spacer"></div>
 
 		<div class="frame green">
-			<form action="" method="post">
+			<form action="" method="post"  accept-charset="utf-8">
 				<label for="table_row_count"><strong>&#9016; Anzahl der Eintr&auml;ge der Tabelle pro Seite:</strong></label>
 				<br style=" margin-bottom: 5px;">
 				<label for="table_row_count" style="margin-left: 20px;">Zeilenanzahl: </label>
@@ -142,7 +157,7 @@
 		<div class="spacer"></div>
 
 		<div class="frame blue">
-			<form action="" method="post">
+			<form action="" method="post"  accept-charset="utf-8">
 				<label for="server_ip"><strong>&#128187; Microsoft SQL Server:</strong></label>
 				<br style=" margin-bottom: 10px;">
 				<label style="margin-left: 33px;"> Status: </label> <!--%MSG2%--> <!--%STATUS16%-->
@@ -155,7 +170,7 @@
 		<div class="spacer"></div>
 
 		<div class="frame blue">
-			<form action="" method="post">
+			<form action="" method="post" accept-charset="utf-8">
 				<label for="server_ip"><strong>&#128187; Microsoft SQL Server Address:</strong></label> <!--%STATUS7%-->
 				<br style="margin-bottom: 5px;">
 				<label for="server_ip" style="margin-left: 33px;">Server Ip Address: </label>
@@ -194,7 +209,7 @@
 		<div class="spacer"></div>
 
 		<div class="frame gray">
-			<form action="" method="post">
+			<form action="" method="post" accept-charset="utf-8">
 				<label><strong>&#8675; Programm Aktualisieren:</strong></label><br>
 				<!--%MSG1%--><br>
 				<!--%disabled_update%-->
@@ -213,13 +228,13 @@
 
 		<div class="frame gray">
 			<div><strong>Raspberry Pi Fernsteuerung:</strong></div>
-			<form action="" method="post" style="margin-top: 5px">
+			<form action="" method="post" style="margin-top: 5px" accept-charset="utf-8">
 				<label for="neustarten" style="margin-left: 15px; margin-right: 45px;">&#8634; Barcodescanner neustarten:</label>
 				<input class="small-btn m-btn-gray" style="width: 150px;" id="neustarten" name="neustarten_button" type="submit" value="Neustarten" > <!--%STATUS13%-->
 			</form>
 
-			<form action="" method="post" style="margin-top: 15px">
-				<label for="shutdown_btn" style="margin-left: 15px; margin-right: 5px;" ">&#9212; Barcodescanner herunterfahren:</label>
+			<form action="" method="post" style="margin-top: 15px" accept-charset="utf-8">
+				<label for="shutdown_btn" style="margin-left: 15px; margin-right: 5px;">&#9212; Barcodescanner herunterfahren:</label>
 				<input class="small-btn m-btn-gray" style="width: 150px;" id="shutdown_btn" name="shutdown_button" type="submit" value="Herunterfahren"> <!--%STATUS14%-->
 			</form>
 
@@ -229,7 +244,7 @@
 		<div class="spacer"></div>
 
 		<div class="frame orange">
-			<form action="" method="post">
+			<form action="" method="post" accept-charset="utf-8">
 				<label for="auto_shutdown_tim"  ><strong>&#128337; Automatisches Herunterfahren:</strong></label>
 				<br style="margin-bottom: 5px">
 				<label for="auto_shutdown_tim"> Uhrzeit:</label>
@@ -248,7 +263,7 @@
 		<div class="spacer"></div>
 
 		<div class="frame green">
-			<form action="" method="post">
+			<form action="" method="post" accept-charset="utf-8">
 				<label for="oldPW"><strong>&#128273;Admin Passwort &auml;ndern:</strong></label><br>
 				<label for="oldPW">Admin Passwort: </label>
 				<input class="textInputField" type="password" name="adminPW" id="oldPW" value="">
@@ -296,6 +311,10 @@
 				<li><a href="/html/logout.html">Abmelden</a></li>
 			</ul>
 		</nav>
+
+
+
+		</div>
 
 	</body>
 </html>

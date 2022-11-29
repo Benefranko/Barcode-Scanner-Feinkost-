@@ -20,8 +20,27 @@
 <body>
 
 	<div class="titel">
-		<h1 class="titel-font" >Feinkost Barcode Scanner</h1>
-	</div>
+			<div style="width: 20%" class="titel-container">
+				<a class="h-logo-con" href="/">
+					<div style="margin: auto" class="header-logo"></div>
+					<div class="white-text">FKBCS</div>
+				</a>
+			</div>
+			<div style="width: 60%" class="titel-container">
+				<h1 class="titel-font">Feinkost Barcode Scanner</h1>
+			</div>
+			<div style="width: 20%;" class="titel-container">
+				<!--%ANMELDE_ABMELDE_BTN-->
+				<a id="login-btn" hidden href="/html/login.html" class="login-button">Anmelden</a>
+				<div id="log-out-menu" style="display: flex; align-items: center;">
+					<div class="loged-in-img"></div>
+					<a href="/html/logout.html"  class="logout-btn">Abmelden</a>
+				</div >
+			</div>
+		</div>
+
+	<div class="main-con">
+
 	<h2>Programmversion: %version%</h2>
 
 	<h2>Was ist Feinkost-Barcode-Scanner?</h2>
@@ -79,6 +98,9 @@
 
 		</ul>
 	</nav>
+
+	</div>
+
 
 	</body>
 </html>

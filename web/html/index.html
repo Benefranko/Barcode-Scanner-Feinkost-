@@ -6,11 +6,9 @@
 		<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 		<link rel="stylesheet" href="/css/style.css">
 		<style>
-			body{
-				width: 100%;
-			}
 			.content{
 				width: 90%;
+				margin: auto;
 			}
 			.bigBtn{
 				font-size: 25px;
@@ -25,37 +23,33 @@
 				font-size:35px;
 				text-align: center;
 			}
-			a:link { text-decoration: none; }
 
-			a:visited { text-decoration: none; }
-
-			a:hover { text-decoration: none; }
-
-			a:active { text-decoration: none; }
 		</style>
 	</head>
 	<body>
-		<div class="titel" style="margin: 0px">
-			<div style="float: left; width: 20%">
-				<div style="display: flex; justify-content: center;">
-					<a class="h-logo-con" href="/" style="display: flex; align-items: center;">
-						<div style="margin: auto" class="header-logo">
-						</div>
-							<div style="color: white; text-decoration: none;">FKBCS</div>
-					</a>
-				</div>
+
+
+		<div class="titel">
+			<div style="width: 20%" class="titel-container">
+				<a class="h-logo-con" href="/">
+					<div style="margin: auto" class="header-logo"></div>
+					<div class="white-text">FKBCS</div>
+				</a>
 			</div>
-			<div style="float: left; width: 60%; display: flex; justify-content: center; align-items: center;">
+			<div style="width: 60%" class="titel-container">
 				<h1 class="titel-font">Feinkost Barcodescanner</h1>
 			</div>
-			<div style=" float: left; width: 20%; display: flex; justify-content: center; align-items: Center;">
-				<a href="/html/login.html" class="titel-font" style="text-decoration: none; color: white; border: 3px blue solid;
-border-radius: 5px;
-padding: 0px 8px; height: 60px">Anmelden</a>
+			<div style="width: 20%;" class="titel-container">
+				<!--%ANMELDE_ABMELDE_BTN-->
+				<a id="login-btn" href="/html/login.html" class="login-button">Anmelden</a>
+				<!--<div id="log-out-menu" style="display: flex; align-items: center;">
+					<div class="loged-in-img"></div>
+					<a href="/html/logout.html"  class="logout-btn">Abmelden</a>
+				</div >-->
 			</div>
 		</div>
 
-		<div class="content">
+		<div class="content" >
 			<p class="big_text"> Statistiken:</p>
 
 			<div class="row jc-center">
@@ -85,6 +79,8 @@ padding: 0px 8px; height: 60px">Anmelden</a>
 			<div class="pageEnd"></div>
 
 		</div>
+
+		<script src="/js/checkLogin.js"></script>
 
 	</body>
 </html>

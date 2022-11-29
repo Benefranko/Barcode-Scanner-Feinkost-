@@ -44,6 +44,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         content_type: str = "text/html"
         sub_paths = self.path.split("/")
         html_bytes: bytes = "".encode()
+
         try:
             ####
             # Homepage
@@ -73,14 +74,32 @@ class RequestHandler(BaseHTTPRequestHandler):
             elif sub_paths[1] == "js":
                 content_type = 'text/javascript'
                 if self.checkPathIsNotValid(sub_paths, 2):
-                    html_status, html_bytes = self.getPageNotFound()
+                    html_status, html_bytes = 404, "".encode()
 
                 elif sub_paths[2] == "script.js":
                     html_bytes = self.getFileText("../web/scripts/script.js")
 
+                elif sub_paths[2] == "checkLogin.js":
+                    html_bytes = self.getFileText("../web/scripts/checkLogin.js")
+
                 else:
                     html_status, html_bytes = self.getPageNotFound()
 
+            ###
+            # API
+            ###
+            elif sub_paths[1] == "api":
+                content_type = 'text/plain'
+
+                if self.checkPathIsNotValid(sub_paths, 2):
+                    html_status, html_bytes = 404, "".encode()
+                elif sub_paths[2] == "is_auth":
+                    if self.checkForLoggedIn():
+                        html_bytes = "true".encode()
+                    else:
+                        html_bytes = "false".encode()
+                else:
+                    html_status, html_bytes = 404, "".encode()
             ####
             # Images
             ####
@@ -106,6 +125,9 @@ class RequestHandler(BaseHTTPRequestHandler):
 
                 elif sub_paths[2] == "icon-header.png":
                     html_bytes = self.getFileBytes("../images/icon-header.png")
+
+                elif sub_paths[2] == "user-icon.jpeg":
+                    html_bytes = self.getFileBytes("../images/user-icon.jpeg")
 
                 else:
                     html_status, html_bytes = self.getPageNotFound()
@@ -207,6 +229,8 @@ class RequestHandler(BaseHTTPRequestHandler):
 
             if len(html_bytes) == 0:
                 html_status, html_bytes = self.getPageNotFound()
+
+            print("LOGGED IN:", self.checkForLoggedIn())
 
             ####
             # Send Header
