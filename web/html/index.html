@@ -7,6 +7,9 @@
 		<link rel="stylesheet" href="/css/style.css">
 		<style>
 			body{
+				width: 100%;
+			}
+			.content{
 				width: 90%;
 			}
 			.bigBtn{
@@ -22,40 +25,66 @@
 				font-size:35px;
 				text-align: center;
 			}
+			a:link { text-decoration: none; }
+
+			a:visited { text-decoration: none; }
+
+			a:hover { text-decoration: none; }
+
+			a:active { text-decoration: none; }
 		</style>
 	</head>
-<body>
-	<div class="titel">
-		<h1 class="titel-font">Feinkost Barcodescanner</h1>
-	</div>
+	<body>
+		<div class="titel" style="margin: 0px">
+			<div style="float: left; width: 20%">
+				<div style="display: flex; justify-content: center;">
+					<a class="h-logo-con" href="/" style="display: flex; align-items: center;">
+						<div style="margin: auto" class="header-logo">
+						</div>
+							<div style="color: white; text-decoration: none;">FKBCS</div>
+					</a>
+				</div>
+			</div>
+			<div style="float: left; width: 60%; display: flex; justify-content: center;">
+				<h1 class="titel-font">Feinkost Barcodescanner</h1>
+			</div>
+			<div style="float: left; width: 20%; display: flex; justify-content: center; ">
+				<a class="titel-font" style="border: 3px blue solid;
+border-radius: 5px;
+padding: 8px;">Anmelden</a>
+			</div>
+		</div>
 
-	<p class="big_text"> Statistiken:</p>
+		<div class="content">
+			<p class="big_text"> Statistiken:</p>
 
-	<div class="row jc-center">
-		<a class="m-btn m-btn-blue bigBtn"  href="/html/wochenstatus.html"> &#128202; Wochenstatistik </a>
+			<div class="row jc-center">
+				<a class="m-btn m-btn-blue bigBtn"  href="/html/wochenstatus.html"> &#128202; Wochenstatistik </a>
 
-		<a class="m-btn m-btn-gray row-block-distance-40 bigBtn" href="/html/monatsstatus.html"> &#128202; Monatsstatistik </a>
+				<a class="m-btn m-btn-gray row-block-distance-40 bigBtn" href="/html/monatsstatus.html"> &#128202; Monatsstatistik </a>
 
-		<a class="m-btn m-btn-orange row-block-distance-40 bigBtn" href="/html/jahresstatus.html"> &#128202; Jahresstatistik </a>
+				<a class="m-btn m-btn-orange row-block-distance-40 bigBtn" href="/html/jahresstatus.html"> &#128202; Jahresstatistik </a>
 
-	</div>
+			</div>
 
 
-	<p class="big_text">Sonstiges:</p>
+			<p class="big_text">Sonstiges:</p>
 
-	<div>
-		<a class="m-btn m-btn-green btn1 bigBtn" href="/html/tabelle/0"> &#128441; Verlauf Tabelle</a>
-		<div class="spacer"></div>
-		<a class="m-btn m-btn-green btn1 bigBtn" href="/html/log.html"> &#128712; Ereignis Log</a>
-		<div class="spacer"></div>
-		<a class="m-btn m-btn-green btn1 bigBtn" href="/html/settings.html"> &#9881; Einstellungen</a>
-	</div>
-	<div class="spacer"></div>
-	<div class="big_text">
-			<a style="text-decoration: None; color: blue;" href="/html/about.html">&Uuml;ber</a>
-	</div>
+			<div>
+				<a class="m-btn m-btn-green btn1 bigBtn" href="/html/tabelle/0"> &#128441; Verlauf Tabelle</a>
+				<div class="spacer"></div>
+				<a class="m-btn m-btn-green btn1 bigBtn" href="/html/log.html"> &#128712; Ereignis Log</a>
+				<div class="spacer"></div>
+				<a class="m-btn m-btn-green btn1 bigBtn" href="/html/settings.html"> &#9881; Einstellungen</a>
+			</div>
+			<div class="spacer"></div>
+			<div class="big_text">
+					<a style="text-decoration: None; color: blue;" href="/html/about.html">&Uuml;ber</a>
+			</div>
 
-	<div class="pageEnd"></div>
+			<div class="pageEnd"></div>
+
+		</div>
 
 	</body>
 </html>

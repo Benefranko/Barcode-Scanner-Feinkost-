@@ -96,6 +96,10 @@ class MainWindow(QMainWindow):
         max_height = (0.8 * (self.screenSize.height()))
         self.window.img1.setPixmap(self.getImage("../images/sunmi_scan.png").
                                    scaled(max_width, max_height, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+
+        # self.window.img1.setStyleSheet("border: 3px solid gray; border-radius: 10px;")
+
+
         # InnKaufHaus-Logo-Grafik
         self.window.Innkaufhauslogo.setPixmap(self.getImage("../images/logo.jpg", 2))
 

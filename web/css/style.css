@@ -117,14 +117,32 @@ body {
 }
 
 .titel{
-    display: flex;
-    background-color: cyan;
+    display: block;
     height: 100px;
-    align-items: center;
-    justify-content: center;
+    #align-items: center;
+    #justify-content: center;
     font-size:35px;
-    border-radius: 5px;
+    color: white;
+    background: linear-gradient(to right, #637cf9 20%, #243743 20%);
 }
+
+
+.h-logo-con{
+    transition: transform .3s;
+}
+.header-logo{
+    background: url("/images/icon-header.png") no-repeat center center;
+    width: 100px;
+    height: 100px;
+    #float: left;
+    background-size: 75px 75px;
+
+}
+.h-logo-con:hover{
+transform: scale(1.05);
+}
+
+
 
 .titel-font {
     font-size:40px;

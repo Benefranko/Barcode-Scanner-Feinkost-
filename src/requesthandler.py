@@ -103,6 +103,10 @@ class RequestHandler(BaseHTTPRequestHandler):
 
                 elif sub_paths[2] == "logo.jpg":
                     html_bytes = self.getFileBytes("../images/logo.jpg")
+
+                elif sub_paths[2] == "icon-header.png":
+                    html_bytes = self.getFileBytes("../images/icon-header.png")
+
                 else:
                     html_status, html_bytes = self.getPageNotFound()
 
