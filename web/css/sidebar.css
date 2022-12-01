@@ -5,8 +5,8 @@ nav {
     position: fixed;
     width: 180px; /* Diese Breite kannst du ändern */
     left: -170px; /* Vergiss nicht diesen Wert anzupassen, wenn du die Breite änderst! */
-    top: 0px;
-    bottom: 0px;
+    top: 100px;
+    bottom: 0;
     background-color: rgba( 0, 0, 0, .9 );
     padding: 15px 0px;
     transition: left 0.4s ease-in 0.25s; /* Das ist der Verlauf zwischen left: -150px und left: 0 (Im Code-Block "Main-Wrapper - Teil 3" erfährst du mehr dazu) */

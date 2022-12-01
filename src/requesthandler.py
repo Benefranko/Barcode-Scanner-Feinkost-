@@ -51,7 +51,6 @@ class RequestHandler(BaseHTTPRequestHandler):
             ####
             if self.checkPathIsNotValid(sub_paths, 1):
                 html_bytes = self.getFileText("../web/html/index.html")
-
             ####
             # CSS
             ####
@@ -85,21 +84,6 @@ class RequestHandler(BaseHTTPRequestHandler):
                 else:
                     html_status, html_bytes = self.getPageNotFound()
 
-            ###
-            # API
-            ###
-            elif sub_paths[1] == "api":
-                content_type = 'text/plain'
-
-                if self.checkPathIsNotValid(sub_paths, 2):
-                    html_status, html_bytes = 404, "".encode()
-                elif sub_paths[2] == "is_auth":
-                    if self.checkForLoggedIn():
-                        html_bytes = "true".encode()
-                    else:
-                        html_bytes = "false".encode()
-                else:
-                    html_status, html_bytes = 404, "".encode()
             ####
             # Images
             ####
@@ -216,6 +200,10 @@ class RequestHandler(BaseHTTPRequestHandler):
                 elif sub_paths[2] == "login.html":
                     html_bytes = self.getFileText("../web/html/login.html")
 
+                elif sub_paths[2] == "index.html":
+                    html_bytes = self.getFileText("../web/html/index.html").replace("<a id=\"login-btn\" href=\"/html/login.html\" class=\"login-button\">Anmelden</a>".encode(),
+                                                                                    "<div id=\"log-out-menu\" style=\"display: flex; align-items: center;\"> <div class=\"loged-in-img\"></div><a href=\"/html/logout.html\"  class=\"logout-btn\">Abmelden</a>	</div >".encode())
+
                 elif sub_paths[2] == "about.html":
                     html_bytes = self.getFileText("../web/html/about.html")
                     html_bytes = html_bytes.replace("%version%".encode(),
@@ -229,8 +217,6 @@ class RequestHandler(BaseHTTPRequestHandler):
 
             if len(html_bytes) == 0:
                 html_status, html_bytes = self.getPageNotFound()
-
-            print("LOGGED IN:", self.checkForLoggedIn())
 
             ####
             # Send Header
@@ -562,93 +548,109 @@ class RequestHandler(BaseHTTPRequestHandler):
 
             # Check if Path is OK ( and not Startpage )
             if self.checkPathIsNotValid(sub_paths, 1) or sub_paths[1] != "html" \
-                    or self.checkPathIsNotValid(sub_paths, 2):
+                    or self.checkPathIsNotValid(sub_paths, 2):  # and sub_paths[1] != "api") \
                 html_status, html_bytes = self.getPageNotFound()
 
-            elif sub_paths[2] == "login.html":
-                if "uname" in data and "psw" and "ziel-link" in data and \
-                        self.loc_db_mngr.getAdminPw() == data[data.index("psw") + 1]:
-                    # Wenn Passwort richtig ist, erzeuge Login ID für Cookie
-                    letters = string.ascii_lowercase
-                    result_str = ''.join(random.choice(letters) for i in range(12))
-                    id_str = (datetime.now().strftime("%m.%d.%Y-%H:%M:%S") + result_str)
-                    g_logged_in_clients.append((id_str, datetime.now()))
-                    cookie['LOGIN_ID'] = id_str
-                    # Aktiviere "Sende Cookie", damit Login Cookie später gesendet wird (Im "write header" Abschnitt)
-                    do_send_cookie = True
-                    # Lade HTML Seite zu erfolgreicher Anmeldung
-                    html_bytes = self.getFileText("../web/html/loged_successfull.html")
-                    # Wenn nicht redirect zurück auf Login (falls wiederholtes aufrufen der login Seite)
-                    # → umleitung zu letzter seite ändern ( statt zu "/" )
-                    if "/html/login.html" not in urllib.parse.unquote(data[data.index("ziel-link") + 1]):
-                        html_bytes = html_bytes.replace(";url=/\">".encode(), (";url=" + urllib.parse.unquote(
-                            data[data.index("ziel-link") + 1]) + "\">").encode())
-                    log.debug("Login: {0}: Success".format(str((id_str, datetime.now()))))
-                else:
-                    log.debug("Login: Failed: Wrong Password")
-                    html_bytes = self.getFileText("../web/html/login_failed.html")
+            # elif sub_paths[1] == "api":
+            #     ###
+            #     # API
+            #     ###
+            #     print("ISAp")
+            #     content_type = 'text/plain'
+            #     if sub_paths[2] == "is_auth":
+            #        if self.checkForLoggedIn():
+            # #            html_bytes = "true".encode()
+            #       else:
+            #           print(" data: ", data)
+            #           html_bytes = "false".encode()
+            # #  else:
+            #      html_status, html_bytes = 404, "".encode()
+            # elif sub_paths[1] == "html":
+            else:
+                if sub_paths[2] == "login.html":
+                    if "uname" in data and "psw" and "ziel-link" in data and \
+                            self.loc_db_mngr.getAdminPw() == data[data.index("psw") + 1]:
+                        # Wenn Passwort richtig ist, erzeuge Login ID für Cookie
+                        letters = string.ascii_lowercase
+                        result_str = ''.join(random.choice(letters) for i in range(12))
+                        id_str = (datetime.now().strftime("%m.%d.%Y-%H:%M:%S") + result_str)
+                        g_logged_in_clients.append((id_str, datetime.now()))
+                        cookie['LOGIN_ID'] = id_str
+                        # Aktiviere "Sende Cookie", damit Login Cookie später gesendet wird (Im "write header" Abschnitt)
+                        do_send_cookie = True
+                        # Lade HTML Seite zu erfolgreicher Anmeldung
+                        html_bytes = self.getFileText("../web/html/loged_successfull.html")
+                        # Wenn nicht redirect zurück auf Login (falls wiederholtes aufrufen der login Seite)
+                        # → umleitung zu letzter seite ändern ( statt zu "/" )
+                        if "/html/login.html" not in urllib.parse.unquote(data[data.index("ziel-link") + 1]):
+                            html_bytes = html_bytes.replace(";url=/html/index.html\">".encode(), (";url=" + urllib.parse.unquote(
+                                data[data.index("ziel-link") + 1]) + "\">").encode())
+                        log.debug("Login: {0}: Success".format(str((id_str, datetime.now()))))
+                    else:
+                        log.debug("Login: Failed: Wrong Password")
+                        html_bytes = self.getFileText("../web/html/login_failed.html")
 
-            elif not self.checkForLoggedIn():
-                html_bytes = self.getFileText("../web/html/login.html")
+                elif not self.checkForLoggedIn():
+                    html_bytes = self.getFileText("../web/html/login.html")
 
-            elif sub_paths[2] == "log.html":
-                if "deleteLog" in data:
-                    html_bytes = self.deleteLogPostRequest()
+                elif sub_paths[2] == "log.html":
+                    if "deleteLog" in data:
+                        html_bytes = self.deleteLogPostRequest()
+                    else:
+                        html_status, html_bytes = self.getPageNotFound()
+
+                elif sub_paths[2] == "settings.html":
+                    html_bytes = self.getFileText("../web/html/settings.html")
+
+                    if "ReloadAdvertiseListButton" in data:
+                        html_bytes = self.settingsReloadAdvertiseListPostRequest(html_bytes)
+
+                    if "anzeigezeit_value" in data:
+                        html_bytes = self.settingsUpdateShowTime(data, html_bytes)
+
+                    if "anzeigezeit_Hersteller_value" in data:
+                        html_bytes = self.settingsUpdateProducerShowTime(data, html_bytes)
+
+                    if "changeAdvertiseTime_value" in data:
+                        html_bytes = self.settingsUpdateAdvertiseToggleTime(data, html_bytes)
+
+                    if "changePasswordNewPW_value" and "changePasswordNewPW_CHECK_value" in data:
+                        html_bytes = self.settingsChangePassword(data, html_bytes)
+
+                    if "changeNothingFoundTime_value" in data:
+                        html_bytes = self.settingsUpdateNothingFoundTime(data, html_bytes)
+
+                    if "table_row_count_value" in data:
+                        html_bytes = self.settingsUpdateTableRowCount(data, html_bytes)
+
+                    if "sql_server_port_value" in data and "sql_server_ip_value" in data:
+                        html_bytes = self.settingsUpdateSQLServerAddress(data, html_bytes)
+
+                    if "sql_server_username_value" in data and "sql_server_password_value" in data:
+                        html_bytes = self.settingsUpdateSQLServerLoginData(data, html_bytes)
+
+                    if "mandant_name" in data:
+                        html_bytes = self.settingsUpdateMandant(data, html_bytes)
+
+                    if "update_button" in data:
+                        html_bytes = self.settingsUpdate(data, html_bytes)
+
+                    if "neustarten_button" in data:
+                        html_bytes = self.settings_reboot(data, html_bytes)
+
+                    if "shutdown_button" in data:
+                        html_bytes = self.settings_shutdown(data, html_bytes)
+
+                    if "shutdownTime" in data:
+                        html_bytes = self.settings_auto_shutdown(data, html_bytes)
+
+                    if "reconnect-mssql" in data:
+                        html_bytes = self.settingsReConnectMSSQLDB(data, html_bytes)
+
+                    html_bytes = self.replaceVarsInSettingsHtml(html_bytes)
+
                 else:
                     html_status, html_bytes = self.getPageNotFound()
-
-            elif sub_paths[2] == "settings.html":
-                html_bytes = self.getFileText("../web/html/settings.html")
-
-                if "ReloadAdvertiseListButton" in data:
-                    html_bytes = self.settingsReloadAdvertiseListPostRequest(html_bytes)
-
-                if "anzeigezeit_value" in data:
-                    html_bytes = self.settingsUpdateShowTime(data, html_bytes)
-
-                if "anzeigezeit_Hersteller_value" in data:
-                    html_bytes = self.settingsUpdateProducerShowTime(data, html_bytes)
-
-                if "changeAdvertiseTime_value" in data:
-                    html_bytes = self.settingsUpdateAdvertiseToggleTime(data, html_bytes)
-
-                if "changePasswordNewPW_value" and "changePasswordNewPW_CHECK_value" in data:
-                    html_bytes = self.settingsChangePassword(data, html_bytes)
-
-                if "changeNothingFoundTime_value" in data:
-                    html_bytes = self.settingsUpdateNothingFoundTime(data, html_bytes)
-
-                if "table_row_count_value" in data:
-                    html_bytes = self.settingsUpdateTableRowCount(data, html_bytes)
-
-                if "sql_server_port_value" in data and "sql_server_ip_value" in data:
-                    html_bytes = self.settingsUpdateSQLServerAddress(data, html_bytes)
-
-                if "sql_server_username_value" in data and "sql_server_password_value" in data:
-                    html_bytes = self.settingsUpdateSQLServerLoginData(data, html_bytes)
-
-                if "mandant_name" in data:
-                    html_bytes = self.settingsUpdateMandant(data, html_bytes)
-
-                if "update_button" in data:
-                    html_bytes = self.settingsUpdate(data, html_bytes)
-
-                if "neustarten_button" in data:
-                    html_bytes = self.settings_reboot(data, html_bytes)
-
-                if "shutdown_button" in data:
-                    html_bytes = self.settings_shutdown(data, html_bytes)
-
-                if "shutdownTime" in data:
-                    html_bytes = self.settings_auto_shutdown(data, html_bytes)
-
-                if "reconnect-mssql" in data:
-                    html_bytes = self.settingsReConnectMSSQLDB(data, html_bytes)
-
-                html_bytes = self.replaceVarsInSettingsHtml(html_bytes)
-
-            else:
-                html_status, html_bytes = self.getPageNotFound()
 
             if len(html_bytes) == 0:
                 html_status, html_bytes = self.getPageNotFound()
@@ -662,6 +664,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             if do_send_cookie:
                 for morsel in cookie.values():
                     self.send_header("Set-Cookie", morsel.OutputString())
+                    print(morsel.OutputString())
 
             self.end_headers()
 
