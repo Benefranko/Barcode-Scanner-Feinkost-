@@ -249,10 +249,22 @@ class DataBaseManager:
                              "AND dbo.tMerkmalWertSprache.cMetaKeywords = ?", value, False)
 
     def getSpecialPrice(self, k_article):
-        return self.exec_sql("SELECT fNettoPreis, dEnde FROM [DbeS].[vArtikelSonderpreis] as sp WHERE sp.kArtikel = ?"
-                             " AND sp.cAktiv = 'Y'"
-                             " AND sp.dStart < GETDATE()"
-                             " AND sp.kKundenGruppe = 1", k_article)
+        return self.exec_sql('''/*Sonderpreisabfrage*/
+                            SELECT [fNettoPreis],
+                                   [kArtikel],
+                                   CAST( tas.dStart AS Date ) as "dStart",
+                                   CAST( tas.dEnde AS Date ) as "dEnde",
+                                   CAST( GETDATE() AS Date ) as "currentDate" 
+                            FROM [dbo].[tSonderpreise] AS ts,
+                                   [dbo].[tArtikelSonderpreis] as tas
+                            
+                            WHERE ts.kArtikelSonderpreis = tas.kArtikelSonderpreis
+                            AND tas.kArtikel = ?
+                            AND ts.kKundenGruppe = 1
+                            AND tas.nAktiv = 1
+                            /*Sonderpreis muss begonnen haben und falls ein Enddatum existiert, darf dieses nicht überschritten worden sein*/
+                            AND CAST( tas.dStart AS Date ) <= CAST( GETDATE() AS Date ) 
+                            AND ( tas.nIstDatum = 0 OR tas.dEnde >= CAST( GETDATE() AS Date ) )''', k_article)
 
     def getArticleDescription(self, k_article):
         return self.exec_sql("SELECT cBeschreibung ,cKurzBeschreibung, cName FROM [dbo].[tArtikelBeschreibung] WHERE"

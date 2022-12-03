@@ -65,7 +65,7 @@ class LocalDataBaseManager:
                                             "date" date NOT NULL, 
                                             "time" time NOT NULL, 
                                             "kArticle" integer NOT NULL, 
-                                            "ean" integer NOT NULL, 
+                                            "ean" TEXT NOT NULL, 
                                             "hersteller" TEXT, 
                                             "kategorie" TEXT, 
                                             PRIMARY KEY("id") 

@@ -330,10 +330,10 @@ class MainWindow(QMainWindow):
                         self.window.textEdit_prevdescr2.setAlignment(Qt.AlignCenter)
                         self.window.inhalt_preview_2.setText("Inhalt: " + inhalt)
 
-                        self.window.preis_preview_2.setText(self.databasemanager.roundToStr(preis) + " €")
+                        self.window.preis_preview_2.setText("Für nur " + self.databasemanager.roundToStr(preis) + " €")
                         if s_preis is not None:
                             p: float = float(s_preis.fNettoPreis) * (steuersatz + 1.0)
-                            self.window.label_s_price_2.setText(self.databasemanager.roundToStr(p) + "€ statt")
+                            self.window.label_s_price_2.setText("Für nur " + self.databasemanager.roundToStr(p) + "€ statt")
                             f = self.window.preis_preview_2.font()
                             f.setStrikeOut(True)
                             self.window.preis_preview_2.setFont(f)
@@ -407,24 +407,23 @@ class MainWindow(QMainWindow):
         self.state = self.STATES.SHOW_PRODUCT_DESCRIPTION
 
         # Versuche Informationen vom MS SQL Server zu dem Artikel abzufragen
-        if not scan_article_ean.isdigit() or int(scan_article_ean) <= 0:
+        if not scan_article_ean.isdigit():
             log.warning("    Ungültiger Scan: No Integer EAN: {0}".format(scan_article_ean))
             return self.event_handler("LOAD_ARTICLE_FAILED", scan_article_ean)
 
-        ean: int = int(scan_article_ean)
         data = self.databasemanager.getDataByBarcode(scan_article_ean)
 
         if data is None:
             # Wenn keine Informationen zu dem Artikel gefunden werden kann, welche zu "nichts-gefunden"-Seite
-            log.warning("    Es konnten keine Informationen zu dem Artikel gefunden werden: EAN: {0}".format(ean))
-            return self.event_handler("LOAD_ARTICLE_FAILED", ean)
+            log.warning("    Es konnten keine Informationen zu dem Artikel gefunden werden: EAN: {0}".format(scan_article_ean))
+            return self.event_handler("LOAD_ARTICLE_FAILED", scan_article_ean)
         else:
             k_artikel = data.kArtikel
 
         descript = self.databasemanager.getArticleDescription(k_artikel)
         if descript is None:
             log.warning("    Keine Artikelbeschreibung vorhanden! k_artikel={0}".format(k_artikel))
-            return self.event_handler("LOAD_ARTICLE_FAILED", ean)
+            return self.event_handler("LOAD_ARTICLE_FAILED", scan_article_ean)
 
         steuersatz: float = self.databasemanager.getSteuerSatz(data.kSteuerklasse)
         if steuersatz == -1:
@@ -450,7 +449,7 @@ class MainWindow(QMainWindow):
                 font.setPixelSize(font.pixelSize() - 1)
             self.window.p_name.setFont(font)
         else:
-            log.info("    LOAD_ARTICLE_FAILED: {0} -> data.Artikelname == \"\" ".format(ean))
+            log.info("    LOAD_ARTICLE_FAILED: {0} -> data.Artikelname == \"\" ".format(scan_article_ean))
             return self.event_handler("LOAD_ARTICLE_FAILED", scan_article_ean)
 
         # Artikel Preis
@@ -558,7 +557,7 @@ class MainWindow(QMainWindow):
         else:
             # self.window.inhalt.hide()
             # self.window.label_inhalt.hide()
-            return self.event_handler("LOAD_ARTICLE_FAILED", ean)
+            return self.event_handler("LOAD_ARTICLE_FAILED", scan_article_ean)
 
         lagerbestand = self.databasemanager.getLagerBestand(k_artikel)
         if lagerbestand == -1:
@@ -583,7 +582,7 @@ class MainWindow(QMainWindow):
             kategorie = "Unbekannt"
 
         # Füge den Scan der lokalen Statistiken-Datenbank hinzu:
-        if self.loc_db_mngr.add_new_scan(k_artikel, ean, hersteller, kategorie) is None:
+        if self.loc_db_mngr.add_new_scan(k_artikel, scan_article_ean, hersteller, kategorie) is None:
             log.error("    Error: Das speichern des Scans für Statistiken ist fehlgeschlagen:")
         return
 
