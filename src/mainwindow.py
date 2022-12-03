@@ -413,7 +413,7 @@ class MainWindow(QMainWindow):
             return self.event_handler("LOAD_ARTICLE_FAILED", scan_article_ean)
 
         ean: int = int(scan_article_ean)
-        data = self.databasemanager.getDataByBarcode(ean)
+        data = self.databasemanager.getDataByBarcode(scan_article_ean)
 
         if data is None:
             # Wenn keine Informationen zu dem Artikel gefunden werden kann, welche zu "nichts-gefunden"-Seite
