@@ -312,7 +312,7 @@ class MainWindow(QMainWindow):
                         self.window.preis_preview_1.setText(self.databasemanager.roundToStr(preis) + " €")
                         if s_preis is not None:
                             p: float = float(s_preis.fNettoPreis) * (steuersatz + 1.0)
-                            self.window.label_s_price_1.setText(self.databasemanager.roundToStr(p) + "€ statt")
+                            self.window.label_s_price_1.setText("Nur " + self.databasemanager.roundToStr(p) + "€ statt")
                             self.window.preis_preview_1.font().setStrikeOut(True)
                             f = self.window.preis_preview_1.font()
                             f.setStrikeOut(True)
@@ -330,10 +330,10 @@ class MainWindow(QMainWindow):
                         self.window.textEdit_prevdescr2.setAlignment(Qt.AlignCenter)
                         self.window.inhalt_preview_2.setText("Inhalt: " + inhalt)
 
-                        self.window.preis_preview_2.setText("Für nur " + self.databasemanager.roundToStr(preis) + " €")
+                        self.window.preis_preview_2.setText(self.databasemanager.roundToStr(preis) + " €")
                         if s_preis is not None:
                             p: float = float(s_preis.fNettoPreis) * (steuersatz + 1.0)
-                            self.window.label_s_price_2.setText("Für nur " + self.databasemanager.roundToStr(p) + "€ statt")
+                            self.window.label_s_price_2.setText("Nur " + self.databasemanager.roundToStr(p) + "€ statt")
                             f = self.window.preis_preview_2.font()
                             f.setStrikeOut(True)
                             self.window.preis_preview_2.setFont(f)
