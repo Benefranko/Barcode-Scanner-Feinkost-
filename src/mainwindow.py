@@ -99,7 +99,6 @@ class MainWindow(QMainWindow):
 
         # self.window.img1.setStyleSheet("border: 3px solid gray; border-radius: 10px;")
 
-
         # InnKaufHaus-Logo-Grafik
         self.window.Innkaufhauslogo.setPixmap(self.getImage("../images/logo.jpg", 2))
 
@@ -213,7 +212,7 @@ class MainWindow(QMainWindow):
     def loadAdvertiseList(self):
         self.advertise_kArtikel_list = self.databasemanager.getAdvertiseList(
             consts.wawi_advertise_aktive_meta_keyword)
-        log.debug("DEBUG: LISTE MIT WERBUNG: {0}".format(self.advertise_kArtikel_list))
+        log.info("Liste mit Werbeartikel: {0}".format(self.advertise_kArtikel_list))
 
         if self.advertise_kArtikel_list is None or len(self.advertise_kArtikel_list) < 2:
             log.warning("  Not more than 1 Advertise found !")

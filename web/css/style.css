@@ -258,6 +258,7 @@ a:active { text-decoration: none; }
 
 /* Dropdown Content (Hidden by Default) */
 .dropdown-content {
+border-radius: 0px;
     display: none;
   position: absolute;
   background-color: #1b2932;
