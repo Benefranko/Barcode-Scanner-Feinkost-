@@ -212,7 +212,7 @@ class MainWindow(QMainWindow):
     def loadAdvertiseList(self):
         self.advertise_kArtikel_list = self.databasemanager.getAdvertiseList(
             consts.wawi_advertise_aktive_meta_keyword)
-        log.info("Liste mit Werbeartikel: {0}".format(self.advertise_kArtikel_list))
+        log.info("Liste mit Werbeartikel: kArtikel= {0}".format(self.advertise_kArtikel_list))
 
         if self.advertise_kArtikel_list is None or len(self.advertise_kArtikel_list) < 2:
             log.warning("  Not more than 1 Advertise found !")
