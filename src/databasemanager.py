@@ -114,7 +114,7 @@ class DataBaseManager:
 
     # AUF FEHLER NOCH CHECKEN !!
     def getSteuerSatz(self, steuerklasse) -> float:
-        steuersatz = self.exec_sql('SELECT fSteuersatz FROM [Mandant_1].[dbo].[tSteuersatz]'
+        steuersatz = self.exec_sql('SELECT fSteuersatz FROM [dbo].[tSteuersatz]'
                                    ' WHERE fSteuersatz != 0.0 AND kSteuerklasse = ?', steuerklasse, True)
         if steuersatz:
             return float(steuersatz.fSteuersatz) / 100.0
@@ -267,6 +267,6 @@ class DataBaseManager:
 
     def getKategorieByKArtikel(self, k_article):
         return self.exec_sql("SELECT [tKategorieSprache].cName"
-                             " FROM [Mandant_1].[dbo].[tkategorieartikel], [Mandant_1].[dbo].[tKategorieSprache]"
+                             " FROM [dbo].[tkategorieartikel], [dbo].[tKategorieSprache]"
                              " WHERE [tkategorieartikel].kArtikel = ?"
                              " AND [tkategorieartikel].kKategorie = [tKategorieSprache].kKategorie", k_article)
