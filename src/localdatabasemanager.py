@@ -38,7 +38,7 @@ ms_sql_server_addr: () = ("home.obermui.de", 18769)
 auto_shutdown_time: (str, str) = ("-1", "-1")
 
 
-#   SERVER NOTIFY UI -> GETS EDITED!!!!
+#   SERVER NOTIFY UI -> EDITED BY PROGRAMM!!!!
 want_reload_advertise_var: bool = False
 
 want_reconnect_mssql: bool = False

@@ -139,11 +139,6 @@ class RequestHandler(BaseHTTPRequestHandler):
                 if self.checkPathIsNotValid(sub_paths, 2):
                     html_status, html_bytes = self.getPageNotFound()
 
-                elif not self.checkForLoggedIn():
-                    html_bytes = self.getFileText("../web/html/login.html")\
-                        .replace("name=\"ziel-link\" value=\"/\"".encode(),
-                                 ("name=\"ziel-link\" value=\"" + self.path + "\"").encode())
-
                 elif sub_paths[2] == "logout.html":
                     cookies = SimpleCookie(self.headers.get('Cookie'))
                     login = cookies.get("LOGIN_ID")
@@ -156,6 +151,11 @@ class RequestHandler(BaseHTTPRequestHandler):
                                     log.debug("CLIENT '{0}' hat sich abgemeldet.".format(loginKey))
                                     g_logged_in_clients.remove(loginKey)
                     html_bytes = self.getFileText("../web/html/logout.html")
+
+                elif not self.checkForLoggedIn():
+                    html_bytes = self.getFileText("../web/html/login.html")\
+                        .replace("name=\"ziel-link\" value=\"/\"".encode(),
+                                 ("name=\"ziel-link\" value=\"" + self.path + "\"").encode())
 
                 elif sub_paths[2] == "wochenstatus.html":
                     html_bytes = self.getWochenStatusPage([["Alle Artikel"]], None)
