@@ -32,7 +32,6 @@ var createBarChart = function(ctx, data) {
     }
 
 
-
 var toggleStackedBtn = function(buttonName, chart) {
         button = document.getElementById(buttonName);
         if( button.value == "true" ) {
