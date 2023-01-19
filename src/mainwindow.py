@@ -4,7 +4,7 @@ import os
 import sys
 from PySide2.QtCore import QFile, QTimerEvent, Qt, QIODevice, QRect
 from PySide2.QtCore import Slot, QEventLoop
-from PySide2.QtGui import QImage, QPixmap, QFontMetrics, QFont
+from PySide2.QtGui import QImage, QPixmap, QFontMetrics, QFont, QPalette
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QLabel, QFrame, QWidget  # , QLayout, QLayoutItem
 from PySide2.QtWidgets import QMainWindow, QApplication
@@ -70,10 +70,17 @@ class MainWindow(QMainWindow):
         if self.load_ui(ui_file_path) is None:
             raise Exception("Konnte UI nicht Laden")
 
-        # ### Vollbild auf Screen0 bzw 1:
+        # ### Vollbild auf letzten Screen
         self.screenSize = QApplication.screens()[len(QApplication.screens()) - 1].availableGeometry()
-        self.setGeometry(self.screenSize)
-        self.showFullScreen()
+        self.setGeometry(0, 0, 1280, 800)  # DEBUG
+        # self.showFullScreen()            # RICHTIG
+
+        # Hintergrund Bild skalieren
+        background_img_main_w = QPixmap("../images/sunmi_scan.png")
+        background_img_main_w = background_img_main_w.scaled(self.size(), Qt.IgnoreAspectRatio)
+        palette = QPalette()
+        palette.setBrush(QPalette.Background, background_img_main_w)
+        self.setPalette(palette)
 
         # ### init Sonderpreis redLine, init Sonderpreis Label...
         self.initQtObjects()

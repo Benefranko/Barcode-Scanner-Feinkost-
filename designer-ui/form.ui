@@ -35,8 +35,7 @@
    <bool>false</bool>
   </property>
   <property name="styleSheet">
-   <string notr="true">QWidget#_Widget { background-image: url(&quot;../images/background.jpg&quot;) }
-QWidget#Widget { background-color: &quot;white&quot; }</string>
+   <string notr="true"/>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_8">
    <item>
