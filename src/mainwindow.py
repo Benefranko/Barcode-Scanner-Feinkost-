@@ -72,11 +72,12 @@ class MainWindow(QMainWindow):
 
         # ### Vollbild auf letzten Screen
         self.screenSize = QApplication.screens()[len(QApplication.screens()) - 1].availableGeometry()
-        self.setGeometry(0, 0, 1280, 800)  # DEBUG
-        # self.showFullScreen()            # RICHTIG
+        self.setGeometry(self.screenSize)  # DEBUG
+        # self.setGeometry(0, 0, 1280, 800)  # DEBUG
+        self.showFullScreen()            # RICHTIG
 
         # Hintergrund Bild skalieren
-        background_img_main_w = QPixmap("../images/sunmi_scan.png")
+        background_img_main_w = QPixmap("../images/bg1.png")
         background_img_main_w = background_img_main_w.scaled(self.size(), Qt.IgnoreAspectRatio)
         palette = QPalette()
         palette.setBrush(QPalette.Background, background_img_main_w)
@@ -95,8 +96,9 @@ class MainWindow(QMainWindow):
         # ### Lade Grafiken...
         # self.window.setStyleSheet("QWidget#Widget{background-image: url(../images/sunmi_scan.png) 0 0 0 0 stretch stretch;}")
 
-        # "Kein Bild gefunden"-Grafik...
-        self.window.frame.setPixmap(self.getImage("../images/no_picture_found.jpg"))
+        # "Kein artikel gefunden"-Grafik...
+        self.window.frame.setPixmap(self.getImage("../images/no_picture_found.jpg").scaled(self.window.frame.size(),
+                                                                                           Qt.KeepAspectRatio, Qt.SmoothTransformation ))
 
         # "Barcode Scanner Bild mit Handy Beispiel"-Grafik
         max_width = (0.9 * (self.screenSize.width() / 2))
@@ -303,10 +305,11 @@ class MainWindow(QMainWindow):
                             log.error("    Advertise has no Image!! -> Skipp  (k_artikel={0})".format(k_art))
                         continue
                     else:
-                        pix = QPixmap.fromImage(img).scaled(400, 400, Qt.KeepAspectRatio, Qt.SmoothTransformation)
                         if i == 0:
+                            pix = QPixmap.fromImage(img).scaled(self.window.VorschauBild1.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
                             self.window.VorschauBild1.setPixmap(pix)
                         else:
+                            pix = QPixmap.fromImage(img).scaled(self.window.vorschaubild2.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
                             self.window.vorschaubild2.setPixmap(pix)
 
                     if i == 0:
@@ -451,7 +454,6 @@ class MainWindow(QMainWindow):
             font: QFont = QFont("Areal")
             font.setPixelSize(consts.PRODUCT_MAX_FONT_SIZE)
             font.setBold(True)
-            font.setUnderline(True)
             while QFontMetrics(font).boundingRect(self.window.p_name.text()).width() > self.window.p_name.width():
                 font.setPixelSize(font.pixelSize() - 1)
             self.window.p_name.setFont(font)
@@ -472,12 +474,12 @@ class MainWindow(QMainWindow):
 
         if hersteller is None or hersteller.cName == "":
             self.window.hersteller.hide()
-            self.window.hersteller_label.hide()
+            self.window.widget_7.hide()
             self.window.pushButton_more_infos_hersteller.hide()
         else:
             self.window.hersteller.setText(hersteller.cName)
             self.window.hersteller.show()
-            self.window.hersteller_label.show()
+            self.window.widget_7.show()
             # Lade Hersteller seite
             if self.loadHerstellerPage(k_artikel) is not None:
                 self.window.pushButton_more_infos_hersteller.show()
@@ -487,15 +489,14 @@ class MainWindow(QMainWindow):
         # Artikel Beschreibung - diese muss aus extra Datenbank geladen werden
         if descript is None or descript.cBeschreibung == "" \
                 or descript.cKurzBeschreibung is None or descript.cKurzBeschreibung == "":
-            self.window.groupBox_beschreibung.setTitle("")
-            self.window.description.setHtml("")
+            self.window.label_beschreibung.setText("")
         else:
             self.window.description.setHtml(descript.cBeschreibung)
             if len(descript.cKurzBeschreibung) > consts.MAX_SHORT_DESCRIPTION_LENGTH:
-                self.window.groupBox_beschreibung.setTitle("Produktinformationen:")
+                self.window.label_beschreibung.setText("Produktinformationen:")
             else:
-                self.window.groupBox_beschreibung.setTitle("Produktinformationen: \"{0}\""
-                                                           .format(descript.cKurzBeschreibung))
+                self.window.label_beschreibung.setText("Produktinformationen: \"{0}\""
+                                                       .format(descript.cKurzBeschreibung))
 
         self.window.stackedWidget.setCurrentIndex(1)
         self.window.stackedWidget.setCurrentIndex(0)
@@ -508,14 +509,13 @@ class MainWindow(QMainWindow):
         if content is None or content.bBild is None or img.loadFromData(content.bBild) is False:
             if content:
                 log.warning("    Failed to load img from db: Invalid Img: k=artikel={0}".format(k_artikel))
-            # self.window.img.setPixmap(
-            #     QPixmap("../images/kein-bild-vorhanden.webp").scaled(self.window.img.size() / 1.5, Qt.KeepAspectRatio,
-            #                                                          Qt.SmoothTransformation))
-            self.window.img.hide()
+            self.window.img.setPixmap(
+                QPixmap("../images/kein-bild-vorhanden.webp").scaled(self.window.img.size() / 1.5, Qt.KeepAspectRatio,
+                                                                     Qt.SmoothTransformation))
+            # self.window.img.setPixmap(QPixmap("../images/logo.jpg"))
         else:
             p = QPixmap.fromImage(img).scaled(self.window.img.size() / 1.3, Qt.KeepAspectRatio, Qt.SmoothTransformation)
             self.window.img.setPixmap(p)
-            self.window.img.show()
 
         # Erneuter Seitenwechsel, um Layout-update zu erzwingen
         self.window.stackedWidget.setCurrentIndex(1)
