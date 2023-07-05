@@ -2,7 +2,7 @@
 
 # Barcode-Scanner-Feinkost-
 
-Mit diesem Programm sollen Kunden durch das Scannen eines Produkt Bar Codes zusätzliche Informationen zu diesem bekommen.
+Mit diesem Programm sollen Kunden des Innkaufhauses durch das Scannen eines Barcodes von Produkten zusätzliche Informationen zu diesen erhalten. Die Informationen werden dabei aus der Datenbank des Warenwirtschaftssystems von JTL (JTL Wawi) abgefragt.
 
 # Installation mit Installer
 # [INSTALLER DOWNLOAD](https://github.com/M4RKUS28/FeinkostBarcodeScannerInstaller)
