@@ -4,6 +4,11 @@
 
 Mit diesem Programm sollen Kunden des Innkaufhauses durch das Scannen eines Barcodes von Produkten zusätzliche Informationen zu diesen erhalten. Die Informationen werden dabei aus der Datenbank des Warenwirtschaftssystems von JTL (JTL Wawi) abgefragt.
 
+![Vorschau1](https://github.com/Benefranko/Barcode-Scanner-Feinkost-/blob/main/doc/Screenshots/screenshot-startpage.PNG)
+![Vorschau1](https://github.com/Benefranko/Barcode-Scanner-Feinkost-/blob/main/doc/Screenshots/screenshot-test-article.PNG)
+![Vorschau1](https://github.com/Benefranko/Barcode-Scanner-Feinkost-/blob/main/doc/Screenshots/screenshot-test-advertice.PNG)
+
+
 # Installation mit Installer
 # [INSTALLER DOWNLOAD](https://github.com/M4RKUS28/FeinkostBarcodeScannerInstaller)
 https://github.com/M4RKUS28/FeinkostBarcodeScannerInstaller
