@@ -80,25 +80,21 @@ sudo /tmp/fkbc_uninstall.sh
 
 3. **Configure the ODBC driver**:
    ```bash
-   sudo tee -a "/etc/odbcinst.ini" << EOF
-   [FreeTDS]
+   sudo tee -a "/etc/odbcinst.ini" "[FreeTDS]
    Description=FreeTDS Driver
    Driver=/usr/lib/arm-linux-gnueabihf/odbc/libtdsodbc.so
-   Setup=/usr/lib/arm-linux-gnueabihf/odbc/libtdsS.so
-   EOF
+   Setup=/usr/lib/arm-linux-gnueabihf/odbc/libtdsS.so"
    ```
 
 4. **Setup autostart**:
-   ```bash
-   mkdir -p /home/pi/.config/autostart
-   tee /home/pi/.config/autostart/feinkostbarcodescanner.desktop << EOF
-   [Desktop Entry]
-   Name=FeinkostBarcodeScanner
-   Type=Application
-   Exec=/usr/bin/python /home/pi/FeinkostBarcodeScanner/src/main.py
-   Terminal=false
-   EOF
-   ```
+  ```bash
+  tee /home/pi/.config/autostart/feinkostbarcodescanner.desktop "
+  [Desktop Entry]
+  Name=FeinkostBarcodeScanner
+  Type=Application
+  Exec=/usr/bin/python /home/pi/FeinkostBarcodeScanner/src/main.py
+  Terminal=false"
+  ```
 
 5. **Enable shutdown and restart via web interface**:
    ```bash
