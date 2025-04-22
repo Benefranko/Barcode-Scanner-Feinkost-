@@ -1,127 +1,164 @@
+# 🛒 Feinkost Barcode Scanner
 
+![GitHub License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Version](https://img.shields.io/badge/version-1.0.0-green.svg)
+![Platform](https://img.shields.io/badge/platform-Raspberry%20Pi-red.svg)
 
-# Barcode-Scanner-Feinkost-
+> A sophisticated barcode scanning solution for retail customers to access detailed product information from the JTL Wawi inventory management system.
 
-Mit diesem Programm sollen Kunden des Innkaufhauses durch das Scannen eines Barcodes von Produkten zusätzliche Informationen zu diesen erhalten. Die Informationen werden dabei aus der Datenbank des Warenwirtschaftssystems von JTL (JTL Wawi) abgefragt.
+<div align="center">
+    <img src="https://github.com/Benefranko/Barcode-Scanner-Feinkost-/blob/main/doc/Screenshots/screenshot-startpage.PNG" width="300" alt="Start Page">
+    <img src="https://github.com/Benefranko/Barcode-Scanner-Feinkost-/blob/main/doc/Screenshots/screenshot-test-article.PNG" width="300" alt="Article View">
+    <img src="https://github.com/Benefranko/Barcode-Scanner-Feinkost-/blob/main/doc/Screenshots/screenshot-test-advertice.PNG" width="300" alt="Advertisement View">
+</div>
 
-![Vorschau1](https://github.com/Benefranko/Barcode-Scanner-Feinkost-/blob/main/doc/Screenshots/screenshot-startpage.PNG)
-![Vorschau1](https://github.com/Benefranko/Barcode-Scanner-Feinkost-/blob/main/doc/Screenshots/screenshot-test-article.PNG)
-![Vorschau1](https://github.com/Benefranko/Barcode-Scanner-Feinkost-/blob/main/doc/Screenshots/screenshot-test-advertice.PNG)
+## 📋 Table of Contents
 
+- [Features](#-features)
+- [System Requirements](#-system-requirements)
+- [Installation](#-installation)
+  - [Quick Installation](#quick-installation)
+  - [Manual Installation](#manual-installation)
+- [Configuration](#-configuration)
+- [Dependencies](#-dependencies)
+- [Updating](#-updating)
+- [Troubleshooting](#-troubleshooting)
+- [License](#-license)
 
-# Installation mit Installer
-# [INSTALLER DOWNLOAD](https://github.com/M4RKUS28/FeinkostBarcodeScannerInstaller)
-https://github.com/M4RKUS28/FeinkostBarcodeScannerInstaller
+## ✨ Features
 
-Installation durch:
-````commandline
-wget -O /tmp/fkbc_install.sh https://raw.githubusercontent.com/M4RKUS28/FeinkostBarcodeScannerInstaller/main/install.sh; sudo chmod +x /tmp/fkbc_install.sh; sudo /tmp/fkbc_install.sh
-````
+- **Instant Product Information**: Scan barcodes to retrieve detailed product data
+- **JTL Wawi Integration**: Direct connection to your existing inventory system
+- **User-Friendly Interface**: Clean, intuitive UI for customer self-service
+- **Raspberry Pi Optimized**: Designed to run smoothly on Raspberry Pi devices
+- **Remote Management**: Shutdown and restart capabilities via web interface
 
-Deinstallation mit:
-````commandline
-wget -O /tmp/fkbc_uninstall.sh https://raw.githubusercontent.com/M4RKUS28/FeinkostBarcodeScannerInstaller/main/uninstall.sh; sudo chmod +x /tmp/fkbc_uninstall.sh; sudo /tmp/fkbc_uninstall.sh
-````
+## 💻 System Requirements
 
-# Manuelle Installation
+- Raspberry Pi (tested on Raspberry Pi 4)
+- Raspbian/Raspberry Pi OS
+- Python 3.7 (recommended)
+- Barcode scanner (USB connection)
+- Internet connectivity to JTL Wawi database
 
-## Autostart:
-````
-tee /home/pi/.config/autostart/feinkostbarcodescanner.desktop "
-[Desktop Entry]
-Name=FeinkostBarcodeScanner
-Type=Application
-Exec=/usr/bin/python /home/pi/FeinkostBarcodeScanner/src/main.py
-Terminal=false"
-````
-## Aktiviere Herunterfahren & Neustarten über Web
-````
-sudo visudo
-````
-Und füge folgende Zeile hinzu:
-````
-user_name ALL=(ALL) NOPASSWD: /sbin/reboot, /sbin/shutdown
-````
+## 🚀 Installation
 
-## Installation
+### Quick Installation
 
-Neben der Installation der Abhängigkeiten muss zu dem die Datei
-``src/constants.py-template.txt`` zu ``src/constants.py`` umbenannt werden. In dieser Datei können
-grundlegende Einstellungen wie z.B. der Webserverport festgelegt werden.
-#### WICHTIG:
-Diese Datei wird bei Updates ignoriert! Sollte ein Hauptupdate (erste Stelle einer Version verändert sich) vorliegen,
-so muss die Datei ``src/constants.py-template.txt`` eigenständig von Github heruntergeladen werden und erneut umbenannt
-und die Einstallungen übertragen werden!
+We provide an automated installer script for easy setup:
 
+```bash
+wget -O /tmp/fkbc_install.sh https://raw.githubusercontent.com/M4RKUS28/FeinkostBarcodeScannerInstaller/main/install.sh
+sudo chmod +x /tmp/fkbc_install.sh
+sudo /tmp/fkbc_install.sh
+```
 
-## Abhängigkeiten Installation zusammengefasst:
-Durch folgenden Bash-Code sollten alle benötigten Abhängigkeiten installiert werden. Sollten dabei Probleme auftreten,
-werden darauffolgend noch einmal alle Schritte detaillierter aufgeführt.
+To uninstall:
 
-````
-# 1. Driver
-sudo apt install tdsodbc freetds-dev freetds-bin unixodbc-dev
+```bash
+wget -O /tmp/fkbc_uninstall.sh https://raw.githubusercontent.com/M4RKUS28/FeinkostBarcodeScannerInstaller/main/uninstall.sh
+sudo chmod +x /tmp/fkbc_uninstall.sh
+sudo /tmp/fkbc_uninstall.sh
+```
 
-# Save driver Location for Driver Loader
-sudo tee -a "/etc/odbcinst.ini" "[FreeTDS]
-Description=FreeTDS Driver
-Driver=/usr/lib/arm-linux-gnueabihf/odbc/libtdsodbc.so
-Setup=/usr/lib/arm-linux-gnueabihf/odbc/libtdsS.so"
+### Manual Installation
 
-# 2. Driver Loader, 3. Graphics, 4. Python-modules:
-sudo apt install python3-pyodbc python3-PySide2.*
-````
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/Benefranko/Barcode-Scanner-Feinkost-.git
+   cd Barcode-Scanner-Feinkost-
+   ```
 
-##
-## Abhängigkeiten Schritt für Schritt installieren:
-Da es viele Pakete nur in älteren Version gibt, wird Python 3.7 empfohlen
+2. **Install dependencies**:
+   ```bash
+   # Install MS SQL Driver
+   sudo apt install tdsodbc freetds-dev freetds-bin unixodbc-dev
+   
+   # Install Python dependencies
+   sudo apt install python3-pyodbc python3-PySide2.*
+   ```
 
+3. **Configure the ODBC driver**:
+   ```bash
+   sudo tee -a "/etc/odbcinst.ini" << EOF
+   [FreeTDS]
+   Description=FreeTDS Driver
+   Driver=/usr/lib/arm-linux-gnueabihf/odbc/libtdsodbc.so
+   Setup=/usr/lib/arm-linux-gnueabihf/odbc/libtdsS.so
+   EOF
+   ```
 
-### 1. MS SQL Open Source Driver:
+4. **Setup autostart**:
+   ```bash
+   mkdir -p /home/pi/.config/autostart
+   tee /home/pi/.config/autostart/feinkostbarcodescanner.desktop << EOF
+   [Desktop Entry]
+   Name=FeinkostBarcodeScanner
+   Type=Application
+   Exec=/usr/bin/python /home/pi/FeinkostBarcodeScanner/src/main.py
+   Terminal=false
+   EOF
+   ```
 
-``sudo apt install tdsodbc freetds-dev freetds-bin unixodbc-dev``
+5. **Enable shutdown and restart via web interface**:
+   ```bash
+   sudo visudo
+   ```
+   Add the following line (replace `pi` with your username if different):
+   ```
+   pi ALL=(ALL) NOPASSWD: /sbin/reboot, /sbin/shutdown
+   ```
 
-Getestet mit: \
-tdsodbc/oldstable,now 1.00.104-1+deb10u1 armhf \
-ODBC driver for connecting to MS SQL and Sybase SQL servers 
+## ⚙️ Configuration
 
-#### Einrichten des Drivers nach der Installation:
-[Connect to MSSQL using FreeTDS / ODBC in Python. - Github](https://gist.github.com/rduplain/1293636#file-readme-md) \
-[What's causing 'unable to connect to data source' for pyodbc? - Stackoverflow](https://stackoverflow.com/questions/9723656/whats-causing-unable-to-connect-to-data-source-for-pyodbc)
+1. Rename the template configuration file:
+   ```bash
+   cp src/constants.py-template.txt src/constants.py
+   ```
 
-Mit `` sudo nano /etc/odbcinst.ini`` folgenden Text einfügen:
+2. Edit the configuration file to set your preferences:
+   ```bash
+   nano src/constants.py
+   ```
 
-einfügen und ggf. Pfade ändern (manchmal auch unter /usr/lib/odbc/):
-````
-[FreeTDS]
-Description=FreeTDS Driver
-Driver=/usr/lib/arm-linux-gnueabihf/odbc/libtdsodbc.so
-Setup=/usr/lib/arm-linux-gnueabihf/odbc/libtdsS.so
-````
+**Important**: The `constants.py` file is ignored during updates. When performing a major update (first version number change), you must manually download the new template file and transfer your settings.
 
-Dadurch kann pyodbc den Driver finden. Weitere Informationen unter \
-[FreeTDS.support.Microsoft](https://www.freetds.org/faq.html#Does.FreeTDS.support.Microsoft.servers) \
-bzw. Informationen zur Protokollversion unter \
-[ChoosingTdsProtocol](https://www.freetds.org/userguide/ChoosingTdsProtocol.html)
+## 📦 Dependencies
 
+The application requires the following components:
 
-### Oder Driver offiziell von Mircosoft
-(Kein Support für ArmV8-Architektur! -> Funktioniert nicht auf dem Raspberry-Pi)
+| Component | Purpose | Package Name |
+|-----------|---------|--------------|
+| FreeTDS | MS SQL Driver | `tdsodbc`, `freetds-dev`, `freetds-bin` |
+| UnixODBC | ODBC Driver Manager | `unixodbc-dev` |
+| PyODBC | Python ODBC Interface | `python3-pyodbc` |
+| PySide2 | GUI Framework | `python3-PySide2.*` |
 
-[Microsoft Download Seite zu odbc-driver-for-sql](https://docs.microsoft.com/de-de/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver16)
+## 🔄 Updating
 
-### 2. Zum Laden des Datenbank Drivers pyodbc:
+To update the application:
 
-``sudo apt install python3-pyodbc``
+1. Back up your `constants.py` file
+2. Pull the latest changes from the repository
+3. Check if `constants.py-template.txt` has been updated
+4. If needed, merge your settings with the new template
 
-Getestet mit: \
-python3-pyodbc/oldstable,now 4.0.22-1+b1 armhf \
-Python3 module for ODBC database access 
+## ❓ Troubleshooting
 
+### Common Issues
 
-### 3. Für die Grafik: PyQt bzw. hier Pyside2 Bibliotheken:
+- **Database Connection Errors**: Verify your ODBC configuration and database credentials
+- **Driver Not Found**: Check that FreeTDS is properly installed and configured
+- **UI Not Loading**: Ensure PySide2 packages are correctly installed
 
-``sudo apt install python3-PySide2.*``
+For more detailed information, check the application logs.
 
+## 📄 License
 
+This project is released under the MIT License. See the LICENSE file for details.
 
+---
+
+<div align="center">
+    <strong>Developed for Innkaufhaus | © 2025</strong>
+</div>
